@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Danh sách sinh viên</title>
+</head>
+<body>
+  <h1>Sinh viên trong hệ thống</h1>
+
+  <table border="1" cellspacing="0" cellpadding="6">
+    <tr>
+      <th>Tên</th>
+      <th>Mã SV</th>
+      <th>Ngành học</th>
+      <th>Trường</th>
+      <th>Điểm stress gần nhất</th>
+    </tr>
+    {% for s in students %}
+    <tr>
+      <td>{{ s.full_name }}</td>
+      <td>{{ s.student_code }}</td>
+      <td>{{ s.major }}</td>
+      <td>{{ s.school }}</td>
+      <td>{{ s.last_stress_score }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
