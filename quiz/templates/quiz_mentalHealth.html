@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài test sức khoẻ tinh thần</title>
+</head>
+<body>
+    <h2>Bài test PHQ-9</h2>
+
+    <!-- 🧩 Thêm phần nhập thông tin sinh viên tại đây -->
+    <form id="quizForm">
+        <label><b>Họ và tên</b></label><br>
+        <input type="text" id="ho_ten" placeholder="Nguyễn Văn A" required style="width:100%; padding:8px;"><br><br>
+
+        <label><b>Mã số sinh viên (MSSV)</b></label><br>
+        <input type="text" id="mssv" placeholder="2412345" required style="width:100%; padding:8px;"><br><br>
+
+        <hr><br>
+    </form>
+
+    <button onclick="submitQuiz()">Nộp bài</button>
+
+    <div id="result"></div>
+
+
+<script>
+// === Load câu hỏi từ API ===
+async function loadQuestions() {
+    const res = await fetch('/api/lay-cau-hoi');
+    const data = await res.json();
+
+    const form = document.getElementById('quizForm');
+
+    data.cau_hoi.forEach((cauHoi, index) => {
+        let html = `<p><b>${index + 1}. ${cauHoi}</b></p>`;
+        
+        data.tan_suat.forEach((label, value) => {
+            html += `
+                <label>
+                    <input type="radio" name="q${index}" value="${value}">
+                    ${label}
+                </label><br>
+            `;
+        });
+
+        form.innerHTML += html + "<br>";
+    });
+
+    // Câu hỏi mức độ ảnh hưởng
+    form.innerHTML += `<br><b>Mức độ ảnh hưởng đến cuộc sống:</b><br>`;
+    data.anh_huong.forEach((label, value) => {
+        form.innerHTML += `
+            <label>
+                <input type="radio" name="impact" value="${value}"> ${label}
+            </label><br>
+        `;
+    });
+}
+
+// === Submit form ===
+async function submitQuiz() {
+    let answers = [];
+    for (let i = 0; i < 9; i++) {
+        const choice = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!choice) return alert("Vui lòng trả lời đầy đủ 9 câu!");
+        answers.push(Number(choice.value));
+    }
+
+    const impactChoice = document.querySelector(`input[name="impact"]:checked`);
+    if (!impactChoice) return alert("Vui lòng chọn mức độ ảnh hưởng!");
+
+    const res = await fetch('/api/nop-bai', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            tra_loi: answers,
+            anh_huong: Number(impactChoice.value)
+        })
+    });
+
+    const data = await res.json();
+    showResult(data);
+}
+
+// === Hiển thị kết quả ===
+function showResult(data) {
+    const box = document.getElementById('result');
+    box.innerHTML = `
+        <h3 style="color:green;">${data.msg || "✅ Đã nộp form thành công!"}</h3>
+        <h3>Kết quả:</h3>
+        <p><b>Điểm:</b> ${data.diem}</p>
+        <p><b>Mức độ:</b> ${data.muc_do}</p>
+        <p><b>Ảnh hưởng:</b> ${data.anh_huong_text}</p>
+        <b>Lời khuyên:</b>
+        <ul>
+            ${data.loi_khuyen.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+    `;
+}
+
+
+// Tự load câu hỏi khi mở trang
+loadQuestions();
+</script>
+
+</body>
+</html>
