@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh giá Sức khỏe Tâm thần - PHQ-9</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .question-block {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .question-block h4 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 17px;
+            line-height: 1.5;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .radio-option {
+            flex: 0 0 auto;
+        }
+        
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-option label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #e9ecef;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s ease;
+            user-select: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .radio-option label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .radio-option input[type="radio"]:checked + label:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3e8f 100%);
+        }
+        
+        .impact-section {
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #ffc107;
+            margin: 30px 0;
+        }
+        
+        .impact-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .impact-section p {
+            color: #856404;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .result-level {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .advice-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        .advice-box h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .advice-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .advice-box li {
+            padding: 8px 0;
+            color: #555;
+        }
+        
+        .action-box {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #007bff;
+        }
+        
+        .action-box h4 {
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        
+        .action-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .action-box li {
+            padding: 8px 0;
+            color: #004085;
+        }
+        
+        .continue-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .continue-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .warning-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #856404;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .radio-option {
+                flex: 1 1 100%;
+            }
+            
+            .radio-option label {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Bài Đánh Giá Sức Khỏe Tâm Thần</h1>
+            <p>PHQ-9 (Patient Health Questionnaire-9)</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-section">
+                <h3>📋 Hướng dẫn</h3>
+                <p><strong>Trong 2 tuần vừa qua</strong>, bạn gặp các vấn đề sau với tần suất như thế nào?</p>
+                <p style="margin-top: 10px;">Vui lòng trả lời trung thực để có đánh giá chính xác nhất. Thông tin của bạn được bảo mật hoàn toàn.</p>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <form id="quizForm">
+                <!-- Thông tin sinh viên -->
+                <div class="form-group">
+                    <label>👤 Họ và tên <span style="color: red;">*</span></label>
+                    <input type="text" id="ho_ten" placeholder="Nguyễn Văn A" required>
+                </div>
+
+                <div class="form-group">
+                    <label>🎓 Mã số sinh viên (MSSV) <span style="color: red;">*</span></label>
+                    <input type="text" id="mssv" placeholder="2412345" required>
+                </div>
+
+                <hr style="margin: 30px 0; border: none; border-top: 2px solid #e0e0e0;">
+                
+                <!-- Câu hỏi sẽ được load động -->
+                <div id="questions-container"></div>
+                
+                <!-- Câu hỏi về mức độ ảnh hưởng -->
+                <div class="impact-section" id="impact-section" style="display:none;">
+                    <h3>📊 Câu hỏi cuối cùng</h3>
+                    <p><strong>10. Những khó khăn trên đã ảnh hưởng đến học tập, công việc hoặc các sinh hoạt thường ngày của bạn như thế nào?</strong></p>
+                    <div class="radio-group" id="impact-container"></div>
+                </div>
+
+                <button type="button" class="submit-btn" onclick="submitQuiz()" id="submitBtn" disabled>
+                    📝 Nộp bài đánh giá
+                </button>
+            </form>
+
+            <div class="warning-note">
+                ⚠️ <strong>Lưu ý:</strong> Bài test chỉ mang tính chất tham khảo, không thay thế chẩn đoán của chuyên gia tâm lý hay bác sĩ.
+            </div>
+
+            <!-- Kết quả -->
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let totalQuestions = 0;
+        let answeredQuestions = 0;
+
+        // Load câu hỏi từ API
+        async function loadQuestions() {
+            try {
+                const res = await fetch('/api/lay-cau-hoi');
+                const data = await res.json();
+
+                const container = document.getElementById('questions-container');
+                totalQuestions = data.cau_hoi.length;
+
+                data.cau_hoi.forEach((cauHoi, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-block';
+                    questionDiv.innerHTML = `
+                        <h4>${index + 1}. ${cauHoi}</h4>
+                        <div class="radio-group">
+                            ${data.tan_suat.map((label, value) => `
+                                <div class="radio-option">
+                                    <input type="radio" id="q${index}_${value}" name="q${index}" value="${value}" onchange="updateProgress()">
+                                    <label for="q${index}_${value}">${label}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    container.appendChild(questionDiv);
+                });
+
+                // Load câu hỏi ảnh hưởng
+                const impactContainer = document.getElementById('impact-container');
+                data.anh_huong.forEach((label, value) => {
+                    const div = document.createElement('div');
+                    div.className = 'radio-option';
+                    div.innerHTML = `
+                        <input type="radio" id="impact_${value}" name="impact" value="${value}" onchange="updateProgress()">
+                        <label for="impact_${value}">${label}</label>
+                    `;
+                    impactContainer.appendChild(div);
+                });
+
+            } catch (error) {
+                alert('❌ Lỗi khi tải câu hỏi: ' + error.message);
+            }
+        }
+
+        // Cập nhật progress bar
+        function updateProgress() {
+            answeredQuestions = 0;
+            for (let i = 0; i < totalQuestions; i++) {
+                if (document.querySelector(`input[name="q${i}"]:checked`)) {
+                    answeredQuestions++;
+                }
+            }
+
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Hiện phần ảnh hưởng khi đã trả lời đủ 9 câu
+            if (answeredQuestions === totalQuestions) {
+                document.getElementById('impact-section').style.display = 'block';
+                document.getElementById('impact-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Enable submit button khi đã trả lời đủ
+            const impactChecked = document.querySelector('input[name="impact"]:checked');
+            document.getElementById('submitBtn').disabled = !(answeredQuestions === totalQuestions && impactChecked);
+        }
+
+        // Submit form
+        async function submitQuiz() {
+            const hoTen = document.getElementById('ho_ten').value.trim();
+            const mssv = document.getElementById('mssv').value.trim();
+
+            if (!hoTen || !mssv) {
+                alert('⚠️ Vui lòng nhập đầy đủ họ tên và MSSV!');
+                return;
+            }
+
+            let answers = [];
+            for (let i = 0; i < totalQuestions; i++) {
+                const choice = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!choice) {
+                    alert(`⚠️ Vui lòng trả lời câu hỏi ${i + 1}!`);
+                    return;
+                }
+                answers.push(Number(choice.value));
+            }
+
+            const impactChoice = document.querySelector('input[name="impact"]:checked');
+            if (!impactChoice) {
+                alert('⚠️ Vui lòng chọn mức độ ảnh hưởng!');
+                return;
+            }
+
+            // Disable button để tránh submit nhiều lần
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = '⏳ Đang xử lý...';
+
+            try {
+                const res = await fetch('/api/nop-bai', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        ho_ten: hoTen,
+                        mssv: mssv,
+                        tra_loi: answers,
+                        anh_huong: Number(impactChoice.value)
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    showResult(data);
+                    // Scroll to result
+                    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('❌ ' + data.message);
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').textContent = '📝 Nộp bài đánh giá';
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối: ' + error.message);
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = '📝 Nộp bài đánh giá';
+            }
+        }
+
+        // Hiển thị kết quả
+        function showResult(data) {
+            const box = document.getElementById('result');
+            
+            let levelColor = '#28a745';
+            if (data.loai === 'warning') levelColor = '#ffc107';
+            if (data.loai === 'danger') levelColor = '#dc3545';
+            
+            let canhBaoHtml = '';
+            if (data.canh_bao) {
+                canhBaoHtml = `
+                    <div style="background: #fff3cd; border: 2px solid #dc3545; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                        <h3 style="color: #dc3545; margin-bottom: 10px;">${data.canh_bao}</h3>
+                        <p style="color: #856404;">Vui lòng liên hệ ngay với chuyên gia hoặc hotline hỗ trợ: <strong>115</strong></p>
+                    </div>
+                `;
+            }
+            
+            box.innerHTML = `
+                <div class="result-header">
+                    <h2 style="color: #333;">✅ ${data.msg}</h2>
+                    <div class="result-score" style="color: ${levelColor};">${data.icon} ${data.diem}/${data.diem_max}</div>
+                    <div class="result-level" style="color: ${levelColor};">
+                        Mức độ: <strong>${data.muc_do}</strong>
+                    </div>
+                    <p style="color: #666; margin-top: 10px;">
+                        Mức độ ảnh hưởng: <strong>${data.anh_huong_text}</strong>
+                    </p>
+                </div>
+
+                ${canhBaoHtml}
+
+                <div class="advice-box">
+                    <h4>💡 Đánh giá & Lời khuyên</h4>
+                    <ul>
+                        ${data.loi_khuyen.map(item => `<li>• ${item}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="action-box">
+                    <h4>🎯 Hành động tiếp theo</h4>
+                    <ul>
+                        ${data.hanh_dong.map(item => `<li>✓ ${item}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div style="text-align: center;">
+                    <a href="/therapists" class="continue-btn">
+                        🔍 Xem danh sách chuyên gia tư vấn
+                    </a>
+                </div>
+            `;
+            
+            box.style.display = 'block';
+            
+            // Ẩn form sau khi submit
+            document.getElementById('quizForm').style.display = 'none';
+        }
+
+        // Load câu hỏi khi trang được tải
+        window.onload = loadQuestions;
+    </script>
+</body>
+</html>
