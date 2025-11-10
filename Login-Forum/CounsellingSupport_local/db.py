@@ -27,7 +27,7 @@ def init_db():
         db_conn.executescript(f.read())
     db_conn.commit()
     db_conn.close()
-    print("✅ Database created successfully!")
+    print("Database created successfully!")
 
 # Dùng cho chạy độc lập (tạo DB mới)
 if __name__ == "__main__":
