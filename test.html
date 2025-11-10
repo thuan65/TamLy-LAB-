@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Helper – Frontend</title>
+  <style>
+    :root{
+      --bg:#0f172a;         /* slate-900 */
+      --card:#111827;       /* gray-900 */
+      --muted:#94a3b8;      /* slate-400 */
+      --text:#e5e7eb;       /* gray-200 */
+      --accent:#22d3ee;     /* cyan-400 */
+      --ok:#10b981;         /* emerald-500 */
+      --err:#ef4444;        /* red-500 */
+      --border:#1f2937;     /* gray-800 */
+    }
+    *{box-sizing:border-box}
+    body{font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--text); margin:0;}
+    .wrap{max-width:980px; margin:40px auto; padding:0 16px;}
+    h1{font-size:28px; margin:0 0 16px}
+    p.lead{color:var(--muted); margin:0 0 24px}
+    .row{display:grid; grid-template-columns:1fr; gap:12px}
+    @media(min-width:768px){ .row-3{grid-template-columns:1fr 1fr 1fr} .row-2{grid-template-columns:1fr 1fr} }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.3);}
+    label{font-size:14px; color:var(--muted); display:block; margin:8px 0 6px}
+    input,select,textarea{width:100%; background:#0b1220; color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; outline:none}
+    textarea{min-height:120px; resize:vertical}
+    .btn{cursor:pointer; border-radius:12px; border:1px solid var(--border); padding:10px 14px; background:#0b1220; color:var(--text)}
+    .btn:hover{border-color:#334155}
+    .btn-primary{background:linear-gradient(135deg, #0ea5e9, #22d3ee); color:#002434; border:none; font-weight:600}
+    .btn-ghost{background:transparent}
+    .toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .status{min-height:22px; color:var(--muted)}
+    .status.ok{color:var(--ok)}
+    .status.err{color:var(--err)}
+    .result{background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:16px; overflow:auto}
+    .muted{color:var(--muted)}
+    code, pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .small{font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Health Helper – Frontend</h1>
+    <p class="lead">Giao diện tối giản để gọi <code>/stress_text</code> và <code>/plan_text</code> (trả về Markdown dạng <em>text/plain</em>).</p>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="row row-3">
+        <div>
+          <label for="api">API Base URL</label>
+          <input id="api" placeholder="http://localhost:8000" value="http://localhost:8000" />
+        </div>
+        <div>
+          <label for="mode">Endpoint</label>
+          <select id="mode">
+            <option value="stress">/stress_text</option>
+            <option value="plan">/plan_text</option>
+          </select>
+        </div>
+        <div class="toolbar" style="margin-top:28px">
+          <button class="btn" id="ping">Kiểm tra server</button>
+        </div>
+      </div>
+      <div id="pingStatus" class="status" aria-live="polite"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="row row-2">
+        <div>
+          <label for="age">Age (tuổi)</label>
+          <input id="age" type="number" min="0" placeholder="Ví dụ: 20" />
+        </div>
+        <div>
+          <label for="location">Location (vị trí)</label>
+          <input id="location" placeholder="Ví dụ: Ho Chi Minh City" />
+        </div>
+      </div>
+      <div class="row row-2">
+        <div>
+          <label for="prefs">Preferences (cách nhau bởi dấu phẩy)</label>
+          <input id="prefs" placeholder="prefers_online, english_speaking" />
+        </div>
+        <div>
+          <label for="cons">Constraints (cách nhau bởi dấu phẩy)</label>
+          <input id="cons" placeholder="low_budget, limited_time" />
+        </div>
+      </div>
+      <label for="text">Mô tả/nhu cầu</label>
+      <textarea id="text" placeholder="Tôi dễ lo lắng trước khi thuyết trình, muốn có kế hoạch 4 tuần cải thiện... "></textarea>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="btn btn-primary" id="submit">Gửi yêu cầu</button>
+        <button class="btn btn-ghost" id="clear">Xóa</button>
+        <span id="runStatus" class="status" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:8px">
+        <div class="muted small">Kết quả (Markdown được render)</div>
+        <button class="btn" id="copy">Copy Markdown</button>
+      </div>
+      <div id="result" class="result"></div>
+      <details style="margin-top:10px">
+        <summary class="muted">Xem Markdown gốc</summary>
+        <pre id="raw" class="small"></pre>
+      </details>
+    </div>
+
+    <p class="small muted" style="margin-top:16px">Gợi ý: chạy backend FastAPI bằng <code>uvicorn health_helper:app --reload --port 8000</code>.</p>
+  </div>
+
+  <!-- Markdown renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const els = {
+      api: $("api"), mode: $("mode"), age: $("age"), location: $("location"),
+      prefs: $("prefs"), cons: $("cons"), text: $("text"), submit: $("submit"),
+      clear: $("clear"), result: $("result"), raw: $("raw"), runStatus: $("runStatus"),
+      ping: $("ping"), pingStatus: $("pingStatus"), copy: $("copy")
+    };
+
+    async function checkServer(){
+      els.pingStatus.textContent = "Đang kiểm tra...";
+      els.pingStatus.className = "status";
+      try{
+        const res = await fetch(slash(els.api.value) + "health");
+        if(!res.ok) throw new Error(res.status + " " + res.statusText);
+        const data = await res.json();
+        els.pingStatus.textContent = "Server OK: " + JSON.stringify(data);
+        els.pingStatus.className = "status ok";
+      }catch(err){
+        els.pingStatus.textContent = "Không kết nối được: " + err.message;
+        els.pingStatus.className = "status err";
+      }
+    }
+
+    function slash(url){
+      if(!url) return "";
+      return url.endsWith("/") ? url : url + "/";
+    }
+
+    function csvToArray(v){
+      return v.split(",").map(s=>s.trim()).filter(Boolean);
+    }
+
+    async function submit(){
+      const api = els.api.value.trim() || "http://localhost:8000";
+      const endpoint = els.mode.value === "stress" ? "stress_text" : "plan_text";
+
+      const text = els.text.value.trim();
+      if(!text){ alert("Hãy nhập mô tả/nhu cầu."); return; }
+
+      const ctx = {};
+      if(els.age.value) ctx.age = Number(els.age.value);
+      if(els.location.value.trim()) ctx.location = els.location.value.trim();
+      if(els.prefs.value.trim()) ctx.preferences = csvToArray(els.prefs.value);
+      if(els.cons.value.trim()) ctx.constraints = csvToArray(els.cons.value);
+
+      const payload = { text };
+      if(Object.keys(ctx).length) payload.context = ctx;
+
+      els.runStatus.textContent = "Đang xử lý...";
+      els.runStatus.className = "status";
+      els.result.innerHTML = "";
+      els.raw.textContent = "";
+
+      try{
+        const res = await fetch(slash(api) + endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if(!res.ok){ throw new Error("API error: " + res.status + " " + res.statusText); }
+        const textOut = await res.text(); // endpoints trả text/plain
+        // Render Markdown ra HTML
+        els.result.innerHTML = marked.parse(textOut);
+        els.raw.textContent = textOut;
+        els.runStatus.textContent = "Xong.";
+        els.runStatus.className = "status ok";
+      }catch(err){
+        els.runStatus.textContent = err.message;
+        els.runStatus.className = "status err";
+      }
+    }
+
+    function clearAll(){
+      els.age.value = ""; els.location.value = ""; els.prefs.value = ""; els.cons.value = "";
+      els.text.value = ""; els.result.innerHTML = ""; els.raw.textContent = "";
+      els.runStatus.textContent = ""; els.runStatus.className = "status";
+    }
+
+    async function copyRaw(){
+      const txt = els.raw.textContent || "";
+      if(!txt){ return; }
+      try{ await navigator.clipboard.writeText(txt); els.runStatus.textContent = "Đã copy Markdown"; els.runStatus.className = "status ok"; }
+      catch(e){ els.runStatus.textContent = "Không copy được: " + e.message; els.runStatus.className = "status err"; }
+    }
+
+    els.submit.addEventListener("click", submit);
+    els.clear.addEventListener("click", clearAll);
+    els.ping.addEventListener("click", checkServer);
+    els.copy.addEventListener("click", copyRaw);
+
+    // Tự kiểm tra server lần đầu cho tiện
+    checkServer();
+  </script>
+</body>
+</html>
