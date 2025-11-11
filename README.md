@@ -4,3 +4,4 @@
   + Chạy app.py
   + Xem username ở forum.db
   + Mật khẩu cho tất cả account là "123"
+  + Thêm expert bằng cách chạy add_expert.py
