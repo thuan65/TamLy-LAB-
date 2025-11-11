@@ -54,9 +54,7 @@ def login():
         session["user_id"] = user["id"]
         session["username"] = user["username"]
         session["role"] = user["role"]
-
-        return redirect("/forum")
-
+        return redirect("/dashboard_student" if session["role"]=="student" else "/dashboard_expert")
     return render_template("login.html")
 
 # Đăng xuất

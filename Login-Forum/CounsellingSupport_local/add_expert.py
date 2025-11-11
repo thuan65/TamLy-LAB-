@@ -1,8 +1,10 @@
-from db import get_db
+import sqlite3
 from werkzeug.security import generate_password_hash
 
+DB_PATH = "forum.db"
+
 def add_expert(username, password):
-    conn = get_db()
+    conn = sqlite3.connect(DB_PATH)
     try:
         conn.execute(
             "INSERT INTO users(username, password, role) VALUES(?,?,?)",
