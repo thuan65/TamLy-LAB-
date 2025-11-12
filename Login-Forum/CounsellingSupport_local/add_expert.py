@@ -1,10 +1,12 @@
-import sqlite3
+from db import DATABASE 
 from werkzeug.security import generate_password_hash
 
-DB_PATH = "forum.db"
+import sqlite3
 
 def add_expert(username, password):
-    conn = sqlite3.connect(DB_PATH)
+    # conn = get_db()
+    # Dòng mới: Tự tạo kết nối trực tiếp
+    conn = sqlite3.connect(DATABASE)
     try:
         conn.execute(
             "INSERT INTO users(username, password, role) VALUES(?,?,?)",
