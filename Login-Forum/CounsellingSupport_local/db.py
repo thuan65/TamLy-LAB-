@@ -1,7 +1,12 @@
 import sqlite3
 from flask import g
+# NỘI DUNG MỚI 
+import os
 
-DATABASE = "forum.db"
+# DATABASE = "forum.db"
+# Lấy đường dẫn tuyệt đối đến thư mục chứa file db.py này
+_basedir = os.path.abspath(os.path.dirname(__file__))
+DATABASE = os.path.join(_basedir, "forum.db")
 
 # Kết nối tới database, chỉ tạo nếu chưa có trong g (global context Flask)
 def get_db():
@@ -22,8 +27,11 @@ def close_db(e=None):
 
 # Khởi tạo database từ file models.sql
 def init_db():
+    # NỘI DUNG MỚI 
+    models_path = os.path.join(_basedir, "models.sql")
+    
     db_conn = sqlite3.connect(DATABASE)
-    with open("models.sql", "r", encoding="utf8") as f:
+    with open(models_path, "r", encoding="utf8") as f:
         db_conn.executescript(f.read())
     db_conn.commit()
     db_conn.close()

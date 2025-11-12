@@ -47,7 +47,7 @@ const sendBtn = document.getElementById("send-btn");
 // Load tin nhắn giữa 2 người
 async function loadMessages() {
   try {
-    const res = await fetch(`/chat/api/get_messages/${userId}/${peerId}`);
+    const res = await fetch(`/expert/api/get_messages/${userId}/${peerId}`);
     const data = await res.json();
     chatBox.innerHTML = "";
     data.messages.forEach(msg => {
@@ -71,7 +71,7 @@ async function sendMessage() {
   if(!msg) return;
 
   try {
-    const res = await fetch("/chat/api/send_message", {
+    const res = await fetch("/expert/api/send_message", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({sender_id: userId, receiver_id: peerId, message: msg})

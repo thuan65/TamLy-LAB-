@@ -54,7 +54,14 @@ def login():
         session["user_id"] = user["id"]
         session["username"] = user["username"]
         session["role"] = user["role"]
+        
+        # --- NỘI DUNG MỚI (Giữ của bạn) ---
+        session["chat_opt_in"] = user["chat_opt_in"]
+        session["status_tag"] = user["status_tag"]
+
+        # --- Chuyển hướng (Giữ của bạn bạn) ---
         return redirect("/dashboard_student" if session["role"]=="student" else "/dashboard_expert")
+        
     return render_template("login.html")
 
 # Đăng xuất

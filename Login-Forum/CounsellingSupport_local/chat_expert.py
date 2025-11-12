@@ -3,10 +3,10 @@ from flask import Blueprint, render_template, request, jsonify, session
 from db import get_db
 from datetime import datetime
 
-chat = Blueprint("chat", __name__, url_prefix="/chat")
+chat_expert_bp = Blueprint("chat_expert", __name__, url_prefix="/expert")
 
 # ----- Route dashboard/chat -----
-@chat.route("")
+@chat_expert_bp.route("")
 def chat_dashboard():
     """
     Student: show list of experts
@@ -34,7 +34,7 @@ def chat_dashboard():
         return render_template("dashboard.html", username=session["username"], role=role, user_id=user_id, students=students_list)
 
 # ----- Route mở chat messenger với peer -----
-@chat.route("/<int:peer_id>")
+@chat_expert_bp.route("/<int:peer_id>")
 def open_chat(peer_id):
     if "user_id" not in session:
         return "Bạn cần đăng nhập để vào chat.", 403
@@ -53,7 +53,7 @@ def open_chat(peer_id):
                            peer_name=peer_name)
 
 # ----- API: Lấy danh sách chuyên gia -----
-@chat.route("/api/get_all_experts")
+@chat_expert_bp.route("/api/get_all_experts")
 def get_all_experts():
     conn = get_db()
     rows = conn.execute("SELECT id, username FROM users WHERE role='expert'").fetchall()
@@ -61,7 +61,7 @@ def get_all_experts():
     return jsonify({"experts": experts})
 
 # ----- API: Lấy danh sách học sinh đã chat với expert -----
-@chat.route("/api/get_chats_for_expert/<int:expert_id>")
+@chat_expert_bp.route("/api/get_chats_for_expert/<int:expert_id>")
 def get_chats_for_expert(expert_id):
     conn = get_db()
     rows = conn.execute(
@@ -72,7 +72,7 @@ def get_chats_for_expert(expert_id):
     return jsonify({"students": students})
 
 # ----- API: Lấy số tin nhắn chưa đọc -----
-@chat.route("/api/get_unread/<role>/<int:uid>")
+@chat_expert_bp.route("/api/get_unread/<role>/<int:uid>")
 def get_unread(role, uid):
     conn = get_db()
     if role == "student":
@@ -88,7 +88,7 @@ def get_unread(role, uid):
     return jsonify({"unread": row["cnt"] if row else 0})
 
 # ----- API: Lấy tin nhắn giữa 2 người -----
-@chat.route("/api/get_messages/<int:user_id>/<int:peer_id>")
+@chat_expert_bp.route("/api/get_messages/<int:user_id>/<int:peer_id>")
 def get_messages(user_id, peer_id):
     conn = get_db()
     rows = conn.execute("""
@@ -108,7 +108,7 @@ def get_messages(user_id, peer_id):
     return jsonify({"messages": messages})
 
 # ----- API: Gửi tin nhắn -----
-@chat.route("/api/send_message", methods=["POST"])
+@chat_expert_bp.route("/api/send_message", methods=["POST"])
 def send_message():
     data = request.get_json()
     sender_id = data.get("sender_id")

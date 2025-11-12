@@ -55,7 +55,7 @@ const userId = "{{ user_id }}";
 async function loadExperts() {
   if(role !== "student") return;
   try {
-    const res = await fetch("/chat/api/get_all_experts");
+    const res = await fetch("/expert/api/get_all_experts");
     const data = await res.json();
     const div = document.getElementById("expert-list");
     div.innerHTML = "";
@@ -63,7 +63,7 @@ async function loadExperts() {
       const btn = document.createElement("button");
       btn.textContent = e.username;
       btn.classList.add("btn","btn-primary","btn-sm");
-      btn.onclick = () => window.location = `/chat/${e.id}`;
+      btn.onclick = () => window.location = `/expert/${e.id}`;
       div.appendChild(btn);
     });
   } catch(err){ console.error(err); }
@@ -73,7 +73,7 @@ async function loadExperts() {
 async function loadStudents() {
   if(role !== "expert") return;
   try {
-    const res = await fetch(`/chat/api/get_chats_for_expert/${userId}`);
+    const res = await fetch(`/expert/api/get_chats_for_expert/${userId}`);
     const data = await res.json();
     const div = document.getElementById("student-list");
     div.innerHTML = "";
@@ -82,7 +82,7 @@ async function loadStudents() {
       const btn = document.createElement("button");
       btn.textContent = "Học sinh " + sid;
       btn.classList.add("btn","btn-primary","btn-sm");
-      btn.onclick = () => window.location = `/chat/${sid}`;
+      btn.onclick = () => window.location = `/expert/${sid}`;
       div.appendChild(btn);
     });
   } catch(err){ console.error(err); }
@@ -91,7 +91,7 @@ async function loadStudents() {
 // Thông báo tin nhắn mới
 async function checkUnread() {
   try {
-    const res = await fetch(`/chat/api/get_unread/${role}/${userId}`);
+    const res = await fetch(`/expert/api/get_unread/${role}/${userId}`);
     const data = await res.json();
     const notif = document.getElementById("notifications");
     notif.textContent = data.unread>0 ? `Bạn có ${data.unread} tin nhắn mới!` : "";
