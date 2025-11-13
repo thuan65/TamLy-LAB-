@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Psychotherapy Games</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.8em;
+        }
+        .game-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .game-card {
+            background: white;
+            color: #333;
+            width: 300px;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .game-card img {
+            width: 100%;
+            border-radius: 15px;
+        }
+        .game-title {
+            font-size: 1.5em;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .play-btn {
+            margin-top: 10px;
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 1.1em;
+        }
+        .play-btn:hover {
+            background: #5565d4;
+        }
+
+        .back-btn {
+            margin-top: 40px;
+            display: inline-block;
+            padding: 12px 20px;
+            background: #222;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+    </style>
+
+    <script>
+        function logGame(gameName) {
+            fetch(`/api/gamify/game/{{ student_id }}`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({game: gameName})
+            });
+        }
+    </script>
+</head>
+
+<body>
+
+    <h1>🎮 Psychotherapy Games</h1>
+    <p style="margin-bottom: 25px; opacity: 0.8;">
+        Người chơi ID: <b>{{ student_id }}</b>
+    </p>
+
+    <div class="game-container">
+
+        <!-- Silk Game -->
+        <div class="game-card">
+            <img src="https://weavesilk.com/images/share-thumbnail.jpg" alt="Silk Game">
+            <div class="game-title">Silk – Art & Relaxation</div>
+            <a href="https://weavesilk.com/" 
+               target="_blank" 
+               class="play-btn"
+               onclick="logGame('silk')">
+               Play Silk 🎨
+            </a>
+        </div>
+
+        <!-- ZoomQuilt -->
+        <div class="game-card">
+            <img src="https://zoomquilt.org/og/zoomquilt.png" alt="ZoomQuilt">
+            <div class="game-title">ZoomQuilt – Infinite Journey</div>
+            <a href="https://zoomquilt.org/" 
+               target="_blank" 
+               class="play-btn"
+               onclick="logGame('zoomquilt')">
+               Play ZoomQuilt 🔍
+            </a>
+        </div>
+
+    </div>
+
+    <a href="/diary/{{ student_id }}" class="back-btn">⬅ Quay lại nhật ký</a>
+
+</body>
+</html>

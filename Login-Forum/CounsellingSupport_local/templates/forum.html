@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Diễn đàn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">🎓 Forum</a>
+            <div class="d-flex">
+                {% if session.get('user_id') %}
+                {% if session.get('role') == 'student' %}
+                <a href="/post/new" class="btn btn-success me-2">+ Bài viết mới</a>
+                {% endif %}
+
+                {% if session.get('role') == 'expert' or session.get('status_tag') %}
+
+                <form action="/chat/toggle-opt-in" method="POST" class="d-flex me-2">
+
+                    {% if session.get('chat_opt_in') == 1 %}
+                    <button type="submit" class="btn btn-success">
+                        🟢 Đang Online (Sẵn sàng chat)
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-outline-secondary">
+                        ⚪ Đang Offline
+                    </button>
+                    {% endif %}
+
+                </form>
+                {% endif %}
+                <a href="/logout" class="btn btn-outline-danger">Đăng xuất</a>
+                {% else %}
+                <a href="/login" class="btn btn-outline-primary me-2">Đăng nhập</a>
+                <a href="/register" class="btn btn-primary">Đăng ký</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+
+        {% if session.get('role') == 'student' %}
+        <div class="card shadow-sm mb-4 bg-light border-primary">
+            <div class="card-body text-center">
+                <h5 class="card-title text-primary fw-bold">Kết nối 1-1 Ẩn danh</h5>
+                <p class="card-text text-muted">Bạn cần người lắng nghe? Hãy trò chuyện với một người đã vượt qua hoặc một chuyên gia.</p>
+
+                <div class="d-flex justify-content-center align-items-center">
+                    <select id="illness-select" name="illness_type" class="form-select w-auto me-2" required>
+                        <option value="" disabled selected>Chọn chủ đề bạn cần...</option>
+                        <option value="depression">Trầm cảm</option>
+                        <option value="anxiety">Lo âu</option>
+                        <option value="stress">Căng thẳng / Stress</option>
+                        <option value="relationships">Mối quan hệ</option>
+                        <option value="other">Chủ đề khác</option>
+                    </select>
+
+                    <button type="button" id="find-chat-btn" class="btn btn-primary btn-lg">⚡ Tìm người trò chuyện</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <h3 class="text-center mb-4">📢 Diễn đàn Hỏi & Đáp</h3>
+
+        {% if posts %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                {% for post in posts %}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post['title'] }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Đăng bởi <b>{{ post['username'] }}</b>
+                            {% if post['tag'] == 'answered' %}
+                            <span class="badge bg-success ms-2">Đã trả lời</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark ms-2">Chưa trả lời</span>
+                            {% endif %}
+                        </h6>
+                        <p class="card-text mt-3">
+                            {{ post['content'] }}
+                        </p>
+
+                        {% if session.get('role') == 'expert' %}
+                        <a href="/post/{{ post['id'] }}/reply" class="btn btn-sm btn-outline-primary">Trả lời</a>
+                        {% endif %}
+
+                        {% if post.get('answers') %}
+                        <div class="mt-4">
+                            <h6 class="fw-bold text-success">💬 Trả lời:</h6>
+                            <ul class="list-group list-group-flush">
+                                {% for ans in post['answers'] %}
+                                <li class="list-group-item">
+                                    <i>{{ ans['content'] }}</i>
+                                    <span class="text-muted small">— {{ ans['expert_username'] }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Hiện chưa có bài viết nào.</p>
+        {% endif %}
+    </div>
+
+    {% if session.get('user_id') %}
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script type="text/javascript">
+        const globalSocket = io();
+        const USER_ROLE = "{{ session.get('role', 'guest') }}";
+
+        // 3. LẮNG NGHE LỆNH "ÉP" VÀO PHÒNG (CHO EXPERT)
+        // (Đổi tên từ 'invite_to_chat' và xóa confirm())
+        globalSocket.on('force_join_room', (data) => {
+            console.log('NHẬN ĐƯỢC LỆNH VÀO PHÒNG!', data);
+            // Tự động chuyển hướng ngay lập tức
+            window.location.href = data.room_url;
+        });
+
+        // 4. LẮNG NGHE CẢNH BÁO AI (CHO EXPERT)
+        if (USER_ROLE === 'expert') {
+            globalSocket.on('new_alert', (data) => {
+                console.log('CẢNH BÁO AI!!!', data);
+                alert(`CẢNH BÁO AI KHẨN CẤP:\n\n${data.message}\n\n(Từ Session ID: ${data.session_id})`);
+            });
+        }
+
+        // 5. BẮT SỰ KIỆN BẤM NÚT "TÌM NGƯỜI TRÒ CHUYỆN" (CHO STUDENT)
+        const findChatBtn = document.getElementById('find-chat-btn');
+        const illnessSelect = document.getElementById('illness-select');
+
+        if (findChatBtn) {
+            findChatBtn.addEventListener('click', () => {
+                const illnessType = illnessSelect.value;
+                if (!illnessType) {
+                    alert('Vui lòng chọn một chủ đề bạn cần giúp đỡ!');
+                    return;
+                }
+
+                // 1. Vô hiệu hóa nút và hiển thị "Đang tìm..."
+                findChatBtn.disabled = true;
+                findChatBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang tìm...';
+                illnessSelect.disabled = true;
+
+                // 2. Gửi yêu cầu tìm chat
+                console.log(`Đang gửi yêu cầu tìm chat, chủ đề: ${illnessType}`);
+                globalSocket.emit('request_match', { illness: illnessType });
+            });
+        }
+
+        // 6. LẮNG NGHE KẾT QUẢ TÌM KIẾM (CHO STUDENT)
+        globalSocket.on('match_failed', (data) => {
+            console.log('Match thất bại!', data);
+            alert("Rất tiếc, hiện tại không có ai rảnh. Vui lòng thử lại sau.");
+            // Bật lại nút
+            findChatBtn.disabled = false;
+            findChatBtn.innerHTML = '⚡ Tìm người trò chuyện';
+            illnessSelect.disabled = false;
+        });
+
+        globalSocket.on('match_found', (data) => {
+            console.log('Match thành công!', data);
+            // Tự động chuyển hướng Student vào phòng
+            window.location.href = data.room_url;
+        });
+    </script>
+    {% endif %}
+
+</body>
+</html>

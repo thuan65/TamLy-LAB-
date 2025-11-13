@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Phòng Chat Ẩn Danh</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        #chat-window {
+            height: 450px;
+            overflow-y: scroll;
+            background: #f9f9f9;
+            padding: 1.5rem;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            #messages li {
+                padding: 0.5rem 1rem;
+                margin-bottom: 0.75rem;
+                border-radius: 1rem;
+                max-width: 75%;
+                word-wrap: break-word;
+            }
+
+        .message-mine {
+            background-color: #dcf8c6;
+            margin-left: auto;
+        }
+
+        .message-theirs {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+        }
+
+        .log {
+            font-style: italic;
+            color: #888;
+            text-align: center;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div id="chat-app" data-room-key="{{ session_key }}" data-user-id="{{ session['user_id'] }}">
+                    <div class="card shadow-sm">
+                        <div class="card-header text-center bg-primary text-white">
+                            <h5 class="mb-0">Cuộc trò chuyện ẩn danh</h5>
+                        </div>
+                        <div id="chat-window" class="card-body">
+                            <ul id="messages">
+                                <li class="log">Đang kết nối...</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer p-3 bg-white">
+                            <form id="message-form" class="d-flex">
+                                <input id="message-input" class="form-control me-2" autocomplete="off" placeholder="Nhập tin nhắn..." required />
+                                <button type="submit" class="btn btn-primary">Gửi</button>
+                            </form>
+                            <button id="leave-button" class="btn btn-sm btn-outline-danger w-100 mt-2">Kết thúc trò chuyện</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const socket = io();
+        const chatApp = document.getElementById('chat-app');
+        const roomKey = chatApp.dataset.roomKey;
+        const currentUserId = parseInt(chatApp.dataset.userId);
+        const messagesList = document.getElementById('messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const leaveButton = document.getElementById('leave-button');
+
+        // --- Giữ track tin nhắn đã hiển thị để tránh duplicate ---
+        const displayedMessageIds = new Set();
+
+        // Thêm tin nhắn vào UI
+        function addMessage(type, message, msgId = null) {
+            if (msgId && displayedMessageIds.has(msgId)) return; // tránh duplicate
+            if (msgId) displayedMessageIds.add(msgId);
+
+            const item = document.createElement('li');
+            item.className = type;
+            item.textContent = message;
+            messagesList.appendChild(item);
+            document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
+        }
+
+        // --- Load lịch sử chat từ backend ---
+        async function loadChatHistory() {
+            try {
+                const res = await fetch(`/api/get_history/${roomKey}`);
+                const data = await res.json();
+                messagesList.innerHTML = ""; // xóa log "Đang kết nối..."
+                data.history.forEach(msg => {
+                    const type = (msg.user_id === currentUserId) ? 'message-mine' : 'message-theirs';
+                    if (msg.user_message) addMessage(type, msg.user_message, msg.timestamp);
+                    if (msg.system_response) addMessage('message-theirs', msg.system_response, msg.timestamp + "_sys");
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // --- SocketIO events ---
+        socket.on('connect', () => {
+            socket.emit('join', { room: roomKey });
+            loadChatHistory();
+        });
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            socket.emit('send_message', { room: roomKey, message: message });
+            addMessage('message-mine', message);
+
+            messageInput.value = '';
+        });
+
+        leaveButton.addEventListener('click', () => {
+            if (confirm('Bạn có chắc muốn kết thúc cuộc trò chuyện?')) {
+                socket.emit('leave_chat', { room: roomKey });
+            }
+        });
+
+        socket.on('receive_message', (data) => {
+            addMessage('message-theirs', data.message, data.timestamp || null);
+        });
+
+        socket.on('chat_log', (data) => {
+            addMessage('log', data.message);
+        });
+
+        socket.on('chat_ended', (data) => {
+            addMessage('log', data.message);
+            leaveButton.disabled = true;
+            messageInput.disabled = true;
+            messageInput.placeholder = 'Cuộc trò chuyện đã kết thúc.';
+            messageForm.querySelector('button').disabled = true;
+        });
+    </script>
+
+</body>
+</html>

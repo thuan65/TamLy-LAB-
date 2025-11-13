@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chat History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f4f4f4;
+        }
+
+        #chat-container {
+            width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        #chat-history {
+            height: 400px;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .msg-user {
+            text-align: right;
+            color: blue;
+            margin-bottom: 5px;
+        }
+
+        .msg-system {
+            text-align: left;
+            color: green;
+            margin-bottom: 10px;
+        }
+
+        #chat-input {
+            display: flex;
+        }
+
+            #chat-input input {
+                flex: 1;
+                padding: 10px;
+                border: none;
+            }
+
+            #chat-input button {
+                padding: 10px;
+                border: none;
+                background: #007bff;
+                color: white;
+                cursor: pointer;
+            }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <h2>Test Lịch sử Chat (User ID: {{ user_id }})</h2>
+        <div id="chat-history">
+        </div>
+        <div id="chat-input">
+            <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+            <button id="send-button">Gửi</button>
+        </div>
+    </div>
+
+    <script>
+        const CURRENT_USER_ID = {{ user_id }};
+        const SESSION_TYPE = '{{ session_type }}';
+
+        const historyDiv = document.getElementById('chat-history');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        // --- Hàm 1: Gọi API /api/save_history ---
+        async function saveMessage(userMsg, systemMsg) {
+            try {
+                const response = await fetch('/api/save_history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: CURRENT_USER_ID,
+                        session_type: SESSION_TYPE,
+                        user_message: userMsg,
+                        system_response: systemMsg
+                    })
+                });
+                const result = await response.json();
+                console.log('Save status:', result);
+            } catch (error) {
+                console.error('Error saving history:', error);
+            }
+        }
+
+        // --- Hàm 2: Gọi API /api/get_history ---
+        async function loadHistory() {
+            historyDiv.innerHTML = '<em>Đang tải lịch sử...</em>';
+            try {
+                const response = await fetch(`/api/get_history/${CURRENT_USER_ID}`);
+                const result = await response.json();
+
+                historyDiv.innerHTML = ''; // Xóa chữ "đang tải"
+                if (result.status === 'success' && result.history.length > 0) {
+                    result.history.forEach(record => {
+                        displayMessage(record.user_message, record.system_response);
+                    });
+                } else {
+                    historyDiv.innerHTML = '<em>Chưa có lịch sử chat.</em>';
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                historyDiv.innerHTML = '<em>Lỗi khi tải lịch sử.</em>';
+            }
+        }
+
+        // --- Hàm 3: Hiển thị tin nhắn lên giao diện ---
+        function displayMessage(userMsg, systemMsg) {
+            if (userMsg) {
+                historyDiv.innerHTML += `<div class="msg-user"><strong>Bạn:</strong> ${userMsg}</div>`;
+            }
+            if (systemMsg) {
+                historyDiv.innerHTML += `<div class="msg-system"><strong>${SESSION_TYPE}:</strong> ${systemMsg}</div>`;
+            }
+            // Cuộn xuống tin nhắn mới nhất
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+        }
+
+        // --- Hàm 4: Xử lý khi nhấn nút "Gửi" ---
+        async function handleSend() {
+            const userMsg = messageInput.value;
+            if (!userMsg) return;
+
+            // 1. Giả lập Chatbot/Chuyên gia trả lời
+            // (Trong dự án thật, bạn sẽ gọi API AI/Chuyên gia ở đây)
+            const systemMsg = `(Bot trả lời) Bạn vừa nói: "${userMsg}"`;
+
+            // 2. Hiển thị tin nhắn vừa gửi và trả lời
+            displayMessage(userMsg, systemMsg);
+
+            // 3. Gọi API để lưu vào database
+            await saveMessage(userMsg, systemMsg);
+
+            // 4. Xóa nội dung input
+            messageInput.value = '';
+        }
+
+        // --- Gán sự kiện ---
+        sendButton.addEventListener('click', handleSend);
+        messageInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                handleSend();
+            }
+        });
+
+        // --- Tải lịch sử khi trang vừa mở ---
+        window.onload = loadHistory;
+
+    </script>
+</body>
+</html>

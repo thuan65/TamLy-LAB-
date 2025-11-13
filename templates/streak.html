@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Streak</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            color: white;
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 40px;
+            padding-bottom: 120px; 
+            max-width: 550px;
+            margin: auto;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+
+
+        .fire { 
+            font-size: 3em; 
+        }
+
+        .streak-num {
+            font-size: 4em;
+            font-weight: bold;
+            color: #ff6262;
+        }
+
+        .streak-label {
+            font-size: 1.4em;
+            margin-top: -10px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .status-box {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;     
+            justify-content: center;
+            gap: 8px;               
+            margin: 4px 0;           
+            line-height: 1.2;       
+        }
+
+
+        .checkmark {
+            font-size: 1.5em;
+            width: 25px;
+            text-align: center;
+            line-height: 1;         
+            vertical-align: middle; 
+        }
+
+        .btn {
+            margin-top: 40px;     
+            display: inline-block;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- FIRE ICONS -->
+    <div class="fire">🔥🔥🔥</div>
+
+    <!-- STREAK NUMBER -->
+    <div class="streak-num">{{ streak }}</div>
+
+    <!-- STREAK LABEL -->
+    <div class="streak-label">
+        {{ streak }} ngày streak
+    </div>
+
+    <hr style="margin: 30px auto; width: 80%; border-top: 1px solid #ddd;">
+
+    <div class="section-title">Hoạt động hôm nay</div>
+
+    <div class="status-box">
+        <div class="item">
+            <span class="checkmark">
+                {% if wrote_today %}✔{% else %}❌{% endif %}
+            </span>
+            <span>Đã viết nhật ký</span>
+        </div>
+
+        <div class="item">
+            <span class="checkmark">
+                {% if played_today %}✔{% else %}❌{% endif %}
+            </span>
+            <span>Đã chơi game</span>
+        </div>
+    </div>
+
+    <a href="/diary/{{ student_id }}" class="btn">← Quay lại Nhật ký</a>
+
+</div>
+
+</body>
+</html>

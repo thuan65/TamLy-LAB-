@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đang tìm kiếm...</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">🎓 Forum</a>
+            <div class="d-flex">
+                {% if session.get('user_id') %}
+                {% if session.get('role') == 'student' %}
+                <a href="/post/new" class="btn btn-success me-2">+ Bài viết mới</a>
+                {% endif %}
+                <a href="/logout" class="btn btn-outline-danger">Đăng xuất</a>
+                {% else %}
+                <a href="/login" class="btn btn-outline-primary me-2">Đăng nhập</a>
+                <a href="/register" class="btn btn-primary">Đăng ký</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body p-5">
+
+                        <h2 class="card-title" id="waiting-title">Đang tìm kiếm...</h2>
+
+                        <div id="waiting-spinner" class="spinner-border text-primary my-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-warning" role="alert">
+                            {% for message in messages %}
+                            {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        <p class="text-muted" id="waiting-message">Đang tìm kiếm người phù hợp. Vui lòng chờ trong giây lát...</p>
+
+                        <a href="/forum" class="btn btn-primary mt-2">Quay về Diễn đàn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if session.get('user_id') %}
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script type="text/javascript">
+            const waitingSocket = io();
+
+            // 1. Lắng nghe tín hiệu "Thất bại"
+            waitingSocket.on('match_failed', (data) => {
+                console.log('Match thất bại!', data);
+                // Cập nhật giao diện
+                document.getElementById('waiting-title').textContent = "Không tìm thấy";
+                document.getElementById('waiting-spinner').style.display = 'none'; // Ẩn vòng xoay
+                document.getElementById('waiting-message').textContent = "Rất tiếc, hiện tại không có ai rảnh. Vui lòng thử lại sau.";
+            });
+
+            // 2. Lắng nghe tín hiệu "Thành công"
+            waitingSocket.on('match_found', (data) => {
+                console.log('Match thành công!', data);
+                // Cập nhật giao diện
+                document.getElementById('waiting-title').textContent = "Đã tìm thấy!";
+                document.getElementById('waiting-spinner').style.display = 'none'; // Ẩn vòng xoay
+                document.getElementById('waiting-message').textContent = "Đang kết nối bạn vào phòng chat...";
+
+                // Tự động chuyển hướng Student vào phòng
+                window.location.href = data.room_url;
+            });
+    </script>
+    {% endif %}
+</body>
+</html>

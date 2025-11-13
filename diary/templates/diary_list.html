@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Nhật ký của {{ student.full_name }}</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f5f5;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .entry {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .date {
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        .new-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 12px 18px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .new-btn:hover {
+            background: #5567d1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>📘 Nhật ký của {{ student.full_name }}</h1>
+
+        <a href="/diary/create/{{ student.id }}" class="new-btn">✍️ Viết nhật ký mới</a>
+
+        {% if entries|length == 0 %}
+            <p>Chưa có nhật ký nào.</p>
+        {% endif %}
+
+        {% for e in entries %}
+        <div class="entry">
+            <div class="title">{{ e.title }}</div>
+            <div class="date">Ngày: {{ e.created_at[:10] }}</div>
+            <a href="/diary/view/{{ e.id }}">Xem chi tiết →</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
