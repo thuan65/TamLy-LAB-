@@ -68,6 +68,9 @@
                                 <button type="submit" class="btn btn-primary">Gửi</button>
                             </form>
                             <button id="leave-button" class="btn btn-sm btn-outline-danger w-100 mt-2">Kết thúc trò chuyện</button>
+                            <a href="/forum" id="back-to-forum-btn" class="btn btn-sm btn-primary w-100 mt-2" style="display: none;">
+                                ⬅ Quay về Diễn đàn
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -84,6 +87,7 @@
         const messageForm = document.getElementById('message-form');
         const messageInput = document.getElementById('message-input');
         const leaveButton = document.getElementById('leave-button');
+        const backButton = document.getElementById('back-to-forum-btn');
 
         // --- Giữ track tin nhắn đã hiển thị để tránh duplicate ---
         const displayedMessageIds = new Set();
@@ -149,10 +153,15 @@
 
         socket.on('chat_ended', (data) => {
             addMessage('log', data.message);
-            leaveButton.disabled = true;
+
+            // Vô hiệu hóa việc gửi tin nhắn
             messageInput.disabled = true;
             messageInput.placeholder = 'Cuộc trò chuyện đã kết thúc.';
             messageForm.querySelector('button').disabled = true;
+
+            // Ẩn nút "Kết thúc" và hiện nút "Quay về"
+            leaveButton.style.display = 'none'; // Ẩn nút "Kết thúc"
+            backButton.style.display = 'block';  // Hiện nút "Quay về Diễn đàn"
         });
     </script>
 
