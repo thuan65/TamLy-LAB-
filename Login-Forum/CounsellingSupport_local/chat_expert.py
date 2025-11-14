@@ -8,7 +8,7 @@ from datetime import datetime
 chat_expert_bp = Blueprint("chat_expert", __name__, url_prefix="/chat_expert")
 
 # ============================================================
-# 1) Route: /expert  → Dashboard chỉ có “Vào Chat”
+# 1) Route: /chat_expert  → Dashboard chỉ có “Vào Chat”
 # ============================================================
 @chat_expert_bp.route("")
 def chat_dashboard():
@@ -23,7 +23,7 @@ def chat_dashboard():
     )
 
 # ============================================================
-# 2) Route: /expert/chat  → Giao diện Messenger
+# 2) Route: /chat_expert/chat  → Giao diện Messenger
 # ============================================================
 @chat_expert_bp.route("/chat")
 def chat_page():
@@ -121,30 +121,9 @@ def get_messages(user_id, peer_id):
 
     return jsonify({"messages": messages})
 
-
 # ============================================================
-# 📌 5) API: gửi tin nhắn (không realtime)
+# 6) API: Lấy danh sách chuyên gia
 # ============================================================
-# @chat_expert_bp.route("/api/send_message", methods=["POST"])
-# def send_message():
-#     data = request.get_json()
-#     sender = data.get("sender_id")
-#     receiver = data.get("receiver_id")
-#     message = data.get("message", "").strip()
-
-#     if not sender or not receiver or not message:
-#         return jsonify({"status": "error"}), 400
-
-#     conn = get_db()
-#     conn.execute("""
-#         INSERT INTO messages(sender_id, receiver_id, message, created_at)
-#         VALUES (?, ?, ?, ?)
-#     """, (sender, receiver, message, datetime.now()))
-#     conn.commit()
-
-#     return jsonify({"status": "ok"})
-
-# ----- API: Lấy danh sách chuyên gia -----
 @chat_expert_bp.route("/api/get_all_experts")
 def get_all_experts():
     conn = get_db()
@@ -152,7 +131,9 @@ def get_all_experts():
     experts = [{"id": r["id"], "username": r["username"]} for r in rows]
     return jsonify({"experts": experts})
 
-# ----- API: Lấy số tin nhắn chưa đọc -----
+# ============================================================
+# 7) API: Lấy số tin nhắn chưa đọc
+# ============================================================
 @chat_expert_bp.route("/api/get_unread/<role>/<int:uid>")
 def get_unread(role, uid):
     conn = get_db()
@@ -168,9 +149,8 @@ def get_unread(role, uid):
         ).fetchone()
     return jsonify({"unread": row["cnt"] if row else 0})
 
-
 # ============================================================
-# 📌 6) SOCKET.IO — join room cố định
+# 8) SOCKET.IO — join room cố định
 # ============================================================
 def get_room_for(a, b):
     return f"room_{min(a,b)}_{max(a,b)}"
@@ -187,9 +167,8 @@ def handle_join(data):
     room = get_room_for(user_id, peer_id)
     join_room(room)
 
-
 # ============================================================
-# 📌 7) SOCKET.IO — gửi tin nhắn realtime
+# 9) SOCKET.IO — gửi tin nhắn realtime
 # ============================================================
 @socketio.on("send_message")
 def handle_send(data):
@@ -218,9 +197,8 @@ def handle_send(data):
     """, (sender, peer, msg, datetime.now()))
     conn.commit()
 
-
 # ============================================================
-# 📌 8) SOCKET.IO — đánh dấu đã đọc realtime
+# 10) SOCKET.IO — đánh dấu đã đọc realtime
 # ============================================================
 @socketio.on("mark_read")
 def handle_mark_read(data):
