@@ -3,101 +3,257 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Chat với {{ peer_name }}</title>
+<title>Chat Messenger</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
-body { font-family: sans-serif; margin: 20px; background: #f8f9fa; }
-h2 { margin-bottom: 20px; }
-#chat-box { border: 1px solid #ccc; padding: 15px; height: 400px; overflow-y: auto; background: #fff; border-radius: 5px; }
-.message { margin: 5px 0; padding: 8px 12px; border-radius: 15px; max-width: 70%; display: inline-block; }
-.message.user { background-color: #d1e7dd; align-self: flex-end; }
-.message.peer { background-color: #f8d7da; align-self: flex-start; }
-#input-area { margin-top: 10px; display: flex; }
-#input-area input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+body { font-family: sans-serif; margin: 0; padding: 0; background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; }
+header { padding: 10px 20px; background: #fff; border-bottom: 1px solid #ccc; }
+#chat-app { flex: 1; display: flex; overflow: hidden; }
+#sidebar { width: 250px; background: #fff; border-right: 1px solid #ccc; overflow-y: auto; }
+#sidebar h4 { padding: 10px; margin: 0; border-bottom: 1px solid #ccc; }
+.peer-item { padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+.peer-item:hover { background: #f5f5f5; }
+.peer-item.active { background: #e0e0e0; font-weight: bold; }
+.badge { background: red; color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px; }
+#chat-panel { flex: 1; display: flex; flex-direction: column; }
+#chat-header { padding: 10px; background: #fff; border-bottom: 1px solid #ccc; font-weight: bold; }
+#chat-box { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.message {
+  padding: 8px 12px;
+  border-radius: 15px;
+  max-width: 70%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  align-self: flex-start; /* mặc định, sẽ override cho user */
+  background-color: #e0e0e0; /* peer mặc định */
+}
+.message.user {
+  align-self: flex-end;
+  background-color: #ffc0cb;
+}
+.timestamp {
+  font-size: 10px;
+  color: #555;
+  margin-top: 2px;
+  display: block;
+  text-align: right; /* nếu user, timestamp bên phải; peer bên trái */
+}
+.message.peer { background-color: #e0e0e0; align-self: flex-start; }
+#input-area { display: flex; padding: 10px; border-top: 1px solid #ccc; background: #fff; }
+#input-area textarea { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; resize: none; height: 50px; }
 #input-area button { margin-left: 10px; }
-#back-btn { margin-bottom: 10px; }
-#chat-container { display: flex; flex-direction: column; }
 </style>
 </head>
 <body>
 
-<a id="back-btn" href="{{ role=='student' and '/dashboard_student' or '/dashboard_expert' }}" class="btn btn-secondary">
-  ⬅ Quay lại Dashboard
-</a>
+<header>
+  💬 Chat App - <span id="role-display">{{ role }}</span> - <a href="/chat_expert">⬅ Quay lại Dashboard</a>
+</header>
 
-<h2>💬 Chat với {{ peer_name }}</h2>
+<div id="chat-app">
+  <div id="sidebar">
+    <h4>Danh sách {% if role=='student' %}chuyên gia{% else %}học sinh{% endif %}</h4>
+    <div id="peer-list"></div>
+  </div>
 
-<div id="chat-container">
-  <div id="chat-box"></div>
-  <div id="input-area">
-    <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-    <button class="btn btn-primary" id="send-btn">Gửi</button>
+  <div id="chat-panel">
+    <div id="chat-header">Chọn một người để chat</div>
+    <div id="chat-box"></div>
+    <div id="input-area">
+      <textarea id="message-input" placeholder="Nhập tin nhắn..."></textarea>
+      <button class="btn btn-primary" id="send-btn">Gửi</button>
+    </div>
   </div>
 </div>
 
 <script>
-const userId = "{{ user_id }}";
-const peerId = "{{ peer_id }}";
+const userId = parseInt("{{ user_id }}",10);
 const role = "{{ role }}";
+let currentPeerId = null;
 
-const chatBox = document.getElementById("chat-box");
-const messageInput = document.getElementById("message-input");
-const sendBtn = document.getElementById("send-btn");
+const socket = io("/");
 
-// Load tin nhắn giữa 2 người
-async function loadMessages() {
+// =====================
+// Load peers (student: all experts, expert: peers)
+// =====================
+async function loadPeers() {
   try {
-    const res = await fetch(`/expert/api/get_messages/${userId}/${peerId}`);
-    const data = await res.json();
-    chatBox.innerHTML = "";
-    data.messages.forEach(msg => {
-      const div = document.createElement("div");
-      div.classList.add("message");
-      if(msg.sender_id === userId) {
-        div.classList.add("user");
-      } else {
-        div.classList.add("peer");
-      }
-      div.textContent = msg.message;
-      chatBox.appendChild(div);
+    let peers = [];
+    if(role==='student'){
+      const res = await fetch(`/chat_expert/api/get_experts_for_student/${userId}`);
+      const data = await res.json();
+      peers = data.peers;
+    } else {
+      const res = await fetch(`/chat_expert/api/get_peers/${userId}`);
+      const data = await res.json();
+      peers = data.peers;
+    }
+
+    const div = document.getElementById("peer-list");
+    div.innerHTML = "";
+
+    peers.forEach(p=>{
+      const btn = document.createElement("div");
+      btn.classList.add("peer-item");
+      btn.dataset.id = p.id;
+
+      let unread = (currentPeerId===p.id) ? 0 : p.unread;
+      btn.innerHTML = `<span>${p.name}</span>${unread>0?`<span class="badge">${unread}</span>`:''}`;
+      btn.onclick = ()=>selectPeer(p.id,p.name,btn);
+      div.appendChild(btn);
     });
-    chatBox.scrollTop = chatBox.scrollHeight;
   } catch(err){ console.error(err); }
 }
 
-// Gửi tin nhắn
-async function sendMessage() {
-  const msg = messageInput.value.trim();
+// =====================
+// Chọn peer
+// =====================
+function selectPeer(id,name,element){
+  if(currentPeerId===id) return;
+
+  currentPeerId=id;
+  document.getElementById("chat-header").textContent=name;
+  document.querySelectorAll(".peer-item").forEach(el=>el.classList.remove("active"));
+  element.classList.add("active");
+
+  socket.emit("join_room",{peer_id:currentPeerId});
+  markCurrentPeerRead();
+
+  loadMessages();
+}
+
+// =====================
+// Load messages
+// =====================
+async function loadMessages(){
+  if(!currentPeerId) return;
+  try{
+    const res = await fetch(`/chat_expert/api/get_messages/${userId}/${currentPeerId}`);
+    const data = await res.json();
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML="";
+    data.messages.forEach(msg=>{
+      appendMessage(msg.sender_id===userId?"user":"peer",msg.message,msg.timestamp);
+    });
+  }catch(err){console.error(err);}
+}
+
+// =====================
+// Append message
+// =====================
+function appendMessage(type,text,timestamp=null){
+  const chatBox=document.getElementById("chat-box");
+  const wrapper=document.createElement("div");
+  wrapper.style.display="flex";
+  wrapper.style.flexDirection="column";
+  wrapper.style.alignItems=type==="user"?"flex-end":"flex-start";
+
+  const msgDiv=document.createElement("div");
+  msgDiv.classList.add("message",type);
+  msgDiv.textContent=text;
+  wrapper.appendChild(msgDiv);
+
+  if(timestamp){
+    const ts=new Date(timestamp);
+    const hours=ts.getHours().toString().padStart(2,"0");
+    const minutes=ts.getMinutes().toString().padStart(2,"0");
+    const span=document.createElement("span");
+    span.classList.add("timestamp");
+    span.textContent=`${hours}:${minutes}`;
+    wrapper.appendChild(span);
+  }
+
+  chatBox.appendChild(wrapper);
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+// =====================
+// Gửi message realtime
+// =====================
+function sendMessage(){
+  if(!currentPeerId) return;
+  const msgInput=document.getElementById("message-input");
+  const msg=msgInput.value.trim();
   if(!msg) return;
 
-  try {
-    const res = await fetch("/expert/api/send_message", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({sender_id: userId, receiver_id: peerId, message: msg})
-    });
-    const data = await res.json();
-    if(data.status === "success") {
-      messageInput.value = "";
-      loadMessages();
-    } else {
-      alert("Gửi thất bại: " + data.message);
-    }
-  } catch(err){ console.error(err); }
+  socket.emit("send_message",{peer_id:currentPeerId,message:msg});
+  appendMessage("user",msg,new Date());
+  msgInput.value="";
 }
 
-// Gửi khi nhấn nút
-sendBtn.addEventListener("click", sendMessage);
+// =====================
+// Mark read và update badge
+// =====================
+function markCurrentPeerRead(){
+  if(!currentPeerId) return;
+  socket.emit("mark_read",{peer_id:currentPeerId});
+  updateBadges();
+}
 
-// Gửi khi nhấn Enter
-messageInput.addEventListener("keydown", (e) => {
-  if(e.key === "Enter") sendMessage();
+// =====================
+// Update badge
+// =====================
+async function updateBadges(){
+  try{
+    let peers=[];
+    if(role==='student'){
+      const res=await fetch(`/chat_expert/api/get_experts_for_student/${userId}`);
+      const data=await res.json();
+      peers=data.peers;
+    } else {
+      const res=await fetch(`/chat_expert/api/get_peers/${userId}`);
+      const data=await res.json();
+      peers=data.peers;
+    }
+
+    peers.forEach(p=>{
+      const el=document.querySelector(`.peer-item[data-id='${p.id}']`);
+      if(el){
+        let unread=(currentPeerId===p.id)?0:p.unread;
+        const badge=el.querySelector(".badge");
+        if(unread>0){
+          if(!badge){
+            const span=document.createElement("span");
+            span.classList.add("badge");
+            span.textContent=unread;
+            el.appendChild(span);
+          } else badge.textContent=unread;
+        } else if(badge){ badge.remove(); }
+      }
+    });
+  }catch(err){console.error(err);}
+}
+
+// =====================
+// Socket realtime
+// =====================
+socket.on("receive_message", data => {
+  // Chỉ append nếu sender khác userId hoặc receiver là userId nhưng peer khác currentPeerId
+  if(data.sender_id !== userId) {
+    if(currentPeerId === data.sender_id) {
+      appendMessage("peer", data.message, data.timestamp);
+    }
+  }
+  updateBadges();
 });
 
-// Tự động load tin nhắn mỗi 2 giây
-setInterval(loadMessages, 2000);
-window.onload = loadMessages;
-</script>
 
+// =====================
+// Event listeners
+// =====================
+document.getElementById("send-btn").addEventListener("click",sendMessage);
+document.getElementById("message-input").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+// =====================
+// Auto load peers + badges khi mở chat
+// =====================
+window.onload=()=>{
+  loadPeers();
+  setInterval(updateBadges,5000);
+};
+</script>
 </body>
 </html>
