@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback sau tư vấn</title>
+</head>
+<body style="font-family: Arial; max-width:500px; margin:auto;">
+
+    <h2>Feedback sau tư vấn</h2>
+
+    <form method="POST">
+        <label>Họ tên (không bắt buộc)</label><br>
+        <input type="text" name="name" style="width:100%; padding:8px;"><br><br>
+
+        <label>Mức độ hài lòng</label><br>
+        <select name="rating" style="width:100%; padding:8px;" required>
+            <option value="">--Chọn--</option>
+            <option>Rất hài lòng</option>
+            <option>Hài lòng</option>
+            <option>Bình thường</option>
+            <option>Không hài lòng</option>
+        </select><br><br>
+
+        <label>Chia sẻ thêm (tự nguyện)</label><br>
+        <textarea name="comments" style="width:100%; padding:8px; height:100px;"></textarea><br><br>
+
+        <button type="submit" style="padding:10px 15px;">Gửi phản hồi</button>
+    </form>
+
+    <hr>
+    <h3>Khảo sát thêm</h3>
+    <p>Hãy giúp tụi mình hoàn thiện dịch vụ hơn qua form khảo sát:</p>
+
+    <button onclick="openSurvey()" style="padding:10px 15px;">Mở Google Form</button>
+
+    <script>
+    function openSurvey() {
+        // link gg form
+        window.open("...", "_blank");
+    }
+    </script>
+
+</body>
+</html>
