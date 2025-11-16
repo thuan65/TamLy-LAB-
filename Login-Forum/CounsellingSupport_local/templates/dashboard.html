@@ -17,7 +17,6 @@ h2 { margin-bottom: 20px; }
 </head>
 <body>
 <h2>👋 Chào {{ username }}!</h2>
-<div id="notifications"></div>
 
 {% if role == "student" %}
 <!-- Forum -->
@@ -29,7 +28,7 @@ h2 { margin-bottom: 20px; }
 <!-- Chat với chuyên gia -->
 <div class="section" id="expert-chat-section">
   <h3>💬 Chat với chuyên gia</h3>
-  <div class="button-list" id="expert-list"></div>
+  <button class="btn btn-primary" onclick="window.location='/chat_expert/chat'">Vào Chat</button>
 </div>
 
 {% else %}
@@ -43,69 +42,9 @@ h2 { margin-bottom: 20px; }
 <!-- Chat với học sinh -->
 <div class="section" id="student-chat-section">
   <h3>💬 Chat với học sinh</h3>
-  <div class="button-list" id="student-list"></div>
+  <button class="btn btn-primary" onclick="window.location='/chat_expert/chat'">Vào Chat</button>
 </div>
 {% endif %}
 
-<script>
-const role = "{{ role }}";
-const userId = "{{ user_id }}";
-
-// Load danh sách chuyên gia cho student
-async function loadExperts() {
-  if(role !== "student") return;
-  try {
-    const res = await fetch("/chat/api/get_all_experts");
-    const data = await res.json();
-    const div = document.getElementById("expert-list");
-    div.innerHTML = "";
-    data.experts.forEach(e => {
-      const btn = document.createElement("button");
-      btn.textContent = e.username;
-      btn.classList.add("btn","btn-primary","btn-sm");
-      btn.onclick = () => window.location = `/chat/${e.id}`;
-      div.appendChild(btn);
-    });
-  } catch(err){ console.error(err); }
-}
-
-// Load danh sách học sinh đã chat cho expert
-async function loadStudents() {
-  if(role !== "expert") return;
-  try {
-    const res = await fetch(`/chat/api/get_chats_for_expert/${userId}`);
-    const data = await res.json();
-    const div = document.getElementById("student-list");
-    div.innerHTML = "";
-    if(data.students.length === 0) div.textContent = "Chưa có học sinh nào chat.";
-    data.students.forEach(sid => {
-      const btn = document.createElement("button");
-      btn.textContent = "Học sinh " + sid;
-      btn.classList.add("btn","btn-primary","btn-sm");
-      btn.onclick = () => window.location = `/chat/${sid}`;
-      div.appendChild(btn);
-    });
-  } catch(err){ console.error(err); }
-}
-
-// Thông báo tin nhắn mới
-async function checkUnread() {
-  try {
-    const res = await fetch(`/chat/api/get_unread/${role}/${userId}`);
-    const data = await res.json();
-    const notif = document.getElementById("notifications");
-    notif.textContent = data.unread>0 ? `Bạn có ${data.unread} tin nhắn mới!` : "";
-  } catch(err){ console.error(err); }
-}
-
-window.onload = () => {
-  loadExperts();
-  loadStudents();
-  checkUnread();
-  setInterval(checkUnread, 5000);
-  setInterval(loadExperts, 5000);
-  setInterval(loadStudents, 5000);
-}
-</script>
 </body>
 </html>

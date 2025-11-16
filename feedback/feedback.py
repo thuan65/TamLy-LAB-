@@ -7,7 +7,7 @@ feedback_bp = Blueprint(
     "feedback",
     __name__,
     template_folder="templates",
-    static_folder="../static"
+    url_prefix="/feedback"
 )
 
 # --- Kết nối DB ---
@@ -15,11 +15,12 @@ engine = create_engine("sqlite:///therapy.db")
 Session = sessionmaker(bind=engine)
 
 # --- Route feedback ---
-@feedback_bp.route("/feedback/<int:therapist_id>", methods=["GET", "POST"])
+@feedback_bp.route("/<int:therapist_id>", methods=["GET", "POST"])
 def feedback(therapist_id):
     s = Session()
     th = s.query(Therapist).filter_by(id=therapist_id).first()
     if not th:
+        s.close()
         return "❌ Không tìm thấy chuyên gia", 404
 
     if request.method == "POST":
@@ -46,6 +47,7 @@ def feedback(therapist_id):
             comments.append(comment_val.strip())
 
         if len(scores) == 0:
+            s.close()
             return "⚠️ Bạn chưa chấm điểm", 400
 
         avg_score = sum(scores) / len(scores)
@@ -73,9 +75,27 @@ def feedback(therapist_id):
         therapist_name = th.full_name
         s.close()
         return f"""
-        <h3>Cảm ơn bạn đã đánh giá chuyên gia {therapist_name}!</h3>
-        <p>Điểm trung bình bạn chấm: <b>{avg_score:.2f}</b> ⭐</p>
-        <a href="/therapists">⬅️ Quay lại danh sách chuyên gia</a>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Đánh giá thành công</title>
+            <style>
+                body {{ font-family: Arial; max-width:600px; margin:50px auto; padding:20px; }}
+                .success {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <div class="success">
+                <h3>✅ Cảm ơn bạn đã đánh giá chuyên gia {therapist_name}!</h3>
+                <p>Điểm trung bình bạn chấm: <b>{avg_score:.2f}</b> ⭐</p>
+                <p>Đánh giá của bạn đã được ghi nhận và sẽ giúp các sinh viên khác lựa chọn chuyên gia phù hợp.</p>
+            </div>
+            <br>
+            <a href="/therapists" style="text-decoration:none; background:#007bff; color:white; padding:10px 20px; border-radius:5px; display:inline-block;">⬅️ Quay lại danh sách chuyên gia</a>
+        </body>
+        </html>
         """
+    
     s.close()
     return render_template("feedback.html", therapist=th)
