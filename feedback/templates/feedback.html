@@ -2,98 +2,41 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Feedback sau tư vấn</title>
+    <title>Khảo sát tư vấn tâm lý</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 60px auto;
+            text-align: center;
+        }
+        a {
+            font-size: 20px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
 </head>
-<body style="font-family: Arial; max-width:500px; margin:auto;">
 
-    <h2>Feedback sau tư vấn</h2>
+<body>
 
-<form method="POST" style="margin-top:20px;">
+    <h2>Khảo sát tư vấn tâm lý</h2>
 
-    <!-- Thông tin người đánh giá -->
-    <label><b>Họ và tên</b> (không bắt buộc)</label><br>
-    <input type="text" name="student_name" placeholder="Nguyễn Văn A" style="width:100%; padding:8px;"><br><br>
-
-    <label><b>Mã số sinh viên (MSSV)</b> (nếu có)</label><br>
-    <input type="text" name="student_code" placeholder="2412345" style="width:100%; padding:8px;"><br><br>
-
-    <hr>
-    <!-- Câu 1 -->
-    <label><b>1. Bạn cảm thấy mức độ lắng nghe và thấu hiểu của chuyên gia như thế nào?</b></label><br>
-    <select name="q1_score" required style="width:100%; padding:8px;">
-        <option value="">-- Chọn mức độ (1–5) --</option>
-        <option value="1">1 - Rất kém</option>
-        <option value="2">2 - Kém</option>
-        <option value="3">3 - Trung bình</option>
-        <option value="4">4 - Tốt</option>
-        <option value="5">5 - Rất tốt</option>
-    </select><br><br>
-    <textarea name="q1_comment" placeholder="Hãy chia sẻ thêm..." style="width:100%; height:70px; padding:8px;"></textarea><br><br>
-
-    <!-- Câu 2 -->
-    <label><b>2. Nội dung tư vấn có giúp bạn nhận ra hướng giải quyết vấn đề không?</b></label><br>
-    <select name="q2_score" required style="width:100%; padding:8px;">
-        <option value="">-- Chọn mức độ (1–5) --</option>
-        <option value="1">1 - Không giúp gì</option>
-        <option value="2">2 - Ít giúp</option>
-        <option value="3">3 - Bình thường</option>
-        <option value="4">4 - Giúp khá nhiều</option>
-        <option value="5">5 - Giúp rất nhiều</option>
-    </select><br><br>
-    <textarea name="q2_comment" placeholder="Điều gì khiến bạn thấy rõ hoặc chưa rõ hơn..." style="width:100%; height:70px; padding:8px;"></textarea><br><br>
-
-    <!-- Câu 3 -->
-    <label><b>3. Bạn đánh giá mức độ thoải mái trong buổi tư vấn ra sao?</b></label><br>
-    <select name="q3_score" required style="width:100%; padding:8px;">
-        <option value="">-- Chọn mức độ (1–5) --</option>
-        <option value="1">1 - Rất căng thẳng</option>
-        <option value="2">2 - Hơi căng</option>
-        <option value="3">3 - Bình thường</option>
-        <option value="4">4 - Khá thoải mái</option>
-        <option value="5">5 - Rất thoải mái</option>
-    </select><br><br>
-    <textarea name="q3_comment" placeholder="Điều gì khiến bạn cảm thấy thoải mái hoặc không?" style="width:100%; height:70px; padding:8px;"></textarea><br><br>
-
-    <!-- Câu 4 -->
-    <label><b>4. Bạn cảm nhận thế nào về khả năng chuyên môn của chuyên gia?</b></label><br>
-    <select name="q4_score" required style="width:100%; padding:8px;">
-        <option value="">-- Chọn mức độ (1–5) --</option>
-        <option value="1">1 - Thiếu chuyên nghiệp</option>
-        <option value="2">2 - Hơi thiếu</option>
-        <option value="3">3 - Trung bình</option>
-        <option value="4">4 - Tốt</option>
-        <option value="5">5 - Rất chuyên nghiệp</option>
-    </select><br><br>
-    <textarea name="q4_comment" placeholder="Theo bạn điều gì cho thấy chuyên gia chuyên nghiệp?" style="width:100%; height:70px; padding:8px;"></textarea><br><br>
-
-    <!-- Câu 5 -->
-    <label><b>5. Bạn có mong muốn tiếp tục gặp lại chuyên gia này trong tương lai không?</b></label><br>
-    <select name="q5_score" required style="width:100%; padding:8px;">
-        <option value="">-- Chọn mức độ (1–5) --</option>
-        <option value="1">1 - Không bao giờ</option>
-        <option value="2">2 - Có thể không</option>
-        <option value="3">3 - Cân nhắc</option>
-        <option value="4">4 - Có thể có</option>
-        <option value="5">5 - Chắc chắn có</option>
-    </select><br><br>
-    <textarea name="q5_comment" placeholder="Điều gì khiến bạn chọn vậy?" style="width:100%; height:70px; padding:8px;"></textarea><br><br>
-
-    <button type="submit" style="padding:10px 15px;">Gửi phản hồi</button>
-</form>
-
-
-
-    <hr>
-    <h3>Khảo sát thêm</h3>
-    <p>Hãy giúp tụi mình hoàn thiện dịch vụ hơn qua form khảo sát:</p>
-
-    <button onclick="openSurvey()" style="padding:10px 15px;">Mở Google Form</button>
+    <p>
+        Vui lòng điền form tại đây:<br>
+        <a href="https://forms.gle/tnAyECz3wHSfbzV7A" target="_blank">
+            👉 Nhấn vào đây để mở form
+        </a>
+    </p>
 
     <script>
-    function openSurvey() {
-        // link gg form
-        window.open("...", "_blank");
-    }
+        // Hiển thị cảm ơn:
+        if (window.location.search.includes("submitted=true")) {
+            document.body.innerHTML = `
+                <h2>Cảm ơn bạn.</h2>
+                <p>Chúc bạn một ngày tuyệt vời nhé! 🌿</p>
+            `;
+        }
     </script>
 
 </body>
