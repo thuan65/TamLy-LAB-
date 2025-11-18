@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS answers (
     FOREIGN KEY (post_id) REFERENCES posts(id)
 );
 
--- NỘI DUNG MỚI (TỪ BẠN)
 -- BẢNG MỚI: Hàng đợi chat
 CREATE TABLE IF NOT EXISTS chat_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +76,6 @@ CREATE TABLE IF NOT EXISTS conversation_history (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- NỘI DUNG MỚI (TỪ BẠN BẠN)
 -- Bảng lưu tin nhắn giữa user và expert
 CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,4 +86,5 @@ CREATE TABLE IF NOT EXISTS messages (
     is_read INTEGER DEFAULT 0,
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id)
+
 );
