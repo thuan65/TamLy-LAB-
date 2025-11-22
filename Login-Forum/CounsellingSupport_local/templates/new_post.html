@@ -1,5 +1,40 @@
-<form method="POST">
+<!-- <form method="POST">
   <input name="title" placeholder="Title" required><br>
   <textarea name="content" placeholder="Content" required></textarea><br>
   <button>Post</button>
+</form> -->
+
+<!-- templates/new_post.html -->
+<form method="POST" class="mb-3">
+
+  {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <div class="mb-3">
+    <label class="form-label">Tiêu đề</label>
+    <input 
+      name="title" 
+      class="form-control"
+      value="{{ request.form.title or '' }}"
+      placeholder="Nhập tiêu đề"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Nội dung</label>
+    <textarea 
+      name="content" 
+      class="form-control" 
+      rows="5"
+      placeholder="Nhập nội dung câu hỏi"
+      required
+    >{{ request.form.content or '' }}</textarea>
+  </div>
+
+  <button class="btn btn-primary">Đăng bài</button>
+
 </form>

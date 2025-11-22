@@ -37,6 +37,41 @@ def init_db():
     db_conn.close()
     print("Database created successfully!")
 
+def get_all_forum_posts():
+    """
+    Lấy tất cả posts, trả về dict có đủ fields:
+    id, title, content, user_id, username, tag, created_at, answers
+    """
+    db = get_db()
+    cursor = db.execute("""
+        SELECT p.id, p.title, p.content, p.tag, p.created_at, p.user_id, u.username
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+    """)
+    posts = cursor.fetchall()
+    result = []
+    for row in posts:
+        # Lấy danh sách answers cho post này
+        ans_cursor = db.execute("""
+            SELECT a.content, u.username AS expert_username
+            FROM answers a
+            JOIN users u ON a.expert_id = u.id
+            WHERE a.post_id = ?
+        """, (row["id"],))
+        answers = [{"content": a["content"], "expert_username": a["expert_username"]} for a in ans_cursor.fetchall()]
+
+        result.append({
+            "id": row["id"],
+            "title": row["title"],
+            "content": row["content"],
+            "tag": row["tag"],
+            "created_at": row["created_at"],
+            "username": row["username"],
+            "answers": answers
+        })
+    return result
+
+
 # Dùng cho chạy độc lập (tạo DB mới)
 if __name__ == "__main__":
     init_db()

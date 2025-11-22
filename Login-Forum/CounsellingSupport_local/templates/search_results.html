@@ -1,0 +1,20 @@
+<h2>Kết quả tìm kiếm cho "{{ query }}"</h2>
+
+<!-- Nút quay lại forum -->
+<div class="mb-3">
+    <a href="{{ url_for('forum.show_forum') }}" class="btn btn-secondary">← Quay lại diễn đàn</a>
+</div>
+
+{% if posts %}
+  <ul class="list-group">
+    {% for post in posts %}
+      <li class="list-group-item mb-2">
+        <strong>{{ post.title }}</strong> - {{ post.created_at }}<br>
+        {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+        <br>Similarity score: {{ post.score | round(3) }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Không tìm thấy bài viết nào hoặc các post bị lọc vì chứa nội dung không phù hợp.</p>
+{% endif %}
