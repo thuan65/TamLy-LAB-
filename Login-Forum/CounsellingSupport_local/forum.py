@@ -96,17 +96,39 @@ def reply_post(post_id):
 
     return render_template("reply_post.html", post=post)
 
-@forum.route("/search_forum", methods=["GET"])
+# @forum.route("/search_forum", methods=["GET"])
+# def search_forum():
+#     query = request.args.get("q", "").strip()
+#     if not query:
+#         return render_template("search_results.html", posts=[], query=query)
+
+#     posts = get_all_forum_posts()
+
+#     top_results = compute_similarity(query, posts)
+
+#     filtered_results = [p for p in top_results if not is_toxic(p["content"])]
+
+#     return render_template("search_results.html", posts=filtered_results, query=query)
+
+@forum.route("/search_forum")
 def search_forum():
     query = request.args.get("q", "").strip()
     if not query:
-        return render_template("search_results.html", posts=[], query=query)
+        return render_template("search_results.html", query=query, posts=[])
 
     posts = get_all_forum_posts()
-
     top_results = compute_similarity(query, posts)
-
     filtered_results = [p for p in top_results if not is_toxic(p["content"])]
+    db = get_db()
+    for post in filtered_results:
+        answers = db.execute(
+            "SELECT a.content, u.username as expert_username "
+            "FROM answers a "
+            "JOIN users u ON a.expert_id = u.id "
+            "WHERE a.post_id=?",
+            (post["id"],)
+        ).fetchall()
+        post["answers"] = [{"content": a["content"], "expert_username": a["expert_username"]} for a in answers]
 
     return render_template("search_results.html", posts=filtered_results, query=query)
 

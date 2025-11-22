@@ -1,20 +1,59 @@
-<h2>Kết quả tìm kiếm cho "{{ query }}"</h2>
-
-<!-- Nút quay lại forum -->
-<div class="mb-3">
-    <a href="{{ url_for('forum.show_forum') }}" class="btn btn-secondary">← Quay lại diễn đàn</a>
-</div>
+<!-- <h2>Kết quả tìm kiếm cho "{{ query }}"</h2>
 
 {% if posts %}
-  <ul class="list-group">
+  <ul>
     {% for post in posts %}
-      <li class="list-group-item mb-2">
-        <strong>{{ post.title }}</strong> - {{ post.created_at }}<br>
+      <li>
+        <strong>Post ID: {{ post.id }}</strong><br>
+        <strong>{{ post.title }}</strong><br>
         {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
         <br>Similarity score: {{ post.score | round(3) }}
+
+        {% if post.answers %}
+          <div style="margin-left:20px; margin-top:5px;">
+            <strong>💬 Trả lời:</strong>
+            <ul>
+              {% for ans in post.answers %}
+                <li><i>{{ ans.content }}</i> — <small>{{ ans.expert_username }}</small></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
 {% else %}
   <p>Không tìm thấy bài viết nào hoặc các post bị lọc vì chứa nội dung không phù hợp.</p>
 {% endif %}
+
+<a href="{{ url_for('forum.show_forum') }}" class="btn btn-secondary mt-3">Quay lại Forum</a> -->
+
+<h2>Kết quả tìm kiếm cho "{{ query }}"</h2>
+
+{% if posts %}
+  <ul>
+    {% for post in posts %}
+      <li>
+        <strong>Đăng bởi: {{ post.username }}</strong><br>
+        <strong>{{ post.title }}</strong><br>
+        {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+        <br>Similarity score: {{ post.score | round(3) }}
+
+        {% if post.answers %}
+          <div style="margin-left:20px; margin-top:5px;">
+            <strong>💬 Trả lời:</strong>
+            <ul>
+              {% for ans in post.answers %}
+                <li><i>{{ ans.content }}</i> — <small>{{ ans.expert_username }}</small></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Không tìm thấy bài viết nào hoặc các post bị lọc vì chứa nội dung không phù hợp.</p>
+{% endif %}
+
+<a href="{{ url_for('forum.show_forum') }}" class="btn btn-secondary mt-3">Quay lại Forum</a>
