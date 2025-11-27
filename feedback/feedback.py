@@ -23,7 +23,8 @@ def feedback(therapist_id):
     
     if not th:
         s.close()
-        return "❌ Không tìm thấy chuyên gia", 404
+        return "Không tìm thấy chuyên gia", 404
     
     s.close()
     return render_template("feedback.html", therapist=th)
+
