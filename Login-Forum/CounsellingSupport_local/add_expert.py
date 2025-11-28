@@ -1,6 +1,7 @@
-import sqlite3
 from db import DATABASE 
 from werkzeug.security import generate_password_hash
+
+import sqlite3
 
 def add_expert(username, password):
     # conn = get_db()

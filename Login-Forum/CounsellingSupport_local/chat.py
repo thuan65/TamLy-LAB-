@@ -277,121 +277,20 @@ def on_disconnect():
 def on_request_match(data):
     if "user_id" not in session:
         return
-
+    illness = data.get('illness')
     seeker_id = session.get('user_id')
     seeker_room = f'user_{seeker_id}'
-    illness = data.get('illness')
-    
-    # Chuẩn bị các biến tag
-    tag_to_match = f"cured_{illness}" 
-    sql_tag_pattern = f'%,{tag_to_match},%'
-    
-    # Kiểm tra xem user đã đang chờ chưa
-    if seeker_id in WAITING_USERS:
-        logging.info(f"User {seeker_id} đã đang tìm kiếm.")
-        # Báo cho client biết là vẫn đang chờ (phòng trường hợp client refresh)
-        emit('match_waiting', {'message': 'Vẫn đang tìm kiếm...'}, to=seeker_room)
-        return
-
-    conn = get_db()
-
-    # Hàm helper để tạo session (bạn có thể đã có hàm này)
-    def create_session(helper_id, is_expert=0):
-        new_session_key = str(uuid.uuid4())
-        try:
-            conn.execute(
-                "INSERT INTO chat_sessions (session_key, seeker_id, helper_id, is_expert_fallback) VALUES (?, ?, ?, ?)",
-                (new_session_key, seeker_id, helper_id, is_expert)
-            )
-            conn.commit()
-            return {"session_key": new_session_key, "helper_id": helper_id}
-        except Exception as e:
-            logging.error(f"Lỗi tạo session chat: {e}")
-            conn.rollback()
-            return None
-
-    try:
-        # --- LOGIC MỚI THEO KỊCH BẢN CỦA BẠN ---
-
-        # 1. TÌM P1: Student cùng tag (Ưu tiên cao nhất)
-        p1_helper = conn.execute(
-            """
-            SELECT id FROM users
-            WHERE (',' || status_tag || ',') LIKE ? 
-            AND role != 'expert' AND (chat_opt_in=1 OR chat_opt_in='1') AND id != ?
-            AND id NOT IN (SELECT helper_id FROM chat_sessions WHERE status='active')
-            AND id NOT IN (SELECT seeker_id FROM chat_sessions WHERE status='active')
-            ORDER BY RANDOM() LIMIT 1
-            """,
-            (sql_tag_pattern, seeker_id)
-        ).fetchone()
-
-        if p1_helper:
-            logging.info(f"MATCH P1: Tìm thấy {p1_helper['id']} cho {seeker_id}")
-            session_data = create_session(p1_helper['id'], is_expert=0)
-            if session_data:
-                room_url = f"/chat/room/{session_data['session_key']}"
-                emit("match_found", {"room_url": room_url}, to=seeker_room)
-                emit("force_join_room", {"room_url": room_url}, to=f'user_{p1_helper["id"]}')
-            return # KẾT THÚC
-
-        # 2. TÌM P2: Expert (Ưu tiên nhì)
-        p2_helper = conn.execute(
-            """
-            SELECT id FROM users
-            WHERE role='expert' AND (chat_opt_in=1 OR chat_opt_in='1') AND id != ?
-            AND id NOT IN (SELECT helper_id FROM chat_sessions WHERE status='active')
-            AND id NOT IN (SELECT seeker_id FROM chat_sessions WHERE status='active')
-            ORDER BY RANDOM() LIMIT 1
-            """,
-            (seeker_id,)
-        ).fetchone()
-        
-        if p2_helper:
-            logging.info(f"MATCH P2: Tìm thấy Expert {p2_helper['id']} cho {seeker_id}")
-            session_data = create_session(p2_helper['id'], is_expert=1)
-            if session_data:
-                room_url = f"/chat/room/{session_data['session_key']}"
-                emit("match_found", {"room_url": room_url}, to=seeker_room)
-                emit("force_join_room", {"room_url": room_url}, to=f'user_{p2_helper["id"]}')
-            return # KẾT THÚC
-
-        # 3. TÌM P3: Student khác tag (Kịch bản CHỜ)
-        p3_helper = conn.execute(
-            """
-            SELECT id FROM users
-            WHERE status_tag LIKE 'cured_%' AND (',' || status_tag || ',') NOT LIKE ?
-            AND role != 'expert' AND (chat_opt_in=1 OR chat_opt_in='1') AND id != ?
-            AND id NOT IN (SELECT helper_id FROM chat_sessions WHERE status='active')
-            AND id NOT IN (SELECT seeker_id FROM chat_sessions WHERE status='active')
-            ORDER BY RANDOM() LIMIT 1
-            """,
-            (sql_tag_pattern, seeker_id)
-        ).fetchone()
-
-        if p3_helper:
-            # Đây là kịch bản bạn muốn: (A: Trầm cảm, B: Lo âu)
-            logging.info(f"MATCH P3 (WAIT): Tìm thấy {p3_helper['id']} (khác tag). Đưa {seeker_id} vào hàng đợi.")
-            WAITING_USERS.add(seeker_id)
-            emit('match_waiting', {'message': 'Đang tìm kiếm người phù hợp...'}, to=seeker_room)
-            return # KẾT THÚC (nhưng user vẫn ở trạng thái isSearching=true)
-
-        # 4. KHÔNG TÌM THẤY AI CẢ
-        logging.info(f"MATCH FAILED: Không tìm thấy P1, P2, hay P3 cho {seeker_id}")
-        emit('match_failed', {"message":"Rất tiếc, hiện tại không có ai rảnh."}, to=seeker_room)
-
-    except Exception as e:
-        logging.error(f"Lỗi nghiêm trọng trong on_request_match: {e}")
-        emit('match_failed', {"message": f"Lỗi server: {e}"}, to=seeker_room)
-
-@socketio.on('cancel_match')
-def on_cancel_match():
-    seeker_id = session.get("user_id")
-    if not seeker_id:
-        return
-    
-    if seeker_id in WAITING_USERS:
-        WAITING_USERS.remove(seeker_id)
-        logging.info(f"User {seeker_id} đã hủy tìm kiếm.")
+    prefer_anonymous = data.get('anonymous', False)  # frontend gửi lên nếu muốn chat ẩn danh
+    match_result = find_match_for_user(seeker_id, illness, prefer_anonymous=prefer_anonymous)
+    if match_result:
+        helper_id = match_result["helper_id"]
+        session_key = match_result["session_key"]
+        room_url = f"/chat/room/{session_key}"
+        helper_room = f'user_{helper_id}'
+        # Ép helper join room
+        socketio.emit("force_join_room", {"room_url": room_url}, to=helper_room)
+        # Gửi về student
+        socketio.emit("match_found", {"room_url": room_url}, to=seeker_room)
     else:
-        logging.warning(f"User {seeker_id} HỦY nhưng không có trong hàng đợi.")
+        socketio.emit("match_failed", {"message":"Không tìm thấy ai rảnh."}, to=seeker_room)
+

@@ -153,7 +153,7 @@
 
         socket.on('chat_ended', (data) => {
             addMessage('log', data.message);
-
+            leaveButton.disabled = true;
             // Vô hiệu hóa việc gửi tin nhắn
             messageInput.disabled = true;
             messageInput.placeholder = 'Cuộc trò chuyện đã kết thúc.';
