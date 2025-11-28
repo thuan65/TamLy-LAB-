@@ -1,2 +1,0 @@
-Do làm riêng nên kết quả quiz tui lưu về list nên chưa liên kết với chức năng của Thúy, sau đợt thuyết trình này tui sửa lại cho fit nhe
-pip install flask-cors

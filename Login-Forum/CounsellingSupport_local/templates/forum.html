@@ -94,6 +94,12 @@
 
             <h3 class="text-center mb-4">📢 Diễn đàn Hỏi & Đáp</h3>
 
+            <!-- Thanh tìm kiếm -->
+            <form action="{{ url_for('forum.search_forum') }}" method="get" class="mb-4 text-center">
+                <input type="text" name="q" placeholder="Tìm kiếm..." value="{{ query or '' }}" class="form-control d-inline-block w-50">
+                <button type="submit" class="btn btn-primary ms-2">Tìm kiếm</button>
+            </form>
+
             {% if posts %}
             <div class="row justify-content-center">
                 <div class="col-md-8">

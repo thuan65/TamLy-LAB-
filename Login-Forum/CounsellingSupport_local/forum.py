@@ -1,7 +1,33 @@
 from flask import Blueprint, render_template, request, redirect, session
-from db import get_db
+from sentence_transformers import SentenceTransformer, util
+from toxic_filter import is_toxic
+from db import get_db, get_all_forum_posts
 
 forum = Blueprint("forum", __name__)
+
+model = SentenceTransformer("keepitreal/vietnamese-sbert")
+
+def compute_similarity(query_text, posts, top_k=5):
+    """So sánh độ tương đồng giữa query và posts trong DB"""
+    query_embedding = model.encode(query_text, convert_to_tensor=True)
+
+    scored = []
+    for post in posts:
+        # combine title + content
+        post_text = f"{post['title']} {post['content']}"
+        post_embedding = model.encode(post_text, convert_to_tensor=True)
+        similarity = util.cos_sim(query_embedding, post_embedding).item()
+        scored.append((similarity, post))
+
+    # Sắp xếp giảm dần
+    scored.sort(reverse=True, key=lambda x: x[0])
+
+    # Trả về top_k
+    results = [dict(x[1]) for x in scored[:top_k]]
+    # Nếu muốn, có thể thêm score vào dict
+    for i, r in enumerate(results):
+        r["score"] = float(scored[i][0])
+    return results
 
 @forum.route("/forum")
 def show_forum():
@@ -32,6 +58,9 @@ def new_post():
     if request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
+
+        if is_toxic(content) or is_toxic(title):
+            return render_template("new_post.html", error="Nội dung câu hỏi/tiêu đề không phù hợp. Vui lòng viết lại.")
         conn = get_db()
         conn.execute(
             "INSERT INTO posts(title, content, user_id) VALUES(?,?,?)",
@@ -66,3 +95,49 @@ def reply_post(post_id):
         return redirect("/forum")
 
     return render_template("reply_post.html", post=post)
+
+# @forum.route("/search_forum", methods=["GET"])
+# def search_forum():
+#     query = request.args.get("q", "").strip()
+#     if not query:
+#         return render_template("search_results.html", posts=[], query=query)
+
+#     posts = get_all_forum_posts()
+
+#     top_results = compute_similarity(query, posts)
+
+#     filtered_results = [p for p in top_results if not is_toxic(p["content"])]
+
+#     return render_template("search_results.html", posts=filtered_results, query=query)
+
+@forum.route("/search_forum")
+def search_forum():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return render_template("search_results.html", query=query, posts=[])
+
+    posts = get_all_forum_posts()
+    top_results = compute_similarity(query, posts)
+    filtered_results = [p for p in top_results if not is_toxic(p["content"])]
+    db = get_db()
+    for post in filtered_results:
+        answers = db.execute(
+            "SELECT a.content, u.username as expert_username "
+            "FROM answers a "
+            "JOIN users u ON a.expert_id = u.id "
+            "WHERE a.post_id=?",
+            (post["id"],)
+        ).fetchall()
+        post["answers"] = [{"content": a["content"], "expert_username": a["expert_username"]} for a in answers]
+
+    return render_template("search_results.html", posts=filtered_results, query=query)
+
+print(is_toxic("fuck"))   # phải trả về True
+print(is_toxic("you are stupid"))  # True
+print(is_toxic("hello world"))  # False
+print(is_toxic("đụ"))  # True
+print(is_toxic("bạn thật ngu ngốc"))  # True
+print(is_toxic("chào bạn"))  # False
+print(is_toxic("đm"))  # True
+print(is_toxic("bạn là đồ khốn nạn"))  # True
+print(is_toxic("vl"))  # True

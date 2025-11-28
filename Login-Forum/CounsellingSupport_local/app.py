@@ -3,17 +3,12 @@ import eventlet
 eventlet.monkey_patch()
 
 from flask import Flask, render_template, session, redirect
-
-# --- Import của cả hai bạn ---
 from extensions import socketio
 from history_conversation import history_bp
 from chat import chat
 from auth import auth
 from forum import forum
 from chat_expert import chat_expert_bp
-
-
-# from chat_expert import chat # <--- Bị trùng, file chat đã import ở trên
 from db import close_db, init_db, get_db 
 import os
 
@@ -22,22 +17,22 @@ import os
 app = Flask(__name__)
 app.secret_key = "my-dev-secret-key"
 
-# --- Teardown DB (Giữ của bạn) ---
+# --- Teardown DB ---
 app.teardown_appcontext(close_db)
 
-# --- Đăng ký blueprint (Gộp cả hai) ---
+# --- Đăng ký blueprint ---
 app.register_blueprint(auth)
 app.register_blueprint(forum)
 app.register_blueprint(chat)
 app.register_blueprint(chat_expert_bp)
-app.register_blueprint(history_bp) # <--- Giữ của bạn
+app.register_blueprint(history_bp)
 
-# # --- Tạo thư mục instance (Giữ của bạn) ---
+# # --- Tạo thư mục instance ---
 # instance_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "instance")
 # if not os.path.exists(instance_dir):
 #     os.makedirs(instance_dir)
 
-# # --- Tạo file SQLite history (Giữ của bạn) ---
+# # --- Tạo file SQLite history ---
 # history_db_path = os.path.join(instance_dir, "history.db")
 # if not os.path.exists(history_db_path):
 #     import sqlite3
@@ -70,7 +65,7 @@ app.register_blueprint(history_bp) # <--- Giữ của bạn
 #     conn.commit()
 #     conn.close()
 
-# ---- DASHBOARD (Giữ của bạn bạn) ----
+# ---- DASHBOARD ----
 @app.route("/dashboard")
 def dashboard():
     """
@@ -110,16 +105,17 @@ def dashboard_expert():
         user_id=session["user_id"]
     )
 
-# --- Khởi tạo SocketIO (Giữ của bạn) ---
+# --- Khởi tạo SocketIO ---
 socketio.init_app(app)
 
 if __name__ == "__main__":
-    # --- Gộp logic của cả hai ---
+
     
-    # Tạo DB forum.db nếu chưa có (Từ bạn của bạn)
+    # Tạo DB forum.db nếu chưa có 
     if not os.path.exists("forum.db"):
         init_db()
         
-    # Chạy server với SocketIO (Từ bạn)
+    # Chạy server với SocketIO 
     print("Khởi chạy server với SocketIO...")
+
     socketio.run(app, debug=True, use_reloader=False, allow_unsafe_werkzeug=True)
