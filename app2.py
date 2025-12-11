@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from datetime import datetime
-from quiz.LogicDiem import tinh_muc_do, tao_loi_khuyen, CAU_HOI, TAN_SUAT, ANH_HUONG
+# from quiz.LogicDiem import tinh_muc_do, tao_loi_khuyen, CAU_HOI, TAN_SUAT, ANH_HUONG
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from createTherapyDB import Student, StressLog
+
+from LogicDiem import tinh_muc_do, tao_loi_khuyen, phan_tich_chi_tiet, CAU_HOI, TAN_SUAT, ANH_HUONG
 
 app = Flask(__name__, template_folder="quiz/templates", static_folder="quiz/static")
 CORS(app)
