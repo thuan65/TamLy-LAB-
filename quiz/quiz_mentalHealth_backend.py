@@ -190,7 +190,6 @@ def lay_cau_hoi():
 
 @app.route('/api/nop-bai', methods=['POST'])
 def nop_bai():
-    """API nhận và xử lý kết quả bài test PHQ-9"""
     try:
         data = request.json
         ho_ten = data.get('ho_ten', '').strip()
@@ -257,7 +256,7 @@ def nop_bai():
         
         return jsonify({
             'success': True,
-            'msg': '✅ Đã hoàn thành bài đánh giá!',
+            'msg': 'Đã hoàn thành bài đánh giá!',
             'diem': tong_diem,
             'diem_max': 27,
             'muc_do': muc_do,
