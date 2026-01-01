@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Forum</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        .forum-card { border-radius: 12px; }
+        .post-badge { font-size: .85rem; }
+        .post-content { white-space: pre-wrap; }
+        .pill-btn { border-radius: 999px; }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- Spinner -->
+<div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+</div>
+
+<!-- Forum -->
+<div class="container-fluid py-5">
+    <div class="container">
+
+        <!-- TOP ACTION BAR -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+            <!-- Back Home -->
+            <a href="{{ url_for('home') }}" class="btn btn-outline-primary pill-btn">
+                <i class="fa-solid fa-house me-2"></i>Trang chủ
+            </a>
+
+            <!-- Auth buttons -->
+            <div class="d-flex gap-2">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger pill-btn">Đăng xuất</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-dark pill-btn">Đăng nhập</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary pill-btn">Đăng ký</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- TITLE -->
+        <div class="text-center mx-auto mb-4" style="max-width: 750px;">
+            <p class="section-title bg-white text-center text-primary px-3">Community</p>
+            <h1 class="display-6 mb-2">Diễn đàn Hỏi & Đáp</h1>
+            <p class="mb-0">Chia sẻ vấn đề của bạn, nhận phản hồi từ cộng đồng và chuyên gia.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="bg-light rounded p-4 p-md-5 forum-card">
+
+                    <!-- ACTION ROW -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+                        <div class="d-flex gap-2">
+                            {% if session.get('user_id') and session.get('role') == 'student' %}
+                                <a href="{{ url_for('forum.new_post') }}" class="btn btn-primary pill-btn">
+                                    <i class="fa-solid fa-plus me-2"></i>Bài viết mới
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        {% if session.get('user_id') and session.get('role') == 'expert' %}
+                        <form action="{{ url_for('chat.toggle_opt_in') }}" method="POST">
+                            {% if session.get('chat_opt_in') == 1 %}
+                                <button class="btn btn-success pill-btn">
+                                    <i class="fa-solid fa-circle me-2"></i>Online
+                                </button>
+                            {% else %}
+                                <button class="btn btn-outline-secondary pill-btn">
+                                    <i class="fa-regular fa-circle me-2"></i>Offline
+                                </button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- SEARCH -->
+                    <div class="p-4 bg-white rounded mb-4">
+                        <form action="{{ url_for('forum.search_forum') }}" method="get" class="row g-2">
+                            <div class="col-md-9">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" name="q"
+                                           placeholder="Tìm kiếm..." value="{{ query or '' }}">
+                                    <label><i class="fa-solid fa-magnifying-glass me-2"></i>Tìm kiếm bài viết</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button class="btn btn-primary py-3">
+                                    <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- POSTS -->
+                    {% if posts %}
+                        {% for post in posts %}
+                        <div class="p-4 bg-white rounded border mb-3">
+                            <h5 class="mb-1">{{ post.title if post.title else post['title'] }}</h5>
+                            <div class="text-muted small mb-2">
+                                {{ post.username if post.username else post['username'] }}
+                            </div>
+
+                            <div class="post-content mb-2">
+                                {{ post.content if post.content else post['content'] }}
+                            </div>
+
+                            {% if session.get('role') == 'expert' %}
+                                <a href="{{ url_for('forum.reply_post', post_id=post.id if post.id else post['id']) }}"
+                                   class="btn btn-outline-primary pill-btn">
+                                    <i class="fa-solid fa-reply me-2"></i>Trả lời
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            Chưa có bài viết nào.
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+{% if session.get('user_id') %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+{% endif %}
+
+</body>
+</html>

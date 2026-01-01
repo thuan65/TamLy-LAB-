@@ -4,17 +4,50 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from createTherapyDB import DiaryEntry, Student
 from datetime import datetime
+import os
+
 
 diary_bp = Blueprint(
     "diary",
     __name__,
-    template_folder="templates",
+    template_folder="htmltemplates",
     static_folder="../static"
 )
 
-# --- Kết nối DB ---
-engine = create_engine("sqlite:///therapy.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB_PATH = os.path.abspath(
+    os.path.join(BASE_DIR, "..", "therapy.db")
+)
+
+engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
 Session = sessionmaker(bind=engine)
+
+
+from flask import session, redirect, url_for
+#@diary_bp.route("/diary")
+#def diary_home():
+#    user_id = session.get("user_id")
+#    if user_id:
+#        # user_id == student_id (theo thiết kế hiện tại)
+#        return redirect(url_for("diary.list_diary", student_id=user_id))
+#    else:
+#        return redirect(url_for("auth.login"))
+
+@diary_bp.route("/diary")
+def diary_home():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("auth.login"))
+
+    s = Session()
+    student = s.query(Student).filter_by(user_id=user_id).first()
+    s.close()
+
+    if not student:
+        return "❌ User này chưa có hồ sơ Student (chưa link).", 404
+
+    return redirect(url_for("diary.list_diary", student_id=student.id))
 
 # --- Danh sách nhật ký của sinh viên ---
 @diary_bp.route("/diary/<int:student_id>", methods=["GET"])

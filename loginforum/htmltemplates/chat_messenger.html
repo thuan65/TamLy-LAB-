@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Chat Messenger</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        .chat-shell { height: 70vh; min-height: 520px; }
+        .peer-item { cursor: pointer; }
+        .peer-item.active { background: rgba(0,0,0,.05); font-weight: 700; }
+
+        .msg-bubble {
+            max-width: 75%;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border-radius: 16px;
+            padding: .6rem .9rem;
+        }
+        .msg-me { background: rgba(13,110,253,.15); align-self: flex-end; }
+        .msg-peer { background: rgba(0,0,0,.06); align-self: flex-start; }
+
+        .msg-wrap { display:flex; flex-direction:column; gap:.25rem; }
+        .ts { font-size: 12px; opacity: .7; }
+
+        .badge-dot {
+            min-width: 22px;
+            height: 22px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Topbar Start -->
+    <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
+        <div class="row align-items-center h-100">
+            <div class="col-lg-4 text-center text-lg-start">
+                <a href="{{ url_for('home') }}">
+                    <h1 class="display-5 text-primary m-0">Aerial</h1>
+                </a>
+            </div>
+            <div class="col-lg-8 d-none d-lg-block">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-phone-alt text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Call Us</h6>
+                                <span class="text-white">+012 345 6789</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-envelope-open text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Mail Us</h6>
+                                <span class="text-white">info@domain.com</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-map-marker-alt text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Address</h6>
+                                <span class="text-white">227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+    <!-- Page Header -->
+    <div class="container-fluid page-header py-2 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-4">
+            <h1 class="display-3 animated slideInDown">Chat Messenger</h1>
+            <p class="mb-0 text-dark">
+                Vai trò: <strong class="text-dark">{{ role }}</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Chat Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            <!-- Header actions: CHỈ CÒN VỀ HOME -->
+            <div class="d-flex justify-content-end mb-3">
+                <a class="btn btn-outline-primary" href="{{ url_for('home') }}">
+                    <i class="fa-solid fa-house me-2"></i>Về Home
+                </a>
+            </div>
+
+            <div class="bg-light rounded p-3 p-md-4">
+                <div class="row g-3 chat-shell">
+                    <!-- Sidebar -->
+                    <div class="col-lg-4">
+                        <div class="bg-white rounded h-100 border">
+                            <div class="p-3 border-bottom">
+                                <h5 class="mb-0">
+                                    {% if role=='student' %}Danh sách chuyên gia{% else %}Danh sách học sinh{% endif %}
+                                </h5>
+                                <small class="text-muted">Chọn một người để bắt đầu trò chuyện.</small>
+                            </div>
+                            <div id="peer-list" class="list-group list-group-flush" style="overflow-y:auto; max-height: calc(70vh - 120px);">
+                                <!-- peers -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat panel -->
+                    <div class="col-lg-8">
+                        <div class="bg-white rounded h-100 border d-flex flex-column">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold" id="chat-header">Chọn một người để chat</div>
+                                    <small class="text-muted" id="chat-sub">Tin nhắn sẽ hiển thị ở đây.</small>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-lock me-1"></i>Riêng tư
+                                </div>
+                            </div>
+
+                            <div id="chat-box" class="p-3" style="overflow-y:auto; flex: 1; display:flex; flex-direction:column; gap:.6rem;">
+                                <!-- messages -->
+                            </div>
+
+                            <div class="p-3 border-top">
+                                <div class="input-group">
+                                    <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1" style="resize:none;"></textarea>
+                                    <button class="btn btn-primary" id="send-btn">
+                                        <i class="fa-regular fa-paper-plane me-1"></i>Gửi
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">Enter để gửi, Shift+Enter để xuống dòng.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Start -->
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container">
+            <div class="row g-5 py-5">
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-light mb-4">Our Office</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-light mb-4">About Us</h4>
+                    <p>Seven Deadly Sins Lab Project</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="text-light">Course</h6>
+                    <p class="mb-1">Computational Thinking - CSC10014</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+
+    <!-- Template Javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        const userId = parseInt("{{ user_id }}", 10);
+        const role = "{{ role }}";
+        let currentPeerId = null;
+
+        const socket = io("/");
+
+        const URLS = {
+            getExpertsForStudent: (uid) =>
+                "{{ url_for('chat_expert.get_experts_for_student', uid=0) }}".replace("/0", `/${uid}`),
+
+            getPeers: (uid) =>
+                "{{ url_for('chat_expert.get_peers', user_id=0) }}".replace("/0", `/${uid}`),
+
+            getMessages: (uid, peerId) =>
+                "{{ url_for('chat_expert.get_messages', user_id=0, peer_id=0) }}".replace("/0/0", `/${uid}/${peerId}`)
+        };
+
+        async function loadPeers() {
+            try {
+                let peers = [];
+                if (role === 'student') {
+                    const res = await fetch(URLS.getExpertsForStudent(userId));
+                    const data = await res.json();
+                    peers = data.peers || [];
+                } else {
+                    const res = await fetch(URLS.getPeers(userId));
+                    const data = await res.json();
+                    peers = data.peers || [];
+                }
+
+                const list = document.getElementById("peer-list");
+                list.innerHTML = "";
+
+                peers.forEach(p => {
+                    const item = document.createElement("button");
+                    item.type = "button";
+                    item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center peer-item";
+                    item.dataset.id = p.id;
+
+                    const unread = (currentPeerId === p.id) ? 0 : (p.unread || 0);
+
+                    item.innerHTML = `
+                        <span class="text-truncate" style="max-width: 70%;">${p.name}</span>
+                        ${unread > 0 ? `<span class="badge bg-danger badge-dot">${unread}</span>` : ``}
+                    `;
+                    item.onclick = () => selectPeer(p.id, p.name, item);
+                    list.appendChild(item);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function selectPeer(id, name, element) {
+            if (currentPeerId === id) return;
+
+            currentPeerId = id;
+            document.getElementById("chat-header").textContent = name;
+            document.querySelectorAll(".peer-item").forEach(el => el.classList.remove("active"));
+            element.classList.add("active");
+
+            socket.emit("join_room", { peer_id: currentPeerId });
+            markCurrentPeerRead();
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!currentPeerId) return;
+            try {
+                const res = await fetch(URLS.getMessages(userId, currentPeerId));
+                const data = await res.json();
+
+                const chatBox = document.getElementById("chat-box");
+                chatBox.innerHTML = "";
+
+                (data.messages || []).forEach(msg => {
+                    const type = (msg.sender_id === userId) ? "me" : "peer";
+                    appendMessage(type, msg.message, msg.timestamp);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        function appendMessage(type, text, timestamp = null) {
+            const chatBox = document.getElementById("chat-box");
+
+            const wrap = document.createElement("div");
+            wrap.className = "msg-wrap";
+            wrap.style.alignItems = (type === "me") ? "flex-end" : "flex-start";
+
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble " + ((type === "me") ? "msg-me" : "msg-peer");
+            bubble.textContent = text;
+
+            wrap.appendChild(bubble);
+
+            if (timestamp) {
+                const ts = new Date(timestamp);
+                const hours = ts.getHours().toString().padStart(2, "0");
+                const minutes = ts.getMinutes().toString().padStart(2, "0");
+
+                const meta = document.createElement("div");
+                meta.className = "ts";
+                meta.textContent = `${hours}:${minutes}`;
+                wrap.appendChild(meta);
+            }
+
+            chatBox.appendChild(wrap);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (!currentPeerId) return;
+            const input = document.getElementById("message-input");
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            socket.emit("send_message", { peer_id: currentPeerId, message: msg });
+            appendMessage("me", msg, new Date());
+            input.value = "";
+        }
+
+        function markCurrentPeerRead() {
+            if (!currentPeerId) return;
+            socket.emit("mark_read", { peer_id: currentPeerId });
+            updateBadges();
+        }
+
+        async function updateBadges() {
+            try {
+                let peers = [];
+                if (role === 'student') {
+                    const res = await fetch(URLS.getExpertsForStudent(userId));
+                    const data = await res.json();
+                    peers = data.peers || [];
+                } else {
+                    const res = await fetch(URLS.getPeers(userId));
+                    const data = await res.json();
+                    peers = data.peers || [];
+                }
+
+                peers.forEach(p => {
+                    const el = document.querySelector(`.peer-item[data-id='${p.id}']`);
+                    if (!el) return;
+
+                    const unread = (currentPeerId === p.id) ? 0 : (p.unread || 0);
+                    const badge = el.querySelector(".badge");
+
+                    if (unread > 0) {
+                        if (!badge) {
+                            const span = document.createElement("span");
+                            span.className = "badge bg-danger badge-dot";
+                            span.textContent = unread;
+                            el.appendChild(span);
+                        } else {
+                            badge.textContent = unread;
+                        }
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        socket.on("receive_message", data => {
+            if (data.sender_id !== userId) {
+                if (currentPeerId === data.sender_id) {
+                    appendMessage("peer", data.message, data.timestamp);
+                }
+            }
+            updateBadges();
+        });
+
+        document.getElementById("send-btn").addEventListener("click", sendMessage);
+        document.getElementById("message-input").addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        window.onload = () => {
+            loadPeers();
+            setInterval(updateBadges, 5000);
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>PHQ-9 - Đánh giá Sức khỏe Tâm thần</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Bootstrap + Theme -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        .quiz-card { border-radius: 12px; }
+        .quiz-progress {
+            height: 10px; border-radius: 999px; overflow: hidden; background: #e9ecef;
+        }
+        .quiz-progress .progress-bar { transition: width .25s ease; }
+        .option-grid { display: flex; flex-wrap: wrap; gap: .75rem; }
+        .option-pill { border-radius: 999px; }
+        .question-title { line-height: 1.5; }
+        .result-score { font-size: 44px; font-weight: 800; line-height: 1.1; }
+        .pill-btn { border-radius: 999px; }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- Spinner -->
+<div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+</div>
+
+<!-- Content -->
+<div class="container-fluid py-5">
+    <div class="container">
+
+        <!-- TOP ACTION BAR -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-primary pill-btn">
+                <i class="fa-solid fa-house me-2"></i>Trang chủ
+            </a>
+        </div>
+
+        <!-- TITLE -->
+        <div class="text-center mx-auto mb-4" style="max-width: 750px;">
+            <p class="section-title bg-white text-center text-primary px-3">Mental Health</p>
+            <h1 class="display-6 mb-3">Bài đánh giá sức khỏe tâm thần (PHQ-9)</h1>
+            <p class="mb-0">
+                Trong <strong>2 tuần vừa qua</strong>, bạn gặp các vấn đề sau với tần suất như thế nào?
+                (Chỉ mang tính tham khảo)
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-10">
+                <div class="bg-light rounded p-4 p-md-5 quiz-card">
+
+                    <!-- Progress -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Tiến độ</small>
+                            <small class="text-muted"><span id="answeredCount">0</span>/<span id="totalCount">0</span></small>
+                        </div>
+                        <div class="quiz-progress">
+                            <div class="progress-bar bg-primary" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <form id="quizForm">
+
+                        <!-- Student info -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="ho_ten" placeholder="Nguyễn Văn A" required>
+                                    <label for="ho_ten">👤 Họ và tên *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="mssv" placeholder="2412345" required>
+                                    <label for="mssv">🎓 MSSV *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Questions -->
+                        <div id="questions-container"></div>
+
+                        <!-- Impact -->
+                        <div class="mt-4" id="impact-section" style="display:none;">
+                            <div class="p-4 bg-white rounded">
+                                <h4 class="mb-3">📊 Câu hỏi cuối cùng</h4>
+                                <p class="mb-3">
+                                    <strong>10.</strong> Những khó khăn trên đã ảnh hưởng đến sinh hoạt của bạn như thế nào?
+                                </p>
+                                <div class="option-grid" id="impact-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary py-3 w-100" onclick="submitQuiz()" id="submitBtn" disabled>
+                                <i class="fa-regular fa-paper-plane me-2"></i>Nộp bài đánh giá
+                            </button>
+                            <div class="alert alert-warning mt-3 mb-0 text-center">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                Bài test chỉ mang tính tham khảo.
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Result -->
+                    <div id="result" class="mt-4" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- TOÀN BỘ SCRIPT QUIZ GIỮ NGUYÊN -->
+<script>
+    /* JS quiz của bạn giữ nguyên – không sửa */
+    /* loadQuestions, updateProgress, submitQuiz, showResult ... */
+    window.onload = loadQuestions;
+</script>
+
+</body>
+</html>

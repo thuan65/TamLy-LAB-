@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Kết quả tìm kiếm</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        /* Card gọn + nội dung canh TOP */
+        .post-card { padding: 18px 20px; display: block !important; }
+        .post-card * { align-self: flex-start; }
+
+        .post-meta { font-size: 0.95rem; color: #6c757d; }
+        .post-title { margin: 8px 0 0; font-weight: 700; }
+        .post-snippet { white-space: pre-wrap; margin-top: 10px; line-height: 1.55; color: #333; }
+
+        .result-gap { gap: 14px; }
+        .pill-btn { border-radius: 999px; }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Content -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 wow fadeIn" data-wow-delay="0.1s">
+
+                    <div class="bg-light rounded p-4 p-md-5">
+
+                        <!-- Top action bar -->
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                            <div>
+                                <p class="section-title bg-white text-center text-primary px-3 d-inline-block mb-0">Forum</p>
+                                <h3 class="mb-1 mt-2">Kết quả tìm kiếm</h3>
+                                <p class="text-muted mb-0">
+                                    Từ khóa: <strong>"{{ query }}"</strong>
+                                </p>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ url_for('home') }}" class="btn btn-outline-primary pill-btn">
+                                    <i class="fa-solid fa-house me-2"></i>Trang chủ
+                                </a>
+                                <a href="{{ url_for('forum.show_forum') }}" class="btn btn-primary pill-btn">
+                                    <i class="fa-solid fa-arrow-left me-2"></i>Quay lại Forum
+                                </a>
+                            </div>
+                        </div>
+
+                        {% if posts %}
+                            <div class="row result-gap">
+                                {% for post in posts %}
+                                    <div class="col-12">
+                                        <div class="bg-white rounded border post-card">
+
+                                            <div class="post-meta">
+                                                <i class="fa-regular fa-user me-2"></i>
+                                                Đăng bởi: <strong>{{ post.username }}</strong>
+                                            </div>
+
+                                            <h5 class="post-title">{{ post.title }}</h5>
+
+                                            {% if post.content %}
+                                                <div class="post-snippet">
+                                                    {{ post.content[:320] }}{% if post.content|length > 320 %}...{% endif %}
+                                                </div>
+                                            {% endif %}
+
+                                            {% if post.answers %}
+                                                <hr class="my-3">
+                                                <h6 class="fw-bold text-success mb-2">
+                                                    <i class="fa-solid fa-comments me-2"></i>Trả lời
+                                                </h6>
+                                                <ul class="list-group list-group-flush">
+                                                    {% for ans in post.answers %}
+                                                        <li class="list-group-item">
+                                                            <div class="fst-italic">{{ ans.content }}</div>
+                                                            <div class="text-muted small mt-1">— {{ ans.expert_username }}</div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info text-center mb-0">
+                                <i class="fa-regular fa-circle-question me-2"></i>
+                                Không tìm thấy bài viết nào.
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

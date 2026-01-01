@@ -1,17 +1,9 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[codz]
-*$py.class
-
-# Environments
+*.pyc
+*.pyo
 .env
-.envrc
-.venv
-env/
 venv/
-ENV/
-env.bak/
-venv.bak/
+.env/
 
-#other
-tes/
+.idea/
+.vscode/

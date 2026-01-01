@@ -1,7 +1,11 @@
 # createTherapyDB.py
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Text, Float, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_URL = f"sqlite:///{os.path.join(BASE_DIR, 'therapy.db')}"
 
 Base = declarative_base()
 
@@ -29,11 +33,14 @@ class Student(Base):
     phone = Column(String)
     gender = Column(String)
     dob = Column(String)
-    major = Column(String)              # ✅ mới
-    school = Column(String)             # ✅ mới
+    major = Column(String)             
+    school = Column(String)            
     vip_level = Column(Integer, default=0)
     last_stress_score = Column(Float, default=0.0)
     is_active = Column(Integer, default=1)
+    #moi them vao de mapping diary student voi user id 
+    user_id = Column(Integer, nullable=True, unique=True)
+
 
 class TherapistRating(Base):
     __tablename__ = "therapist_ratings"
@@ -53,7 +60,22 @@ class StressLog(Base):
     note = Column(Text)
     created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
 
-engine = create_engine("sqlite:///therapy.db")
+
+class DiaryEntry(Base):
+    __tablename__ = "diary_entries"
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    mood = Column(String, default="Binh thuong")
+    mood_score = Column(Integer, default=3)
+    tags = Column(String)
+    is_private = Column(Integer, default=1)  # 1: private, 0: public/share
+
+    created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
+    updated_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
+
+engine = create_engine(DB_URL)
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
@@ -79,4 +101,4 @@ if __name__ == "__main__":
         session.commit()
 
     session.close()
-    print("✅ therapy.db created (v2 with major & school)")
+    print(" therapy.db created (v2 with major & school)")

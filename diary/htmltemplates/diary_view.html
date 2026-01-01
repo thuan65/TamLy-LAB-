@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ entry.title }}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        .diary-content { white-space: pre-wrap; line-height: 1.8; font-size: 1.05rem; color: #333; }
+        .tag-pill { font-size: 0.85rem; }
+        .pill-btn { border-radius: 999px; }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            <!-- Top actions -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <a href="{{ url_for('home') }}" class="btn btn-outline-primary pill-btn">
+                    <i class="fa-solid fa-house me-2"></i>Trang chủ
+                </a>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('diary.list_diary', student_id=entry.student_id) }}" class="btn btn-outline-primary pill-btn">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Quay lại
+                    </a>
+                    <a href="{{ url_for('diary.edit_diary', entry_id=entry.id) }}" class="btn btn-primary pill-btn">
+                        <i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('diary.delete_diary', entry_id=entry.id) }}"
+                          style="margin:0"
+                          onsubmit="return confirm('Bạn có chắc muốn xóa nhật ký này?')">
+                        <button type="submit" class="btn btn-danger pill-btn">
+                            <i class="fa-regular fa-trash-can me-2"></i>Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mx-auto mb-4" style="max-width: 750px;">
+                <p class="section-title bg-white text-center text-primary px-3">Diary</p>
+                <h1 class="display-6 mb-1">{{ entry.title }}</h1>
+                <p class="mb-0 text-muted">
+                    {{ entry.created_at[:10] }} • {{ entry.created_at[11:16] }}
+                </p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="bg-light rounded p-4 p-md-5 wow fadeIn" data-wow-delay="0.1s">
+
+                        {% set emoji = "😐" %}
+                        {% set moodBadge = "bg-info" %}
+                        {% if entry.mood == "Vui vẻ" %}
+                            {% set emoji = "😊" %}{% set moodBadge = "bg-success" %}
+                        {% elif entry.mood == "Buồn" %}
+                            {% set emoji = "😢" %}{% set moodBadge = "bg-danger" %}
+                        {% elif entry.mood == "Lo lắng" %}
+                            {% set emoji = "😰" %}{% set moodBadge = "bg-warning text-dark" %}
+                        {% elif entry.mood == "Tức giận" %}
+                            {% set emoji = "😠" %}{% set moodBadge = "bg-danger" %}
+                        {% endif %}
+
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <span class="badge {{ moodBadge }} px-3 py-2">
+                                {{ emoji }} {{ entry.mood }} • {% for i in range(entry.mood_score) %}⭐{% endfor %}
+                            </span>
+
+                            {% if entry.updated_at != entry.created_at %}
+                                <span class="text-muted small"><i class="fa-regular fa-pen-to-square me-2"></i>Đã chỉnh sửa</span>
+                            {% endif %}
+
+                            {% if entry.is_private == 1 %}
+                                <span class="text-muted small"><i class="fa-solid fa-lock me-2"></i>Riêng tư</span>
+                            {% else %}
+                                <span class="text-muted small"><i class="fa-solid fa-globe me-2"></i>Công khai</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="bg-white rounded border p-4">
+                            <div class="diary-content">{{ entry.content }}</div>
+                        </div>
+
+                        {% if entry.tags %}
+                            <div class="mt-3">
+                                <div class="fw-bold text-muted mb-2"><i class="fa-solid fa-tags me-2"></i>Tags</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for tag in entry.tags.split(',') %}
+                                        <span class="badge bg-primary tag-pill">#{{ tag.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

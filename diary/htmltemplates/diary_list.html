@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Nhật ký - {{ student.name if student and student.name else 'Sinh viên' }}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        .entry-card { padding: 18px 20px; }
+        .entry-preview { white-space: pre-wrap; line-height: 1.6; margin-top: 10px; color: #333; }
+        .tag-pill { font-size: 0.85rem; }
+        .pill-btn { border-radius: 999px; }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            <!-- Top actions -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <a href="{{ url_for('home') }}" class="btn btn-outline-primary pill-btn">
+                    <i class="fa-solid fa-house me-2"></i>Trang chủ
+                </a>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-primary pill-btn" href="{{ url_for('diary.create_diary', student_id=student.id) }}">
+                        <i class="fa-solid fa-plus me-2"></i>Viết nhật ký mới
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mx-auto mb-4" style="max-width: 750px;">
+                <p class="section-title bg-white text-center text-primary px-3">Diary</p>
+                <h1 class="display-6 mb-2">Danh sách nhật ký</h1>
+                <p class="mb-0 text-muted">
+                    {{ student.name if student and student.name else "Sinh viên" }} • Tổng: <b>{{ entries|length }}</b>
+                </p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="bg-light rounded p-4 p-md-5 wow fadeIn" data-wow-delay="0.1s">
+
+                        {% if not entries %}
+                            <div class="alert alert-info text-center mb-0">
+                                <i class="fa-regular fa-pen-to-square me-2"></i>
+                                Chưa có nhật ký nào. Hãy bắt đầu viết vài dòng nhé.
+                            </div>
+                        {% else %}
+                            <div class="row g-3">
+                                {% for e in entries %}
+                                    <div class="col-12">
+                                        <div class="bg-white rounded border entry-card">
+
+                                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                                <div>
+                                                    <h5 class="mb-1">{{ e.title }}</h5>
+
+                                                    <div class="text-muted small d-flex flex-wrap gap-3">
+                                                        <span><i class="fa-regular fa-calendar me-2"></i>{{ e.created_at[:10] }}</span>
+                                                        <span><i class="fa-regular fa-clock me-2"></i>{{ e.created_at[11:16] }}</span>
+                                                        {% if e.updated_at != e.created_at %}
+                                                            <span><i class="fa-regular fa-pen-to-square me-2"></i>Đã chỉnh sửa</span>
+                                                        {% endif %}
+                                                        {% if e.is_private == 1 %}
+                                                            <span><i class="fa-solid fa-lock me-2"></i>Riêng tư</span>
+                                                        {% else %}
+                                                            <span><i class="fa-solid fa-globe me-2"></i>Công khai</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                {% set emoji = "😐" %}
+                                                {% set moodBadge = "bg-info" %}
+                                                {% if e.mood == "Vui vẻ" %}
+                                                    {% set emoji = "😊" %}{% set moodBadge = "bg-success" %}
+                                                {% elif e.mood == "Buồn" %}
+                                                    {% set emoji = "😢" %}{% set moodBadge = "bg-danger" %}
+                                                {% elif e.mood == "Lo lắng" %}
+                                                    {% set emoji = "😰" %}{% set moodBadge = "bg-warning text-dark" %}
+                                                {% elif e.mood == "Tức giận" %}
+                                                    {% set emoji = "😠" %}{% set moodBadge = "bg-danger" %}
+                                                {% endif %}
+
+                                                <span class="badge {{ moodBadge }} px-3 py-2">
+                                                    {{ emoji }} {{ e.mood }} • {% for i in range(e.mood_score) %}⭐{% endfor %}
+                                                </span>
+                                            </div>
+
+                                            <div class="entry-preview">
+                                                {{ (e.content[:240] ~ ('...' if e.content|length > 240 else '')) }}
+                                            </div>
+
+                                            {% if e.tags %}
+                                                <div class="mt-3 d-flex flex-wrap gap-2">
+                                                    {% for tag in e.tags.split(',') %}
+                                                        <span class="badge bg-primary tag-pill">#{{ tag.strip() }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top">
+                                                <a href="{{ url_for('diary.view_diary', entry_id=e.id) }}" class="btn btn-outline-primary pill-btn">
+                                                    <i class="fa-regular fa-eye me-2"></i>Xem
+                                                </a>
+                                                <a href="{{ url_for('diary.edit_diary', entry_id=e.id) }}" class="btn btn-primary pill-btn">
+                                                    <i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa
+                                                </a>
+
+                                                <form method="POST"
+                                                      action="{{ url_for('diary.delete_diary', entry_id=e.id) }}"
+                                                      style="margin:0"
+                                                      onsubmit="return confirm('Bạn có chắc muốn xóa nhật ký này?')">
+                                                    <button type="submit" class="btn btn-danger pill-btn">
+                                                        <i class="fa-regular fa-trash-can me-2"></i>Xóa
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Phòng Chat Ẩn Danh</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        #chat-window {
+            height: 520px;
+            overflow-y: auto;
+            background: #fff;
+            padding: 1.25rem;
+        }
+        #messages { list-style: none; padding: 0; margin: 0; }
+        #messages li {
+            padding: .55rem .9rem;
+            margin-bottom: .75rem;
+            border-radius: 1rem;
+            max-width: 78%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .message-mine { background-color: rgba(13,110,253,.15); margin-left: auto; }
+        .message-theirs { background-color: rgba(0,0,0,.06); }
+        .log { font-style: italic; color: #888; text-align: center; font-size: .95em; max-width: 100% !important; }
+    </style>
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Topbar Start -->
+    <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
+        <div class="row align-items-center h-100">
+            <div class="col-lg-4 text-center text-lg-start">
+                <a href="{{ url_for('home') }}">
+                    <h1 class="display-5 text-primary m-0">Aerial</h1>
+                </a>
+            </div>
+            <div class="col-lg-8 d-none d-lg-block">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-phone-alt text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Call Us</h6>
+                                <span class="text-white">+012 345 6789</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-envelope-open text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Mail Us</h6>
+                                <span class="text-white">info@domain.com</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="flex-shrink-0 btn-square bg-primary">
+                                <i class="fa fa-map-marker-alt text-dark"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="text-primary mb-0">Address</h6>
+                                <span class="text-white">227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+    <!-- Navbar Start -->
+    <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="nav-bar">
+            <nav class="navbar navbar-expand-lg bg-primary navbar-dark px-4 py-lg-0">
+                <h4 class="d-lg-none m-0">Menu</h4>
+                <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav me-auto">
+                        <a href="{{ url_for('home') }}" class="nav-item nav-link">Home</a>
+                        <a href="{{ url_for('about') }}" class="nav-item nav-link">About</a>
+                        <a href="{{ url_for('quiz_bp.trang_quiz') }}" class="nav-item nav-link">Quiz</a>
+
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Main Features</a>
+                            <div class="dropdown-menu bg-light m-0">
+                                <a href="feature.html" class="dropdown-item">Matching</a>
+                                <a href="team.html" class="dropdown-item">Therapy</a>
+
+                                {% if session.get("user_id") %}
+                                    <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
+                                    <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item active">Forum</a>
+                                {% else %}
+                                    <a href="{{ url_for('auth.login') }}" class="dropdown-item">Diary</a>
+                                    <a href="{{ url_for('auth.login') }}" class="dropdown-item active">Forum</a>
+                                {% endif %}
+
+                                <a href="404.html" class="dropdown-item">Chatbot</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-none d-lg-flex ms-auto align-items-center">
+                        {% if session.get("user_id") %}
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.logout') }}">Đăng xuất</a>
+                        {% else %}
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">Đăng ký</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+    <!-- Page Header -->
+    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-4">
+            <h1 class="display-3 animated slideInDown">Chat Ẩn Danh</h1>
+            <p class="text-white-50 mb-0">Phòng: <strong class="text-white">{{ session_key }}</strong></p>
+        </div>
+    </div>
+
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-9">
+                    <div id="chat-app" data-room-key="{{ session_key }}" data-user-id="{{ session['user_id'] }}">
+                        <div class="bg-light rounded p-4 p-md-5">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <p class="section-title bg-white text-center text-primary px-3 d-inline-block mb-0">Anonymous</p>
+                                    <h3 class="mb-0 mt-2">Cuộc trò chuyện</h3>
+                                </div>
+                                <a href="{{ url_for('forum.show_forum') }}" class="btn btn-outline-primary">
+                                    <i class="fa-solid fa-arrow-left me-2"></i>Về Forum
+                                </a>
+                            </div>
+
+                            <div id="chat-window" class="rounded border">
+                                <ul id="messages">
+                                    <li class="log">Đang kết nối...</li>
+                                </ul>
+                            </div>
+
+                            <div class="mt-3">
+                                <form id="message-form" class="d-flex gap-2">
+                                    <input id="message-input" class="form-control" autocomplete="off" placeholder="Nhập tin nhắn..." required />
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa-regular fa-paper-plane me-1"></i>Gửi
+                                    </button>
+                                </form>
+
+                                <div class="d-grid gap-2 mt-2">
+                                    <button id="leave-button" class="btn btn-outline-danger">
+                                        <i class="fa-solid fa-xmark me-2"></i>Kết thúc trò chuyện
+                                    </button>
+
+                                    <a href="{{ url_for('forum.show_forum') }}" id="back-to-forum-btn"
+                                       class="btn btn-primary" style="display: none;">
+                                        <i class="fa-solid fa-arrow-left me-2"></i>Quay về Diễn đàn
+                                    </a>
+                                </div>
+
+                                <div class="alert alert-warning mt-3 mb-0 text-center">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                    Lưu ý: Hãy tôn trọng nhau khi trò chuyện.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container">
+            <div class="row g-5 py-5">
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-light mb-4">Our Office</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JS libs -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        const socket = io();
+        const chatApp = document.getElementById('chat-app');
+        const roomKey = chatApp.dataset.roomKey;
+        const currentUserId = parseInt(chatApp.dataset.userId, 10);
+
+        const messagesList = document.getElementById('messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const leaveButton = document.getElementById('leave-button');
+        const backButton = document.getElementById('back-to-forum-btn');
+
+        const HISTORY_URL_TEMPLATE = "{{ url_for('history.get_history', session_key='__ROOM__') }}";
+
+        const displayedMessageIds = new Set();
+
+        function addMessage(type, message, msgId = null) {
+            if (msgId && displayedMessageIds.has(msgId)) return;
+            if (msgId) displayedMessageIds.add(msgId);
+
+            const item = document.createElement('li');
+            item.className = type;
+            item.textContent = message;
+            messagesList.appendChild(item);
+
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        async function loadChatHistory() {
+            try {
+                const url = HISTORY_URL_TEMPLATE.replace('__ROOM__', encodeURIComponent(roomKey));
+                const res = await fetch(url);
+                const data = await res.json();
+
+                messagesList.innerHTML = "";
+                (data.history || []).forEach(msg => {
+                    const type = (msg.user_id === currentUserId) ? 'message-mine' : 'message-theirs';
+                    if (msg.user_message) addMessage(type, msg.user_message, msg.timestamp);
+                    if (msg.system_response) addMessage('message-theirs', msg.system_response, (msg.timestamp || "") + "_sys");
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        socket.on('connect', () => {
+            socket.emit('join', { room: roomKey });
+            loadChatHistory();
+        });
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            socket.emit('send_message', { room: roomKey, message: message });
+            addMessage('message-mine', message);
+
+            messageInput.value = '';
+        });
+
+        leaveButton.addEventListener('click', () => {
+            if (confirm('Bạn có chắc muốn kết thúc cuộc trò chuyện?')) {
+                socket.emit('leave_chat', { room: roomKey });
+            }
+        });
+
+        socket.on('receive_message', (data) => {
+            addMessage('message-theirs', data.message, data.timestamp || null);
+        });
+
+        socket.on('chat_log', (data) => {
+            addMessage('log', data.message);
+        });
+
+        socket.on('chat_ended', (data) => {
+            addMessage('log', data.message);
+
+            leaveButton.disabled = true;
+            messageInput.disabled = true;
+            messageInput.placeholder = 'Cuộc trò chuyện đã kết thúc.';
+            messageForm.querySelector('button').disabled = true;
+
+            leaveButton.style.display = 'none';
+            backButton.style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>

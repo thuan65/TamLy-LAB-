@@ -1,0 +1,28 @@
+Các file html khác (ngoại trừ index.thml và about.html) là để Thúy lấy nếu muốn, xem mấy cái đó tại https://htmlcodex.com/demo/?item=3641.
+Nếu Thúy có sử dụng lại mấy trang đó thì thay các đường dẫn trích file (các file như .css, .js, .jpg,...) như:
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    thành
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    (Kêu ChatGpt đổi dùm cũng được, phải trích đường dẫn theo chuẩn Flask nó mới chạy).
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Phần comment trong file index.html sẽ có dạng như này <!-- Topbar Start -->.
+Chạy app.py rồi xem các nút cần đổi là ở phần nào (vd như Footer, Navbar,) rồi dò trong index.html để vào đúng phần.
+Các nút sẽ có dạng <a href="donation.html" class="nav-item nav-link">Quiz</a>. <- Đây là nút Quiz á
+    - href="donation.html": chỉnh thành tên đường dẫn sẽ được trỏ vào nếu bấm vào nút đó. 
+    - Sau đó vào app.py định nghĩa đường dẫn đó.
+    Vd: 
+    <a href="donation.html" class="nav-item nav-link">Quiz</a>
+    Đổi thành <a href="quiz" class="nav-item nav-link">Quiz</a>
+    @app.route('/quiz')
+        def quiz():
+            return render_template('quiz.html')
+
+Các file html Thúy có thể lấy cái có sẵn từ mấy bạn hoặc tự làm cái mới cũng được.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Đối với chỉnh ảnh thì vào folder static/img để chỉnh.
+Phần "Join Us Now" sẽ dẫn tới chỗ Login nha.
+Matching và Forum hiện tại đang ở chung file html nên chỉnh cho hai nút đó trỏ tới một file HTML. 

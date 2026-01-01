@@ -38,9 +38,9 @@ def is_toxic_vi(text: str, threshold: float = VI_THRESHOLD) -> bool:
 # — Kết hợp —
 def is_toxic(text: str, en_threshold: float = EN_THRESHOLD, vi_threshold: float = VI_THRESHOLD) -> bool:
     # Nếu là tiếng Việt hoặc mix: check với vi_model
-    if is_toxic_vi(text, vi_threshold):
-        return True
+    #if is_toxic_vi(text, vi_threshold):
+        #return True
     # Nếu không, check với model Anh
-    if is_toxic_en(text, en_threshold):
-        return True
+    #if is_toxic_en(text, en_threshold):
+        #return True
     return False

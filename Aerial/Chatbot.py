@@ -36,7 +36,7 @@ import os, json, re
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 
-from flask import Flask, request, jsonify, send_from_directory, Response, render_template
+from flask import Blueprint, request, jsonify, send_from_directory, Response, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -75,7 +75,7 @@ def _model(name:str):
 # ─────────────────────────────────────────────────────────────────────────────
 # Ensure therapists_recommender can auto-build a city DB using database_fetcher
 try:
-    import database_fetcher as dbf
+    from . import database_fetcher as dbf
 except Exception as e:
     raise SystemExit(f"Could not import database_fetcher.py: {e}")
 
@@ -127,7 +127,7 @@ if not hasattr(dbf, "build_city"):
 
 # Now import the recommender
 try:
-    from therapists_recommender import recommend
+    from .therapists_recommender import recommend
 
     def _format_recommend_markdown(result: dict) -> str:
         """Render recommender JSON into friendly Vietnamese Markdown."""
@@ -304,10 +304,10 @@ def _gen_text(prompt: str) -> str:
     return "Xin lỗi, máy chủ đang bận. Vui lòng thử lại sau.\nChi tiết: " + (last_err or "unknown error")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Flask app
+# ================ ROUTE START HERE =========================================
 # ─────────────────────────────────────────────────────────────────────────────
-app = Flask(__name__, template_folder='templates')
-CORS(app)
+chatbot_bp = Blueprint("Aerial",__name__, template_folder='Aerial_templates')
+CORS(chatbot_bp)
 
 # Optional tiny anti-burst throttle per IP
 LAST_HIT = {}
@@ -327,17 +327,17 @@ def _throttle():
     except Exception:
         pass
 
-@app.route("/", methods=["GET"])
+@chatbot_bp.route("/chatBotIndex", methods=["GET"])
 def index():
     return render_template("GUI_new.html")
 
 # Health check
-@app.route("/api/health", methods=["GET"])
+@chatbot_bp.route("/api/health", methods=["GET"])
 def api_health():
     return jsonify({"status": "ok"})
 
 # Stress advice (text/markdown)
-@app.route("/api/stress_text", methods=["POST"])
+@chatbot_bp.route("/api/stress_text", methods=["POST"])
 def api_stress_text():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -353,7 +353,7 @@ def api_stress_text():
     return Response(out, mimetype="text/plain; charset=utf-8")
 
 # Wellbeing plan (text/markdown)
-@app.route("/api/plan_text", methods=["POST"])
+@chatbot_bp.route("/api/plan_text", methods=["POST"])
 def api_plan_text():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -370,7 +370,7 @@ def api_plan_text():
 
 # Recommender (JSON)
 
-@app.route("/api/recommend_text", methods=["POST"])
+@chatbot_bp.route("/api/recommend_text", methods=["POST"])
 def api_recommend_text():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -382,7 +382,7 @@ def api_recommend_text():
     except Exception as e:
         return Response(f"Lỗi: {e}", mimetype="text/plain; charset=utf-8", status=500)
 
-@app.route("/api/recommend", methods=["POST"])
+@chatbot_bp.route("/api/recommend", methods=["POST"])
 def api_recommend():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -398,10 +398,4 @@ def api_recommend():
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    app.run(host="0.0.0.0", port=port, debug=True)
-
-
-# Modern UI route
-@app.route("/new", methods=["GET"])
-def new_ui():
-    return render_template("GUI_new.html")
+    chatbot_bp.run(host="0.0.0.0", port=port, debug=True)
