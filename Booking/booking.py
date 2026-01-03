@@ -1,7 +1,8 @@
 ﻿from flask import Blueprint, render_template, request, redirect, session, url_for
 from datetime import datetime, timedelta
-from createTherapyDB import Therapist, Student, Appointment
-from db_session import TherapySession
+from models import User, ExpertProfile, StudentProfile, Appointment
+from database import TherapySession
+from sqlalchemy.orm import joinedload
 
 # Khai báo Blueprint
 booking_bp = Blueprint("booking", __name__, url_prefix="/booking", template_folder="templates")
@@ -33,7 +34,12 @@ def select_therapist():
         return redirect(url_for("auth.login"))
     
     db = TherapySession()
-    therapists_objs = db.query(Therapist).filter_by(is_active=1).all()
+
+    therapists_objs = db.query(User)\
+    .options(joinedload(User.expert_profile))\
+    .filter(User.role=="EXPERT")\
+    .filter(ExpertProfile.is_active==True)\
+    .all()
     
     therapists_list = [to_dict(t) for t in therapists_objs]
     
@@ -50,8 +56,8 @@ def calendar(therapist_id):
         return redirect(url_for("auth.login"))
 
     db = TherapySession()
-    therapist_obj = db.query(Therapist).filter_by(id=therapist_id).first()
-    student = db.query(Student).filter_by(user_id=session["user_id"]).first()
+    therapist_obj = db.query(User).filter_by(id=therapist_id).first()
+    student = db.query(User).filter_by(id=session["user_id"]).first()
     
     if not student or not therapist_obj:
         db.close()
@@ -148,7 +154,7 @@ def my_appointments():
     
     db = TherapySession()
     
-    student = db.query(Student).filter_by(user_id=session["user_id"]).first()
+    student = db.query(User).filter_by(id=session["user_id"]).first()
     if not student:
         db.close()
         return "Không tìm thấy thông tin học sinh."

@@ -6,7 +6,7 @@ import os
 # DATABASE = "forum.db"
 # Lấy đường dẫn tuyệt đối đến thư mục chứa file db.py này
 _basedir = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.path.join(_basedir, "forum.db")
+DATABASE = os.path.join(_basedir, "therapy.db")
 
 # Kết nối tới database, chỉ tạo nếu chưa có trong g (global context Flask)
 def get_db():

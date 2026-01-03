@@ -9,7 +9,7 @@ from Aerial.Chatbot import chatbot_bp
 
 from loginforum.extensions import socketio
 from loginforum.chat import chat
-from loginforum.db import close_db, init_db
+from db import close_db, init_db
 from loginforum.history_conversation import history_bp
 from loginforum.auth import auth
 from loginforum.forum import forum
@@ -53,7 +53,5 @@ def about():
 
 if __name__ == "__main__":
     # tạo db nếu cần
-    if not os.path.exists("forum.db"):
-        init_db()
     print(app.url_map) #in ra endpoint de debug
     socketio.run(app, debug=True, use_reloader=False, allow_unsafe_werkzeug=True)

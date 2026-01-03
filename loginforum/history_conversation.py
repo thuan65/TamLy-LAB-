@@ -1,6 +1,6 @@
 ﻿# history_conversation.py
 from flask import Blueprint, request, jsonify, render_template, current_app
-from .db import get_db  # Hàm trả về conn SQLite (dict row)
+from db import get_db  # Hàm trả về conn SQLite (dict row)
 import logging
 
 # --- Tạo Blueprint ---

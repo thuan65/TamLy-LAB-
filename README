@@ -1,3 +1,21 @@
+Database đã được chỉnh
+có 2 cách để truy xuất Database:
+
+- Thuần sqlAchemy: 
+from database import TherapySession
+with TherapySession() as session:
+    ... (bất cứ hành động query nào)
+    vd: student = session.query(User).filter_by(user_id=user_id).first()
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 Các file html khác (ngoại trừ index.thml và about.html) là để Thúy lấy nếu muốn, xem mấy cái đó tại https://htmlcodex.com/demo/?item=3641.
 Nếu Thúy có sử dụng lại mấy trang đó thì thay các đường dẫn trích file (các file như .css, .js, .jpg,...) như:
     <link href="lib/animate/animate.min.css" rel="stylesheet">

@@ -1,6 +1,8 @@
 ﻿# chat.py
 from flask import Blueprint, render_template, request, redirect, session, flash, current_app, jsonify
-from .db import get_db
+# from .db import get_db
+import sqlite3
+import os
 import uuid
 import logging
 from .extensions import socketio
@@ -10,6 +12,30 @@ chat = Blueprint("chat", __name__)
 
 #Dùng set để lưu ID của seeker đang chờ
 WAITING_USERS = set()
+
+
+# ============ TEMPORARY ONLY ============
+_basedir = os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.dirname(_basedir)
+DATABASE = os.path.join(parent_dir, "therapy.db")
+
+def get_db():
+    if "db" not in g:
+        g.db = sqlite3.connect(
+            DATABASE,
+            detect_types=sqlite3.PARSE_DECLTYPES,
+            timeout=10  # chờ nếu database đang bị lock
+        )
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+# Đóng kết nối sau mỗi request
+def close_db(e=None):
+    db_conn = g.pop("db", None)
+    if db_conn is not None:
+        db_conn.close()
+
+# ============ TEMPORARY ONLY ============
 
 # -----------------------------------------------
 # --- LOGIC MATCHING

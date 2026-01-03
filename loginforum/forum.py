@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session
 from sentence_transformers import SentenceTransformer, util
 from .toxic_filter import is_toxic
-from .db import get_db, get_all_forum_posts
+from db import get_db, get_all_forum_posts
 
 forum = Blueprint("forum", __name__, url_prefix="/forum", template_folder="htmltemplates")
 
