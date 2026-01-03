@@ -15,6 +15,7 @@ from loginforum.auth import auth
 from loginforum.forum import forum
 from loginforum.chat_expert import chat_expert_bp
 from Booking.booking import booking_bp
+from Search.search_specialization import search_specialization_bp
 
 import os
 
@@ -38,6 +39,7 @@ app.register_blueprint(quiz_bp)
 app.register_blueprint(diary_bp)
 app.register_blueprint(chatbot_bp)
 app.register_blueprint(booking_bp)
+app.register_blueprint(search_specialization_bp)
 
 @app.route("/")
 def index():
