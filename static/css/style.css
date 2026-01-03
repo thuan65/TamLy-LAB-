@@ -625,3 +625,66 @@ select,
 .dropdown-menu {
     font-family: inherit;
 }
+
+/* =========================
+   TOPBAR: CĂN GIỮA + KHÔNG BỊ XẾP DỌC
+   ========================= */
+
+.topbar{
+  background: #1e6b5c;     /* xanh lá */
+  height: 110px;           /* chỉnh cao thấp tuỳ bạn */
+  display: flex;
+  align-items: center;     /* căn giữa theo chiều dọc */
+}
+
+.topbar .topbar-inner{
+  display: flex;
+  flex-direction: row;     /* ÉP NẰM NGANG */
+  align-items: center;     /* căn giữa dọc */
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: nowrap;       /* KHÔNG CHO RỚT XUỐNG DÒNG */
+}
+
+.topbar .logo{
+  display: flex;
+  align-items: center;     /* chữ logo giữa dọc */
+  height: 100%;
+  font-size: 48px;
+  font-weight: 700;
+  color: #ffb703;
+  margin: 0;
+  line-height: 1;          /* tránh lệch dọc */
+}
+
+.topbar .topbar-item{
+  display: flex;
+  align-items: center;     /* icon + text giữa dọc */
+  gap: 12px;
+  color: #fff;
+  white-space: nowrap;     /* tránh bể chữ thành nhiều dòng */
+}
+
+.topbar .topbar-item i{
+  color: #ffb703;
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,183,3,.12);
+  border-radius: 8px;
+}
+
+.topbar .topbar-item small{
+  display: block;
+  font-weight: 600;
+  opacity: .95;
+  line-height: 1.1;
+}
+
+.topbar .topbar-item span{
+  display: block;
+  line-height: 1.2;
+  opacity: .95;
+}

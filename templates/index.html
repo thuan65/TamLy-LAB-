@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Seven Deadly Sins Lab Project</title>
+    <title>Dự án Hỗ trợ Tâm lý Sinh viên</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -38,55 +38,38 @@
     </div>
     <!-- Spinner End -->
     <!-- Topbar Start -->
-    <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
-        <div class="row align-items-center h-100">
-            <div class="col-lg-4 text-center text-lg-start">
-                <a href="{{ url_for('index') }}">
-                    <h1 class="display-5 text-primary m-0">Aerial</h1>
-                </a>
+    <div class="topbar">
+        <div class="container topbar-inner">
+            <div class="logo">Tâm lý</div>
+
+            <div class="topbar-item">
+            <i class="fa fa-phone"></i>
+            <div class="topbar-text">
+                <small>Call Us</small>
+                <span>+012 345 6789</span>
             </div>
-            <div class="col-lg-8 d-none d-lg-block">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-phone-alt text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Call Us</h6>
-                                <span class="text-white">+012 345 6789</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-envelope-open text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Mail Us</h6>
-                                <span class="text-white">info@domain.com</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-map-marker-alt text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Address</h6>
-                                <span class="text-white">
-                                    227 Nguyễn Văn Cừ, <br>
-                                    P. Chợ Quán, TPHCM</br>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
+
+            <div class="topbar-item">
+            <i class="fa fa-envelope"></i>
+            <div class="topbar-text">
+                <small>Mail Us</small>
+                <span>info@domain.com</span>
+            </div>
+            </div>
+
+            <div class="topbar-item">
+            <i class="fa fa-map-marker-alt"></i>
+            <div class="topbar-text">
+                <small>Address</small>
+                <span>227 Nguyễn Văn Cừ, 
+                    phường Chợ Quán</span>
+            </div>
+            </div>
+
         </div>
     </div>
+
     <!-- Topbar End -->
     <!-- Navbar Start -->
     <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
@@ -180,11 +163,11 @@
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
                         <div class="carousel-text">
-                            <h1 class="display-1 text-uppercase mb-3">Together for a Better Tomorrow</h1>
-                            <p class="fs-5 mb-5">We believe in creating opportunities and empowering communities through education, healthcare, and sustainable development.</p>
+                            <h1 class="display-1 text-uppercase mb-3">Vì một tương lai tươi sáng</h1>
+                            <p class="fs-5 mb-5">Chăm sóc và quan tâm bằng sự thấu cảm</p>
                             <div class="d-flex">
-                                <a class="btn btn-primary py-3 px-4 me-3" href="">Do The Quiz</a>
-                                <a class="btn btn-secondary py-3 px-4" href="">Join Us Now</a>
+                                <a class="btn btn-primary py-3 px-4 me-3" href="">Trắc nghiệm tâm lý</a>
+                                <a class="btn btn-secondary py-3 px-4" href="">Tham gia</a>
                             </div>
                         </div>
                     </div>
@@ -199,11 +182,11 @@
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
                         <div class="carousel-text">
-                            <h1 class="display-1 text-uppercase mb-3">Listening, supporting, healing.</h1>
-                            <p class="fs-5 mb-5">We bring understanding, hope, and brighter days to students.</p>
+                            <h1 class="display-1 text-uppercase mb-3">Lắng nghe, đồng hành, chữa lành.</h1>
+                            <p class="fs-5 mb-5">Luôn luôn lắng nghe, lâu lâu mới hiểu.</p>
                             <div class="d-flex mt-4">
-                                <a class="btn btn-primary py-3 px-4 me-3" href="">Do The Quiz</a>
-                                <a class="btn btn-secondary py-3 px-4" href="">Join Us Now</a>
+                                <a class="btn btn-primary py-3 px-4 me-3" href="">Trắc nghiệm tâm lý</a>
+                                <a class="btn btn-secondary py-3 px-4" href="">Tham gia</a>
                             </div>
                         </div>
                     </div>
@@ -227,7 +210,7 @@
                                 data-src="https://www.youtube.com/embed/DWRcNpR6Kdc" data-bs-target="#videoModal">
                             <span></span>
                         </button>
-                        <h3 class="ms-5 mb-0">Every student deserves a chance to shine — with care and understanding.</h3>
+                        <h3 class="ms-5 mb-0">Mỗi sinh viên đều được quan tâm về mặt sức khỏe tâm lý.</h3>
                     </div>
                 </div>
                 <div class="d-none d-lg-block col-lg-1">
@@ -258,12 +241,37 @@
         </div>
     </div>
     <!-- Video Modal End -->
+    <!-- Search Box Start -->
+    <div class="container py-4 wow fadeIn" data-wow-delay="0.1s">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form id="expert-search-form" class="d-flex shadow-sm">
+                    <input
+                        type="search"
+                        class="form-control form-control-lg rounded-start"
+                        id="expert-search-input"
+                        placeholder="Tìm chuyên gia tâm lý (lo âu, trầm cảm,...)"
+                    >
+                    <button class="btn btn-primary px-4 rounded-end" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Search Box End -->
+     <!-- Search Result Start -->
+    <div class="container pb-5 d-none" id="search-result-section">
+        <div class="row g-4" id="search-result-list"></div>
+    </div>
+    <!-- Search Result End -->
+
     <!-- Team Start -->
     <div class="container-fluid py-5">
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                <p class="section-title bg-white text-center text-primary px-3">Our Therapists</p>
-                <h1 class="display-6 mb-4">Meet Our Dedicated Therapists</h1>
+                <p class="section-title bg-white text-center text-primary px-3">Đội ngũ chuyên gia</p>
+                <h1 class="display-6 mb-4">Gặp gỡ đội ngũ chuyên gia giàu kinh nghiệm</h1>
             </div>
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
@@ -365,7 +373,7 @@
             <div class="copyright pt-5">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="fw-semi-bold" href="#">Aerial</a>, All Right Reserved.
+                        &copy; <a class="fw-semi-bold" href="#">Thất đại tội</a>, All Right Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         <!--/*** The author’s attribution link must remain intact in the template. ***/-->
@@ -389,6 +397,52 @@
     <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    <script>
+    document.getElementById("expert-search-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const query = document.getElementById("expert-search-input").value.trim();
+        if (!query) return;
+
+        const resultSection = document.getElementById("search-result-section");
+        const resultList = document.getElementById("search-result-list");
+
+        resultList.innerHTML = "";
+        resultSection.classList.remove("d-none");
+
+        try {
+            const res = await fetch(`/api/search_specialization?query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                resultList.innerHTML = `<div class="col-12 text-center text-muted">Không tìm thấy chuyên gia phù hợp.</div>`;
+                return;
+            }
+
+            data.forEach(expert => {
+                resultList.innerHTML += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="team-item d-flex h-100 p-4">
+                            <div class="team-detail pe-4 w-100">
+                                <h5 class="mb-1">${expert.full_name}</h5>
+                                <div class="text-muted mb-2">${expert.title || ""}</div>
+                                <div class="mb-2"><b>Chuyên môn:</b> ${expert.specialization || ""}</div>
+                                <div class="small">${expert.bio || ""}</div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        } catch (err) {
+            console.error(err);
+            resultList.innerHTML = `<div class="col-12 text-danger text-center">Lỗi khi tìm kiếm chuyên gia.</div>`;
+        }
+    });
+    </script>
 
     <!-- Template Javascript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

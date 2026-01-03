@@ -27,7 +27,7 @@ from Booking.booking import booking_bp
 from Search.search_specialization import search_specialization_bp
 
 from database import TherapySession
-from models import User``
+from models import User
 
 
 app = Flask(__name__)

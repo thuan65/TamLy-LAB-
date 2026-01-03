@@ -7,5 +7,4 @@ venv/
 .db
 .idea/
 .vscode/
-*.db
-__pycache__/
+temp_add_experts.py
