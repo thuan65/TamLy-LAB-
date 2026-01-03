@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, url_for
 from sentence_transformers import SentenceTransformer, util
 from .toxic_filter import is_toxic
 from .db import get_db, get_all_forum_posts
@@ -31,6 +31,9 @@ def compute_similarity(query_text, posts, top_k=5):
 
 @forum.route("/")
 def show_forum():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login", next=request.full_path))
+
     conn = get_db()
     # Lấy tất cả post kèm tên người đăng
     posts = conn.execute(

@@ -36,9 +36,11 @@ from flask import session, redirect, url_for
 
 @diary_bp.route("/diary")
 def diary_home():
+
     user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("auth.login"))
+    if "user_id" not in session:
+        return redirect(url_for("auth.login", next=request.full_path))
+
 
     s = Session()
     student = s.query(Student).filter_by(user_id=user_id).first()

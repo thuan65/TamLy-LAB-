@@ -49,6 +49,7 @@
                         </div>
 
                         <form method="POST" action="">
+                            <input type="hidden" name="next" value="{{ next or '' }}">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="username" name="username"
                                     placeholder="Tên đăng nhập" required>

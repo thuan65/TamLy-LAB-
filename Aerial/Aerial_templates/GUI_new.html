@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,250 +7,376 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aerial — Mental Helper</title>
+
+  <!-- Be Vietnam Pro -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <style>
-    :root{ --bg:#0b0f19; --panel:#0f172a; --line:#1f2937; --text:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee; --accent-2:#60a5fa; }
+    :root{
+      --bg:#FDF8EA;
+      --panel:#ffffff;
+      --panel-2:#FFF3D4;
+      --line:rgba(0,0,0,.10);
+      --text:#051311;
+      --muted:#6c757d;
+      --accent:#FFAC00;
+      --accent-2:#ffbf3a;
+    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; background:var(--bg); color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:"Be Vietnam Pro", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
     .app{display:flex; flex-direction:column; height:100vh;}
-    header{position:sticky; top:0; z-index:20; background:linear-gradient(180deg, #0b0f19 0%, rgba(11,15,25,.6) 100%); border-bottom:1px solid var(--line); padding:10px 12px;}
-    .topbar{max-width:900px; margin:0 auto; display:grid; grid-template-columns:40px 1fr 40px; align-items:center;}
-    .btn{width:36px; height:36px; border-radius:999px; border:1px solid var(--line); background:#0a0f1e; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; line-height:18px;}
-    .btn:disabled{opacity:.55; cursor:not-allowed}
-    .title{text-align:center; font-weight:600; letter-spacing:.3px;}
+
+    header{
+      position:sticky; top:0; z-index:20;
+      background:rgba(253,248,234,.92);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+      padding:10px 12px;
+    }
+    .topbar{
+      max-width:900px; margin:0 auto;
+      display:grid; grid-template-columns:40px 1fr 40px;
+      align-items:center;
+    }
+
+    .btn{
+      width:36px; height:36px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+    }
+    .btn:hover{background:var(--panel-2)}
+
+    .title{
+      text-align:center;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
     main{flex:1; overflow:auto; padding:16px;}
-    .chat{max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:14px;}
+
+    .chat{
+      max-width:900px; margin:0 auto;
+      display:flex; flex-direction:column; gap:14px;
+    }
+
     .msg{display:flex;}
-    .msg .bubble{max-width:78%; padding:12px 14px; border-radius:14px; line-height:1.6; border:1px solid var(--line); background:#0b1020; white-space:pre-wrap;}
     .msg.me{justify-content:flex-end;}
-    .msg.me .bubble{background:linear-gradient(90deg, rgba(14,165,233,.25), rgba(96,165,250,.18)); border-color:#1d4ed8}
-    .sys{font-size:12px; text-align:center; color:var(--muted); margin:6px 0}
-    .toolbar{position:sticky; bottom:0; z-index:30; background:linear-gradient(0deg, rgba(11,15,25,1) 40%, rgba(11,15,25,0) 100%); padding:10px 16px 16px; border-top:1px solid var(--line);}
-    .composer{max-width:900px; margin:0 auto; background:#0a0f1e; border:1px solid var(--line); border-radius:14px; padding:8px; display:flex; gap:8px; align-items:flex-end;}
-    textarea{flex:1; min-height:44px; max-height:160px; resize:none; background:transparent; color:var(--text); border:none; outline:none; line-height:1.5; font-size:15px; padding:6px 8px;}
-    .send{border:none; border-radius:12px; padding:10px 14px; color:white; cursor:pointer; background:linear-gradient(90deg, var(--accent), var(--accent-2));}
-    textarea:disabled, .send:disabled, .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .bubble{
+      max-width:78%;
+      padding:16px 18px;
+      border-radius:16px;
+      line-height:1.75;
+      border:1px solid var(--line);
+      background:#fff;
+      white-space:pre-wrap;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+    }
+
+    .msg.me .bubble{
+      background:rgba(255,172,0,.16);
+      border-color:rgba(255,172,0,.45);
+    }
+
+    .bubble.md{
+      padding:18px 20px;
+    }
+
+    .sys{
+      font-size:13px;
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,172,0,.10);
+      border:1px dashed rgba(255,172,0,.45);
+    }
+
+    /* Markdown formatting */
+    .bubble.md p,
+    .bubble.md li{
+      text-align:justify;
+      text-justify:inter-word;
+    }
+    .bubble.md :is(h1,h2,h3){
+      text-align:left;
+      font-weight:800;
+    }
+    .bubble.md p{margin:.65em 0}
+    .bubble.md li{margin:.35em 0}
+    .bubble.md ul{padding-left:1.2rem}
+
+    /* Toolbar */
+    .toolbar{
+      position:sticky; bottom:0; z-index:30;
+      background:linear-gradient(0deg,rgba(253,248,234,1) 55%,rgba(253,248,234,0) 100%);
+      padding:12px 16px 14px;
+      border-top:1px solid var(--line);
+    }
+
+    .composer{
+      max-width:900px; margin:0 auto;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.06);
+    }
+
+    textarea{
+      flex:1;
+      height:44px;
+      max-height:160px;
+      resize:none;
+      border:none;
+      outline:none;
+      font-size:15px;
+      padding:10px 12px;
+      font-family:"Be Vietnam Pro", sans-serif;
+    }
+
+    #btnPlus{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      font-size:20px;
+    }
+
+    .send{
+      height:44px;
+      padding:0 16px;
+      border:none;
+      border-radius:14px;
+      font-weight:700;
+      cursor:pointer;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    }
+
     /* Sheet */
-    .sheet{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; justify-content:center; z-index:1000;}
+    .sheet{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.35);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:1000;
+    }
     .sheet.open{display:flex}
-    .panel{width:100%; max-width:900px; background:var(--panel); border-top-left-radius:18px; border-top-right-radius:18px; border:1px solid var(--line); padding:14px;}
+
+    .panel{
+      width:100%; max-width:900px;
+      background:#fff;
+      border-top-left-radius:18px;
+      border-top-right-radius:18px;
+      border:1px solid var(--line);
+      padding:14px;
+    }
+
     .modes{display:flex; gap:10px; flex-wrap:wrap}
-    .mode{padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:#0a0f1e; color:var(--text); cursor:pointer; font-size:14px;}
-    .mode.active{outline:2px solid var(--accent)}
-    /* Typing */
-    .typing{display:inline-flex; gap:3px; margin-left:6px; vertical-align:middle}
-    .dot{width:6px; height:6px; border-radius:999px; background:var(--accent); opacity:.45; animation:bounce 1.1s infinite ease-in-out}
+    .mode{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .mode.active{
+      background:rgba(255,172,0,.12);
+      border-color:rgba(255,172,0,.55);
+      outline:2px solid rgba(255,172,0,.55);
+    }
+
+    /* Typing dots */
+    .typing{display:inline-flex; gap:4px; margin-left:6px}
+    .dot{
+      width:6px; height:6px;
+      border-radius:999px;
+      background:var(--accent);
+      opacity:.45;
+      animation:bounce 1.1s infinite ease-in-out;
+    }
     .dot:nth-child(2){animation-delay:.15s}
     .dot:nth-child(3){animation-delay:.30s}
-    @keyframes bounce{0%,80%,100%{transform:translateY(0); opacity:.45} 40%{transform:translateY(-5px); opacity:1}}
-    /* Markdown */
-    .md :is(h1,h2,h3){margin:.4em 0 .2em; font-weight:600}
-    .md h1{font-size:1.1rem} .md h2{font-size:1.05rem} .md h3{font-size:1rem}
-    .md p{margin:.4em 0}
-    .md ul{margin:.3em 0 .6em 1.2em}
-    .md li{margin:.2em 0}
-    .md code{background:#0b1020; padding:.1em .3em; border-radius:6px; border:1px solid var(--line)}
-    .md pre{background:#0b1020; padding:.8em; border-radius:10px; overflow:auto; border:1px solid var(--line)}
+    @keyframes bounce{
+      0%,80%,100%{transform:translateY(0); opacity:.45}
+      40%{transform:translateY(-5px); opacity:1}
+    }
+
+        /* =========================
+      GIẢM SPACING MARKDOWN
+      ========================= */
+
+    /* Tiêu đề */
+    .bubble.md h1{
+      margin: .4em 0 .3em;   /* trên / dưới */
+      font-size: 1.5rem;
+    }
+
+    .bubble.md h2{
+      margin: .45em 0 .3em;
+      font-size: 1.3rem;
+    }
+
+    .bubble.md h3{
+      margin: .4em 0 .25em;
+      font-size: 1.15rem;
+    }
+
+    /* Đoạn văn */
+    .bubble.md p{
+      margin: .4em 0;
+      line-height: 1.7;
+    }
+
+    /* Danh sách */
+    .bubble.md ul{
+      margin: .35em 0 .45em;
+      padding-left: 1.2rem;
+    }
+
+    .bubble.md li{
+      margin: .25em 0;
+    }
+
+    /* Khoảng cách giữa tiêu đề và list */
+    .bubble.md h1 + ul,
+    .bubble.md h2 + ul,
+    .bubble.md h3 + ul{
+      margin-top: .25em;
+    }
+
+    /* Khoảng cách giữa tiêu đề và đoạn văn */
+    .bubble.md h1 + p,
+    .bubble.md h2 + p,
+    .bubble.md h3 + p{
+      margin-top: .25em;
+    }
+
   </style>
 </head>
+
 <body>
-  <div class="app">
-    <header>
-      <div class="topbar">
-        <button id="btnBack" class="btn" title="Trở về" aria-label="Trở về">←</button>
-        <div class="title">Aerial</div>
-        <div style="width:36px;height:36px"></div> <!-- placeholder to keep title centered -->
-      </div>
-    </header>
+<div class="app">
 
-    <main>
-      <div id="chat" class="chat">
-        <div class="sys">Nhấn <b>+</b> (ở khung nhập) để chọn chế độ (Đề xuất chuyên gia / Kế hoạch 4 tuần / Giảm căng thẳng). Nhấn <b>Enter</b> để gửi, <b>Shift+Enter</b> để xuống dòng.</div>
-      </div>
-    </main>
+  <header>
+    <div class="topbar">
+      <button id="btnBack" class="btn">←</button>
+      <div class="title">Aerial – Chatbot hỗ trợ tâm lý</div>
+      <div style="width:36px;height:36px"></div>
+    </div>
+  </header>
 
-    <div class="toolbar">
-      <div class="composer">
-        <button id="btnPlus" class="btn" title="Chọn chế độ" aria-label="Chọn chế độ">+</button>
-        <textarea id="input" placeholder="Viết tin nhắn..."></textarea>
-        <button id="btnSend" class="send">Gửi</button>
+  <main>
+    <div id="chat" class="chat">
+      <div class="sys">
+        Nhấn <b>+</b> để chọn chế độ. Enter để gửi, Shift+Enter xuống dòng.
       </div>
+    </div>
+  </main>
+
+  <div class="toolbar">
+    <div class="composer">
+      <button id="btnPlus" class="btn">+</button>
+      <textarea id="input" placeholder="Viết tin nhắn..."></textarea>
+      <button id="btnSend" class="send">Gửi</button>
     </div>
   </div>
 
-  <!-- Action sheet -->
-  <div id="sheet" class="sheet" aria-hidden="true">
-    <div class="panel">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <div class="muted">Chọn chế độ</div>
-        <button id="closeSheet" class="btn" aria-label="đóng">×</button>
-      </div>
-      <div class="modes">
-        <button class="mode" data-mode="recommend">Đề xuất chuyên gia (JSON)</button>
-        <button class="mode" data-mode="plan_text">Xây dựng kế hoạch</button>
-        <button class="mode" data-mode="stress_text">Tư vấn giảm căng thẳng</button>
-      </div>
+</div>
+
+<!-- Action sheet -->
+<div id="sheet" class="sheet">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+      <strong>Chọn chế độ</strong>
+      <button id="closeSheet" class="btn">×</button>
+    </div>
+    <div class="modes">
+      <button class="mode" data-mode="recommend">Đề xuất chuyên gia</button>
+      <button class="mode" data-mode="plan_text">Xây dựng kế hoạch</button>
+      <button class="mode" data-mode="stress_text">Giảm căng thẳng</button>
     </div>
   </div>
+</div>
 
-    <script>
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('input');
-    const btnSend = document.getElementById('btnSend');
-    const btnPlus = document.getElementById('btnPlus');
-    const btnBack = document.getElementById('btnBack');
-    const sheet = document.getElementById('sheet');
-    const closeSheet = document.getElementById('closeSheet');
-    const modeBtns = Array.from(document.querySelectorAll('.mode'));
+<script>
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('input');
+  const btnSend = document.getElementById('btnSend');
+  const btnPlus = document.getElementById('btnPlus');
+  const btnBack = document.getElementById('btnBack');
+  const sheet = document.getElementById('sheet');
+  const closeSheet = document.getElementById('closeSheet');
+  const modeBtns = [...document.querySelectorAll('.mode')];
 
-    // Default mode = stress_text
-    let mode = 'stress_text';
-    let loading = false;
-    let typingEl = null;
+  let mode='stress_text', loading=false, typingEl=null;
 
-    function setMode(newMode){
-        mode = newMode;
-        modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    }
-    setMode(mode);
+  function setMode(m){
+    mode=m;
+    modeBtns.forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  }
+  setMode(mode);
 
-    // Header controls
-    btnBack.addEventListener('click', ()=>{
-        if (document.referrer && document.referrer !== location.href) history.back();
-        else location.href = '/';
-    });
+  btnBack.onclick=()=>history.back();
+  btnPlus.onclick=()=>sheet.classList.add('open');
+  closeSheet.onclick=()=>sheet.classList.remove('open');
+  sheet.onclick=e=>{if(e.target===sheet) sheet.classList.remove('open');}
+  modeBtns.forEach(b=>b.onclick=()=>{setMode(b.dataset.mode);sheet.classList.remove('open');});
 
-    // Plus button opens sheet
-    btnPlus.addEventListener('click', ()=>{
-        sheet.classList.add('open');
-        sheet.setAttribute('aria-hidden','false');
-    });
-    closeSheet.addEventListener('click', ()=>{
-        sheet.classList.remove('open');
-        sheet.setAttribute('aria-hidden','true');
-    });
-    sheet.addEventListener('click', (e)=>{
-        if(e.target === sheet){
-        sheet.classList.remove('open');
-        sheet.setAttribute('aria-hidden','true');
-        }
-    });
-    modeBtns.forEach(b=> b.addEventListener('click', ()=>{
-        setMode(b.dataset.mode);
-        sheet.classList.remove('open');
-        sheet.setAttribute('aria-hidden','true');
-    }));
+  function endpoint(){
+    if(mode==='recommend') return '/api/recommend_text';
+    if(mode==='plan_text') return '/api/plan_text';
+    return '/api/stress_text';
+  }
 
-    function endpoint(){
-        if(mode==='recommend') return '/api/recommend_text';
-        if(mode==='stress_text') return '/api/stress_text';
-        if(mode==='plan_text') return '/api/plan_text';
-        return '/api/health';
-    }
+  function addMsg(role,text,md=false){
+    const w=document.createElement('div'); w.className='msg '+role;
+    const b=document.createElement('div'); b.className='bubble'+(md?' md':'');
+    b.innerHTML=md?marked.parse(text):text;
+    w.appendChild(b); chat.appendChild(w);
+    chat.scrollTop=chat.scrollHeight;
+  }
 
-    function addMsg(role, text, isMarkdown=false){
-        const wrap = document.createElement('div');
-        wrap.className = 'msg ' + role;
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble' + (isMarkdown ? ' md' : '');
+  function typing(){
+    const w=document.createElement('div'); w.className='msg ai';
+    w.innerHTML='<div class="bubble">Đang soạn<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>';
+    chat.appendChild(w); typingEl=w;
+  }
+  function stopTyping(){ if(typingEl) typingEl.remove(); typingEl=null; }
 
-        if(isMarkdown && window.marked){
-        try{ bubble.innerHTML = marked.parse(text); } catch{ bubble.textContent = text; }
-        } else { bubble.textContent = text; }
+  async function send(){
+    const t=input.value.trim(); if(!t||loading) return;
+    loading=true; addMsg('me',t); input.value=''; typing();
+    const body={text:t}; if(mode==='recommend') body.top_k=5;
+    try{
+      const r=await fetch(endpoint(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      stopTyping(); addMsg('ai',await r.text(),true);
+    }catch{ stopTyping(); addMsg('ai','Lỗi mạng'); }
+    loading=false;
+  }
 
-        wrap.appendChild(bubble);
-        chat.appendChild(wrap);
-        chat.scrollTop = chat.scrollHeight;
-        return bubble;
-    }
-
-    function addTyping(){
-        const wrap = document.createElement('div');
-        wrap.className = 'msg ai';
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.innerHTML = 'Đang soạn<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
-        wrap.appendChild(bubble);
-        chat.appendChild(wrap);
-        chat.scrollTop = chat.scrollHeight;
-        typingEl = wrap;
-        return wrap;
-    }
-    function removeTyping(){
-        if(typingEl && typingEl.parentNode){ typingEl.parentNode.removeChild(typingEl); }
-        typingEl = null;
-    }
-
-    function setLoading(state){
-        loading = state;
-        input.disabled = state;
-        btnSend.disabled = state;
-        btnPlus.disabled = state;
-    }
-
-    async function readBody(resp, preferText=false){
-        const ct = (resp.headers.get('content-type') || '').toLowerCase();
-        if(preferText || ct.includes('text/plain')) return await resp.text();
-        try { return await resp.json(); } catch { return await resp.text(); }
-    }
-
-    async function send(){
-        const text = input.value.trim();
-        if(!text || loading) return;
-
-        setLoading(true);
-        addMsg('me', text, false);
-        input.value='';
-
-        addTyping();
-
-        const body = { text };
-        if(mode==='recommend'){ body.top_k = 5; }
-        else { body.context = { location:"Viet Nam" }; }
-
-        try{
-        const resp = await fetch(endpoint(), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        removeTyping();
-        if(!resp.ok){
-            const err = await resp.text();
-            addMsg('ai', 'Lỗi: ' + (err || ('HTTP ' + resp.status)), false);
-            return;
-        }
-
-        // ✅ Fix: recommend returns Markdown text, not JSON
-        if (mode === 'recommend') {
-            const textOut = await resp.text();
-            addMsg('ai', textOut, true);
-        } else {
-            const textOut = await resp.text();
-            addMsg('ai', textOut, true);
-        }
-        }catch(e){
-        removeTyping();
-        addMsg('ai', 'Lỗi mạng: ' + (e?.message || e), false);
-        }finally{
-          setLoading(false);
-        }
-    }
-
-    // Enter to send, Shift+Enter newline
-    input.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' && !e.shiftKey){
-          e.preventDefault();
-          send();
-        }
-    });
-    btnSend.addEventListener('click', send);
-
-    setTimeout(()=> input.focus(), 200);
-    </script>
+  input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}};
+  btnSend.onclick=send;
+</script>
 </body>
 </html>

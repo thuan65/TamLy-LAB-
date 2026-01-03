@@ -1,3 +1,10 @@
+import os
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+os.environ["EVENTLET_NO_GREENDNS"] = "yes"
 import eventlet
 eventlet.monkey_patch()
 
@@ -16,7 +23,6 @@ from loginforum.forum import forum
 from loginforum.chat_expert import chat_expert_bp
 from Booking.booking import booking_bp
 
-import os
 
 app = Flask(__name__)
 app.secret_key = "my-dev-secret-key"
