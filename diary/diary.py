@@ -111,6 +111,9 @@ def create_diary(student_id):
             
             s.add(entry)
             s.commit()
+            from streak.utils import mark_diary
+            mark_diary(s, user_id=session["user_id"])
+
             entry_id = entry.id
             
             return redirect(url_for("diary.view_diary", entry_id=entry_id))

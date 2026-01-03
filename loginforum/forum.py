@@ -66,8 +66,8 @@ def new_post():
             return render_template("new_post.html", error="Nội dung câu hỏi/tiêu đề không phù hợp. Vui lòng viết lại.")
         conn = get_db()
         conn.execute(
-            "INSERT INTO posts(title, content, user_id) VALUES(?,?,?)",
-            (title, content, session["user_id"])
+            "INSERT INTO posts(title, content, user_id, tag) VALUES(?,?,?,?)",
+            (title, content, session["user_id"], "unanswered")
         )
         conn.commit()
         return redirect("/forum")
@@ -76,7 +76,7 @@ def new_post():
 
 @forum.route("/post/<int:post_id>/reply", methods=["GET","POST"])
 def reply_post(post_id):
-    if "user_id" not in session or session.get("role") != "expert":
+    if "user_id" not in session:
         return "Bạn không có quyền trả lời!", 403
 
     conn = get_db()

@@ -7,6 +7,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
 from database import Base
+from sqlalchemy import UniqueConstraint
+from datetime import date
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_URL = f"sqlite:///{os.path.join(BASE_DIR, 'therapy.db')}"
@@ -216,3 +219,24 @@ class DiaryEntry(Base):
 
     created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
     updated_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
+
+class DailyActivity(Base):
+    __tablename__ = "daily_activity"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+
+    # ngày local VN (YYYY-MM-DD)
+    day = Column(Date, nullable=False, index=True)
+
+    wrote_diary = Column(Boolean, default=False, nullable=False)
+    played_game = Column(Boolean, default=False, nullable=False)
+
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", backref="daily_activities")
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "day", name="uq_daily_activity_user_day"),
+    )
+

@@ -20,7 +20,8 @@
 
     <style>
         .entry-card { padding: 18px 20px; }
-        .entry-preview { white-space: pre-wrap; line-height: 1.6; margin-top: 10px; color: #333; }
+        .entry-body { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; }
+        .entry-preview { white-space: pre-wrap; text-align: justify; line-height: 1.6; color: #333; }
         .tag-pill { font-size: 0.85rem; }
         .pill-btn { border-radius: 999px; }
     </style>
@@ -105,8 +106,8 @@
                                                 </span>
                                             </div>
 
-                                            <div class="entry-preview">
-                                                {{ (e.content[:240] ~ ('...' if e.content|length > 240 else '')) }}
+                                            <div class="entry-body p-3 mt-3">
+                                                <div class="entry-preview">{{- (e.content[:240] ~ ('...' if e.content|length > 240 else ''))|trim -}}</div>
                                             </div>
 
                                             {% if e.tags %}

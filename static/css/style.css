@@ -688,3 +688,15 @@ select,
   line-height: 1.2;
   opacity: .95;
 }
+
+.logout-btn .streak-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;   /* chỉnh số này */
+    background: #ffc107;
+    color: #000;
+    font-size: 0.75rem;
+    padding: 3px 6px;
+    border-radius: 999px;
+}
+

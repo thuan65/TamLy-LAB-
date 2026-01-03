@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Seven Deadly Sins Lab Project</title>
+    <title>Dự án Tâm lý Sinh viên</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -37,106 +37,40 @@
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
     </div>
     <!-- Spinner End -->
-
-
-    <!-- Topbar Start -->
-    <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
-        <div class="row align-items-center h-100">
-            <div class="col-lg-4 text-center text-lg-start">
-                <a href="index.html">
-                    <h1 class="display-5 text-primary m-0">Aerial</h1>
-                </a>
-            </div>
-            <div class="col-lg-8 d-none d-lg-block">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-phone-alt text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Call Us</h6>
-                                <span class="text-white">+012 345 6789</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-envelope-open text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Mail Us</h6>
-                                <span class="text-white">info@domain.com</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="d-flex justify-content-end">
-                            <div class="flex-shrink-0 btn-square bg-primary">
-                                <i class="fa fa-map-marker-alt text-dark"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="text-primary mb-0">Address</h6>
-                                <span class="text-white">227 Nguyễn Văn Cừ, <br>
-                                    P. Chợ Quán, TPHCM</br></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Topbar End -->
-
-
-    <!-- Navbar Start -->
-    <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
-        <div class="nav-bar">
-            <nav class="navbar navbar-expand-lg bg-primary navbar-dark px-4 py-lg-0">
-                <h4 class="d-lg-none m-0">Menu</h4>
-                <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav me-auto">
-                        <a href="index" class="nav-item nav-link">Home</a>
-                        <a href="about" class="nav-item nav-link active">About</a>
-                        <a href="donation.html" class="nav-item nav-link">Quiz</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
-                            <div class="dropdown-menu bg-light m-0">
-                                <a href="feature.html" class="dropdown-item">Matching</a>
-                                <a href="team.html" class="dropdown-item">Therapy</a>
-                                <a href="testimonial.html" class="dropdown-item">Diary</a>
-                                <a href="404.html" class="dropdown-item">Forum</a>
-                                <a href="404.html" class="dropdown-item">Chatbot</a>
-                                <a href="404.html" class="dropdown-item">Game</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-none d-lg-flex ms-auto">
-                        <a class="btn btn-square btn-dark ms-2" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="btn btn-square btn-dark ms-2" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-square btn-dark ms-2" href=""><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
-    <!-- Navbar End -->
-
     <!-- Page Header Start -->
-    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
-        <div class="container text-center py-4">
-            <h1 class="display-3 animated slideInDown">About Us</h1>
+    <div class="container-fluid page-header wow fadeIn"
+        data-wow-delay="0.1s"
+        style="min-height: 45vh; padding:0; display:flex;">
+
+    <div class="w-100 d-flex flex-column align-items-center">
+
+        <!-- spacer TOP (đẩy cả khối xuống) -->
+        <div style="height: 30px;"></div>
+
+        <!-- Home -->
+        <a href="{{ url_for('index') }}"
+        class="btn px-4 py-2 shadow-lg"
+        style="background:#ffb703; color:#000;">
+        <i class="fa fa-home me-2"></i> Home
+        </a>
+
+        <!-- About Us nằm giữa phần còn lại -->
+        <div class="flex-grow-1 d-flex align-items-center">
+        <h1 class="display-3 animated slideInDown mb-0">About Us</h1>
         </div>
+
+        <!-- spacer BOTTOM (đối xứng, giúp About không bị kéo lên) -->
+        <div style="height: 70px;"></div>
+
+    </div>
     </div>
     <!-- Page Header End -->
 
 
+
+
     <!-- Video Start -->
-    <div class="container-fluid bg-primary mb-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container-fluid bg-primary mb-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
             <div class="row g-0">
                 <div class="col-lg-11">
@@ -145,7 +79,7 @@
                             data-src="https://www.youtube.com/embed/DWRcNpR6Kdc" data-bs-target="#videoModal">
                             <span></span>
                         </button>
-                        <h3 class="ms-5 mb-0">Every student deserves a chance to shine — with care and understanding.</h3>
+                        <h3 class="ms-5 mb-0">Mỗi sinh viên đều xứng đáng được chăm sóc và hỗ trợ tâm lý.</h3>
                     </div>
                 </div>
                 <div class="d-none d-lg-block col-lg-1">
@@ -190,13 +124,13 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <p class="section-title bg-white text-start text-primary pe-3">About Us</p>
-                    <h1 class="display-6 mb-4 wow fadeIn" data-wow-delay="0.2s">Seven Deadly Sins Lab Project</h1>
+                    <p class="section-title bg-white text-start text-primary pe-3">Giới thiệu</p>
+                    <h1 class="display-6 mb-4 wow fadeIn" data-wow-delay="0.2s">Dự án Tâm lý Sinh viên</h1>
                     <div class="row g-4 pt-2">
                         <div class="col-sm-20 wow fadeIn" data-wow-delay="0.4s">
                             <div class="h-100">
-                                <h3>Our Project</h3>
-                                <p>This project focuses on developing a web platform that supports student mental well-being, applying Computational Thinking principles to create clear, effective, and user-friendly solutions.</p>
+                                <h3>Nhóm Thất Đại Tội</h3>
+                                <p>Dự án này tập trung vào việc phát triển một nền tảng web hỗ trợ sức khỏe tinh thần của sinh viên, áp dụng các nguyên tắc Tư duy Tính toán để tạo ra các giải pháp rõ ràng, hiệu quả và thân thiện với người dùng.</p>
                             </div>
                         </div>
                     </div>
@@ -212,7 +146,7 @@
                     <div class="row g-4 pt-2">
                         <div class="col-sm-20 wow fadeIn" data-wow-delay="0.4s">
                             <div class="h-100">
-                                <h3>Our Team Members</h3>
+                                <h3>Các thành viên</h3>
                                 <p>24127552 - Nguyễn Võ Nhật Thuận</p>
                                 <p>24127386 - Vũ Đỗ Mạnh Hùng</p>
                                 <p>24127248 - Nguyễn Trần Phương Thúy</p>

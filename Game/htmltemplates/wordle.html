@@ -68,7 +68,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto;   /* cho cuộn dọc */
+            overflow-x: hidden; /* vẫn chặn ngang */
         }
 
         body::before {
@@ -339,6 +340,7 @@
             </div>
 
             <div class="buttons">
+                <button class="game-btn" id="homeBtn">🏠 HOME</button>
                 <button class="game-btn" id="newGameBtn">↻ NEW GAME</button>
             </div>
 
@@ -525,6 +527,10 @@
 
         // Initialize
         initGame();
-    </script>
+    
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+</script>
 </body>
 </html>

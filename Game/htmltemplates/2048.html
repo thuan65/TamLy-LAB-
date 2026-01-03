@@ -68,7 +68,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto;   /* cho cuộn dọc */
+            overflow-x: hidden; /* vẫn chặn ngang */
         }
 
         body::before {
@@ -237,6 +238,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
+        #homeBtn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
         #newGameBtn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -316,6 +323,7 @@
             </div>
 
             <div class="buttons">
+                <button id="homeBtn">🏠 HOME</button>
                 <button id="newGameBtn">↻ NEW GAME</button>
             </div>
 
@@ -523,6 +531,10 @@
         }
 
         // Event listeners
+        document.getElementById('homeBtn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
         document.getElementById('newGameBtn').addEventListener('click', () => {
             document.getElementById('gameOverOverlay').style.display = 'none';
             initBoard();

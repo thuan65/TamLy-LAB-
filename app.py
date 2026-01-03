@@ -17,6 +17,8 @@ from Aerial.Chatbot import chatbot_bp
 from loginforum.extensions import socketio
 from loginforum.chat import chat
 from  profile_dealing.expertUpdateProfile import expert_bp
+from streak.routes import streak_bp
+
 
 from db import close_db, init_db
 from loginforum.history_conversation import history_bp
@@ -53,6 +55,8 @@ app.register_blueprint(diary_bp)
 app.register_blueprint(chatbot_bp)
 app.register_blueprint(booking_bp)
 app.register_blueprint(search_specialization_bp)
+app.register_blueprint(streak_bp)
+
 
 @app.route("/")
 def index():

@@ -94,7 +94,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto;   /* cho cuộn dọc */
+            overflow-x: hidden; /* vẫn chặn ngang */
         }
 
         body::before {
@@ -197,6 +198,12 @@
 
         button:active {
             transform: translateY(-2px) scale(1.02);
+        }
+
+        #homeBtn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
         }
 
         #startBtn {
@@ -351,6 +358,7 @@
             <canvas id="gameBoard" width="350" height="700"></canvas>
             <div id="message"></div>
             <div class="buttons">
+                <button id="homeBtn">🏠 HOME</button>
                 <button id="startBtn">▶ START GAME</button>
                 <button id="pauseBtn" style="display:none;">⏸ PAUSE</button>
                 <button id="resetBtn" style="display:none;">↻ NEW GAME</button>
@@ -809,6 +817,10 @@
 
         // Initial draw
         draw();
-    </script>
+    
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+</script>
 </body>
 </html>

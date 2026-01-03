@@ -11,7 +11,7 @@
     <!-- Favicon -->
     <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
 
-    <!-- Google Fonts & Icon CDN (giữ nguyên – không cần đưa vào static) -->
+    <!-- Google Fonts & Icon CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,6 @@
 
     <!-- Template Stylesheet -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-
 </head>
 
 <body>
@@ -37,40 +36,39 @@
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
     </div>
     <!-- Spinner End -->
+
     <!-- Topbar Start -->
     <div class="topbar">
         <div class="container topbar-inner">
             <div class="logo">Tâm lý</div>
 
             <div class="topbar-item">
-            <i class="fa fa-phone"></i>
-            <div class="topbar-text">
-                <small>Call Us</small>
-                <span>+012 345 6789</span>
-            </div>
-            </div>
-
-            <div class="topbar-item">
-            <i class="fa fa-envelope"></i>
-            <div class="topbar-text">
-                <small>Mail Us</small>
-                <span>info@domain.com</span>
-            </div>
+                <i class="fa fa-phone"></i>
+                <div class="topbar-text">
+                    <small>Call Us</small>
+                    <span>+012 345 6789</span>
+                </div>
             </div>
 
             <div class="topbar-item">
-            <i class="fa fa-map-marker-alt"></i>
-            <div class="topbar-text">
-                <small>Address</small>
-                <span>227 Nguyễn Văn Cừ, 
-                    phường Chợ Quán</span>
-            </div>
+                <i class="fa fa-envelope"></i>
+                <div class="topbar-text">
+                    <small>Mail Us</small>
+                    <span>info@domain.com</span>
+                </div>
             </div>
 
+            <div class="topbar-item">
+                <i class="fa fa-map-marker-alt"></i>
+                <div class="topbar-text">
+                    <small>Address</small>
+                    <span>227 Nguyễn Văn Cừ, phường Chợ Quán</span>
+                </div>
+            </div>
         </div>
     </div>
-
     <!-- Topbar End -->
+
     <!-- Navbar Start -->
     <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="nav-bar">
@@ -79,11 +77,13 @@
                 <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav me-auto">
                         <a href="index" class="nav-item nav-link active">Home</a>
                         <a href="about" class="nav-item nav-link">About</a>
                         <a href="{{ url_for('quiz_bp.trang_quiz') }}" class="nav-item nav-link">Quiz</a>
+
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Main Features</a>
                             <div class="dropdown-menu bg-light m-0">
@@ -95,17 +95,20 @@
                                 <a href="{{ url_for('Aerial.index') }}" class="dropdown-item">Chatbot</a>
                             </div>
                         </div>
+
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Game</a>
                             <div class="dropdown-menu bg-light m-0">
-                                <a href="game/tetris" class="dropdown-item">Tetris</a>
-                                <a href="game/2048" class="dropdown-item">2048</a>
-                                <a href="game/wordle" class="dropdown-item">Wordle</a>
-                                <a href="game/endlessRun" class="dropdown-item">Endless Run</a>
+                                <!-- ✅ đổi thành /game/... + gắn class + data-href để tick /game/start -->
+                                <a href="/game/tetris" class="dropdown-item game-link" data-href="/game/tetris">Tetris</a>
+                                <a href="/game/2048" class="dropdown-item game-link" data-href="/game/2048">2048</a>
+                                <a href="/game/wordle" class="dropdown-item game-link" data-href="/game/wordle">Wordle</a>
+                                <a href="/game/endlessRun" class="dropdown-item game-link" data-href="/game/endlessRun">Endless Run</a>
                             </div>
                         </div>
                     </div>
-                    <div class="d-none d-lg-flex ms-auto align-items-center">   
+
+                    <div class="d-none d-lg-flex ms-auto align-items-center">
                         {% if expert_profile %}
                             {% if expert_profile.verification_status == "PENDING" %}
                                 <div class="alert alert-warning">
@@ -113,42 +116,25 @@
                                     Vui lòng cập nhật đầy đủ thông tin và gửi để được duyệt.
                                 </div>
 
-                                <a href="{{ url_for('expert.edit_profile') }}"
-                                class="btn btn-primary">
+                                <a href="{{ url_for('expert.edit_profile') }}" class="btn btn-primary">
                                     ✏️ Cập nhật hồ sơ & Gửi duyệt
                                 </a>
                             {% endif %}
                         {% endif %}
 
                         {% if session.get("user_id") %}
-                        <!-- Đã đăng nhập: nút Đăng xuất -->
-                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.logout') }}">
+                        <!-- ✅ Đã đăng nhập: nút Đăng xuất + badge streak -->
+                        <a class="btn btn-dark ms-2 position-relative" href="{{ url_for('auth.logout') }}">
                             Đăng xuất
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                                🔥 <span id="streakBadge">0</span>
+                            </span>
                         </a>
 
-                        <!-- Icon 3 gạch (hamburger) dropdown -->
-                        <div class="nav-item dropdown ms-2">
-                            <a href="#"
-                               class="btn btn-dark dropdown-toggle d-flex align-items-center justify-content-center px-3 py-2"
-                               data-bs-toggle="dropdown"
-                               aria-expanded="false"
-                               title="Menu">
-                                <i class="fa-solid fa-bars"></i>
-                            </a>
-
-                            <div class="dropdown-menu dropdown-menu-end bg-light m-0">
-                                <!-- Bạn chỉnh các link trong này theo route của bạn -->
-                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
-                            </div>
-                        </div>
                         {% else %}
-                        <!-- Chưa đăng nhập: nút Đăng nhập -->
-                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">
-                            Đăng nhập
-                        </a>
-                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">
-                            Đăng ký
-                        </a>
+                        <!-- Chưa đăng nhập -->
+                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">Đăng ký</a>
                         {% endif %}
                     </div>
                 </div>
@@ -156,6 +142,7 @@
         </div>
     </div>
     <!-- Navbar End -->
+
     <!-- Carousel Start -->
     <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="owl-carousel header-carousel py-5">
@@ -166,8 +153,12 @@
                             <h1 class="display-1 text-uppercase mb-3">Vì một tương lai tươi sáng</h1>
                             <p class="fs-5 mb-5">Chăm sóc và quan tâm bằng sự thấu cảm</p>
                             <div class="d-flex">
-                                <a class="btn btn-primary py-3 px-4 me-3" href="">Trắc nghiệm tâm lý</a>
-                                <a class="btn btn-secondary py-3 px-4" href="">Tham gia</a>
+                                <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">Trắc nghiệm tâm lý
+                                </a>
+
+                                <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">
+                                Tham gia
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -178,6 +169,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="container py-5">
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
@@ -185,8 +177,14 @@
                             <h1 class="display-1 text-uppercase mb-3">Lắng nghe, đồng hành, chữa lành.</h1>
                             <p class="fs-5 mb-5">Luôn luôn lắng nghe, lâu lâu mới hiểu.</p>
                             <div class="d-flex mt-4">
-                                <a class="btn btn-primary py-3 px-4 me-3" href="">Trắc nghiệm tâm lý</a>
-                                <a class="btn btn-secondary py-3 px-4" href="">Tham gia</a>
+                                <div class="d-flex mt-4">
+                                    <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">
+                                        Trắc nghiệm tâm lý
+                                    </a>
+                                    <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">
+                                        Tham gia
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -200,6 +198,7 @@
         </div>
     </div>
     <!-- Carousel End -->
+
     <!-- Video Start -->
     <div class="container-fluid bg-primary mb-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
@@ -222,6 +221,7 @@
         </div>
     </div>
     <!-- Video End -->
+
     <!-- Video Modal Start -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -231,7 +231,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- 16:9 aspect ratio -->
                     <div class="ratio ratio-16x9">
                         <iframe class="embed-responsive-item" src="" id="video" allowfullscreen allowscriptaccess="always"
                                 allow="autoplay"></iframe>
@@ -241,6 +240,7 @@
         </div>
     </div>
     <!-- Video Modal End -->
+
     <!-- Search Box Start -->
     <div class="container py-4 wow fadeIn" data-wow-delay="0.1s">
         <div class="row justify-content-center">
@@ -260,7 +260,8 @@
         </div>
     </div>
     <!-- Search Box End -->
-     <!-- Search Result Start -->
+
+    <!-- Search Result Start -->
     <div class="container pb-5 d-none" id="search-result-section">
         <div class="row g-4" id="search-result-list"></div>
     </div>
@@ -273,6 +274,7 @@
                 <p class="section-title bg-white text-center text-primary px-3">Đội ngũ chuyên gia</p>
                 <h1 class="display-6 mb-4">Gặp gỡ đội ngũ chuyên gia giàu kinh nghiệm</h1>
             </div>
+
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
                     <div class="team-item d-flex h-100 p-4">
@@ -289,6 +291,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.3s">
                     <div class="team-item d-flex h-100 p-4">
                         <div class="team-detail pe-4">
@@ -304,6 +307,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.5s">
                     <div class="team-item d-flex h-100 p-4">
                         <div class="team-detail pe-4">
@@ -323,12 +327,10 @@
         </div>
     </div>
     <!-- Team End -->
-    {% block content %}
 
-        <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s">
-            </div>
-        <div class="container-fluid py-5">
-            </div>
+    {% block content %}
+        <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s"></div>
+        <div class="container-fluid py-5"></div>
     {% endblock %}
 
     <!-- Footer Start -->
@@ -376,8 +378,6 @@
                         &copy; <a class="fw-semi-bold" href="#">Thất đại tội</a>, All Right Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
-                        <!--/*** The author’s attribution link must remain intact in the template. ***/-->
-                        <!--/*** If you wish to remove this credit link, please purchase the Pro Version . ***/-->
                         Designed By <a class="fw-semi-bold" href="https://htmlcodex.com">HTML Codex</a>
                     </div>
                 </div>
@@ -385,18 +385,99 @@
         </div>
     </div>
     <!-- Footer End -->
+
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
+    <!-- ✅ Streak Modal (đặt trong body, gần cuối) -->
+    <div class="modal fade" id="streakModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div class="modal-header border-0">
+            <h5 class="modal-title">🔥 Streak!</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="fs-5">
+              Bạn đang có <b><span id="streakDays">0</span></b> ngày streak liên tiếp 🎉
+            </div>
+            <div class="text-muted mt-2" id="streakHint"></div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <!-- ✅ bootstrap bundle phải load trước khi dùng bootstrap.Modal -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+
+    <!-- ✅ STREAK: load + update badge + show popup 1 lần/ngày -->
+    <script>
+    async function loadStreakAndRender() {
+      try {
+        const res = await fetch("/api/streak", { method: "GET" });
+        if (res.status === 403) return;
+
+        const data = await res.json();
+
+        // update badge cạnh logout
+        const badge = document.getElementById("streakBadge");
+        if (badge) badge.textContent = data.streak ?? 0;
+
+        // popup chỉ hiện khi hôm nay DONE và chưa show lần nào trong ngày
+        const today = data.today;                 // "YYYY-MM-DD"
+        const done = !!data.today_done;
+        const streak = data.streak ?? 0;
+
+        if (!today) return;
+
+        const key = `streak_popup_shown_${today}`;
+        const shown = localStorage.getItem(key);
+
+        if (done && !shown) {
+          document.getElementById("streakDays").textContent = streak;
+          document.getElementById("streakHint").textContent =
+            "Đủ điều kiện hôm nay: đã viết nhật ký + đã chơi game.";
+
+          const modalEl = document.getElementById("streakModal");
+          const modal = new bootstrap.Modal(modalEl);
+          modal.show();
+
+          localStorage.setItem(key, "1");
+        }
+      } catch (e) {
+        console.log("streak load error:", e);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadStreakAndRender);
+    </script>
+
+    <!-- ✅ GAME: click game -> POST /game/start để tick played_game -> rồi mới chuyển trang game -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".game-link").forEach(a => {
+        a.addEventListener("click", async (e) => {
+          e.preventDefault();
+          try { await fetch("/game/start", { method: "POST" }); } catch {}
+          window.location.href = a.dataset.href;
+        });
+      });
+    });
+    </script>
+
+    <!-- Search Experts -->
     <script>
     document.getElementById("expert-search-form").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -428,7 +509,6 @@
                                 <div class="text-muted mb-2">${expert.title || ""}</div>
                                 <div class="mb-2"><b>Chuyên môn:</b> ${expert.specialization || ""}</div>
                                 <div class="small">${expert.bio || ""}</div>
-                                
                             </div>
                         </div>
                     </div>
