@@ -1,6 +1,5 @@
 ﻿# chat.py
-from flask import Blueprint, render_template, request, redirect, session, flash, current_app, jsonify
-# from .db import get_db
+from flask import Blueprint, render_template, request, redirect, session, flash, current_app, jsonify, url_for, g
 import sqlite3
 import os
 import uuid
@@ -126,33 +125,19 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
         conn.rollback()
         return None
 
-    # Tạo session chat
-    new_session_key = str(uuid.uuid4())
-    try:
-        conn.execute(
-            "INSERT INTO chat_sessions (session_key, seeker_id, helper_id, is_expert_fallback) VALUES (?, ?, ?, ?)",
-            (new_session_key, seeker_id, helper_id, is_expert)
-        )
-        conn.commit()
-        return {"session_key": new_session_key, "helper_id": helper_id}
-    except Exception as e:
-        logging.error(f"Lỗi tạo session chat: {e}")
-        conn.rollback()
-        return None
-
 # -----------------------------------------------
 # --- ROUTES
 # -----------------------------------------------
 @chat.route("/chat/waiting")
 def chat_waiting():
     if "user_id" not in session:
-        return redirect("/login")
+        return redirect(url_for("auth.login", next=request.path))
     return render_template("chat_waiting.html")
 
 @chat.route("/chat/room/<string:session_key>")
 def chat_room(session_key):
     if "user_id" not in session:
-        return redirect("/login")
+        return redirect(url_for("auth.login", next=request.path))
     
     conn = get_db()
     session_data = conn.execute(
@@ -162,7 +147,7 @@ def chat_room(session_key):
 
     if not session_data or session_data['status']=='ended':
         flash("Phòng chat không tồn tại hoặc đã kết thúc.")
-        return redirect("/forum")
+        return redirect("/")
 
     session['current_room_key'] = session_key
 
@@ -273,7 +258,7 @@ def toggle_opt_in():
     conn.execute("UPDATE users SET chat_opt_in=? WHERE id=?", (new_status, session["user_id"]))
     conn.commit()
     session["chat_opt_in"] = new_status
-    return redirect("/forum")
+    return redirect("/")
 
 @socketio.on('connect')
 def on_connect():

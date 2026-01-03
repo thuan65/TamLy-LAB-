@@ -6,6 +6,7 @@ from models import User, ExpertProfile, StudentProfile
 from flask import url_for
 
 
+
 auth = Blueprint("auth", __name__, url_prefix="/auth", template_folder="htmltemplates")
 
 
@@ -96,11 +97,15 @@ def login():
         
         session["chat_opt_in"] = user.chat_opt_in
         session["status_tag"] = user.status_tag
+        #them de direct ve home hoac ve trang request
+        next_url = request.form.get("next")
 
         # --- Chuyển hướng ---
-        return redirect("/")
-        
-    return render_template("login.html")
+        return redirect(next_url or "/")
+    
+    next_url = request.args.get("next")
+    return render_template("login.html", next=next_url)
+
 
 # Đăng xuất
 @auth.route("/logout")

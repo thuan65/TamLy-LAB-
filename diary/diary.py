@@ -22,7 +22,8 @@ DB_PATH = os.path.abspath(
 )
 
 from flask import redirect, url_for
-from flask import session as flask_session
+from flask import session 
+
 #@diary_bp.route("/diary")
 #def diary_home():
 #    user_id = session.get("user_id")
@@ -34,13 +35,13 @@ from flask import session as flask_session
 
 @diary_bp.route("/diary")
 def diary_home():
-    
-    with TherapySession() as  session:
-        user_id = flask_session.get("user_id")
-        if not user_id:
-            return redirect(url_for("auth.login"))
 
-        student = session.query(User).filter_by(id=user_id).first()
+    user_id = session.get("user_id")
+    if "user_id" not in session:
+        return redirect(url_for("auth.login", next=request.full_path))
+
+    with TherapySession() as db_session:
+        student = db_session.query(User).filter_by(id=user_id).first()
 
     if not student:
         return "❌ User này chưa có hồ sơ Student (chưa link).", 404

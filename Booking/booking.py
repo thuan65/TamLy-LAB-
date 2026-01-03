@@ -31,7 +31,7 @@ def generate_slots(date_obj):
 @booking_bp.route("/select-therapist")
 def select_therapist():
     if "user_id" not in session:
-        return redirect(url_for("auth.login"))
+        return redirect(url_for("auth.login", next=request.full_path))
     
     db = TherapySession()
 

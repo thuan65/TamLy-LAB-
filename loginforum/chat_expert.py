@@ -1,5 +1,5 @@
 # chat_expert.py
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, redirect, render_template, request, jsonify, session, url_for
 from db import get_db
 from .extensions import socketio
 from flask_socketio import emit, join_room
@@ -28,7 +28,8 @@ def chat_dashboard():
 @chat_expert_bp.route("/chat")
 def chat_page():
     if "user_id" not in session:
-        return "Bạn cần đăng nhập", 403
+        return redirect(url_for("auth.login", next=request.full_path))
+
 
     return render_template(
         "chat_messenger.html",
