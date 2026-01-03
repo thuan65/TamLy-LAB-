@@ -39,10 +39,11 @@ def select_therapist():
     .options(joinedload(User.expert_profile))\
     .filter(User.role=="EXPERT")\
     .filter(ExpertProfile.is_active==True)\
+    .filter(ExpertProfile.verification_status== "VERIFIED")\
     .all()
     
     therapists_list = [to_dict(t) for t in therapists_objs]
-    
+
     db.close()
     
     return render_template("booking_list.html", therapists=therapists_list)
@@ -159,16 +160,19 @@ def my_appointments():
         db.close()
         return "Không tìm thấy thông tin học sinh."
 
+#appointments được lấy ra theo student id
     appointments = db.query(Appointment).filter_by(student_id=student.id)\
                     .order_by(Appointment.start_time.desc()).all()
     
     app_list = []
     for app in appointments:
+        therapist = app.therapist
+        expert_profile = therapist.expert_profile
         app_list.append({
             "start_time": app.start_time,
             "end_time": app.end_time,
-            "therapist_name": app.therapist.full_name, 
-            "therapist_img": app.therapist.image,      
+            "therapist_name": expert_profile.full_name if expert_profile else "Expert", #Default name
+            "therapist_img": getattr(expert_profile, "image", None),    
             "meet_type": app.meet_type,
             "location": app.location,
             "status": app.status

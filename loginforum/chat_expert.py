@@ -73,7 +73,7 @@ def get_peers(user_id):
 @chat_expert_bp.route("/api/get_experts_for_student/<int:uid>")
 def get_experts_for_student(uid):
     conn = get_db()
-    experts = conn.execute("SELECT id, username FROM users WHERE role='expert'").fetchall()
+    experts = conn.execute("SELECT id, username FROM users WHERE role='EXPERT'").fetchall()
     result = []
 
     for e in experts:
@@ -127,7 +127,7 @@ def get_messages(user_id, peer_id):
 @chat_expert_bp.route("/api/get_all_experts")
 def get_all_experts():
     conn = get_db()
-    rows = conn.execute("SELECT id, username FROM users WHERE role='expert'").fetchall()
+    rows = conn.execute("SELECT id, username FROM users WHERE role='EXPERT'").fetchall()
     experts = [{"id": r["id"], "username": r["username"]} for r in rows]
     return jsonify({"experts": experts})
 

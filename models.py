@@ -25,11 +25,7 @@ class User(Base):
 
     posts = relationship("Post", back_populates="author")
     answers = relationship("Answer", back_populates="expert")
-    expert_profile = relationship(
-    "ExpertProfile",
-    uselist=False,
-    back_populates="user",
-    foreign_keys="ExpertProfile.user_id"
+    expert_profile = relationship("ExpertProfile",uselist=False,back_populates="user", foreign_keys="ExpertProfile.user_id"
     )
     student_profile = relationship("StudentProfile", uselist=False, back_populates="user")
 
@@ -220,27 +216,3 @@ class DiaryEntry(Base):
 
     created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
     updated_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
-
-    
-
-if __name__ == "__main__":
-    pass
-
-    # if not session.query(Therapist).first():
-    #     t1 = Therapist(full_name="ThS. Nguyễn An", field="Stress, học đường", image="static/therapists/an.jpg",
-    #                 years_exp=5, degree="Thạc sĩ Tâm lý", organization="TT Tham vấn ĐH KH Tự nhiên",
-    #                 about="Tập trung vào stress sinh viên, áp lực học tập.")
-    #     t2 = Therapist(full_name="TS. Lê Bình", field="Trị liệu gia đình", image="static/therapists/binh.jpg",
-    #                 years_exp=9, degree="Tiến sĩ Tâm lý", organization="BV Tâm thần",
-    #                 about="Kinh nghiệm xử lý xung đột và lo âu.")
-
-    #     s1 = Student(full_name="Nguyễn Văn A", student_code="2412345", email="a@example.com",
-    #                 major="Công nghệ thông tin", school="ĐH KH Tự nhiên")
-    #     s2 = Student(full_name="Trần Thị B", student_code="2412346", email="b@example.com",
-    #                 major="Tâm lý học", school="ĐH KHXH & NV")
-
-    #     session.add_all([t1, t2, s1, s2])
-    #     session.commit()
-
-    # session.close()
-    # print(" therapy.db created (v2 with major & school)")

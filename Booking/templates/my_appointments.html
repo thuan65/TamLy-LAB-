@@ -27,9 +27,17 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="{{ url_for('static', filename=item.therapist_img) }}"
-                                             class="rounded-circle me-2"
-                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% if item.therapist_img %}
+                                            <img src="{{ url_for('static', filename=item.therapist_img) }}" alt="Therapist"
+                                            class="rounded-circle me-2"
+                                            style="width: 40px; height: 40px; object-fit: cover;"
+                                            >
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="Default avatar"
+                                            class="rounded-circle me-2"
+                                            style="width: 40px; height: 40px; object-fit: cover;"
+                                            >
+                                        {% endif %}
                                         <span class="fw-bold">{{ item.therapist_name }}</span>
                                     </div>
                                 </td>
