@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cập nhật hồ sơ chuyên gia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.verified {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Hồ sơ chuyên gia</h2>
+
+    {% if profile.verification_status == "PENDING" %}
+        <div class="status pending">
+            ⏳ Hồ sơ đang chờ admin xác minh. Khi chỉnh sửa, trạng thái sẽ quay lại chờ duyệt.
+        </div>
+    {% elif profile.verification_status == "VERIFIED" %}
+        <div class="status verified">
+            ✅ Hồ sơ đã được xác minh
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('expert.update_profile') }}">
+        
+        <label>Họ và tên *</label>
+        <input type="text" name="full_name" required
+               value="{{ profile.full_name }}">
+
+        <label>Chức danh (Title)</label>
+        <input type="text" name="title"
+               value="{{ profile.title or '' }}">
+
+        <label>Học vị / Trình độ</label>
+        <input type="text" name="qualification"
+               value="{{ profile.qualification or '' }}">
+
+        <label>Chuyên môn</label>
+        <input type="text" name="specialization"
+               value="{{ profile.specialization or '' }}">
+
+        <label>Tiểu sử / Giới thiệu</label>
+        <textarea name="bio">{{ profile.bio or '' }}</textarea>
+
+        <button type="submit">💾 Cập nhật hồ sơ</button>
+    </form>
+</div>
+</body>
+</html>

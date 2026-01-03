@@ -41,7 +41,7 @@
     <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
         <div class="row align-items-center h-100">
             <div class="col-lg-4 text-center text-lg-start">
-                <a href="index.html">
+                <a href="{{ url_for('index') }}">
                     <h1 class="display-5 text-primary m-0">Aerial</h1>
                 </a>
             </div>
@@ -122,7 +122,20 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-none d-lg-flex ms-auto align-items-center">
+                    <div class="d-none d-lg-flex ms-auto align-items-center">   
+                        {% if expert_profile %}
+                            {% if expert_profile.verification_status == "PENDING" %}
+                                <div class="alert alert-warning">
+                                    <strong>⚠ Hồ sơ chuyên gia chưa được xác minh</strong><br>
+                                    Vui lòng cập nhật đầy đủ thông tin và gửi để được duyệt.
+                                </div>
+
+                                <a href="{{ url_for('expert.edit_profile') }}"
+                                class="btn btn-primary">
+                                    ✏️ Cập nhật hồ sơ & Gửi duyệt
+                                </a>
+                            {% endif %}
+                        {% endif %}
 
                         {% if session.get("user_id") %}
                         <!-- Đã đăng nhập: nút Đăng xuất -->
