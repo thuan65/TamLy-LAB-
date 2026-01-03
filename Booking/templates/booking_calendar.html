@@ -1,0 +1,73 @@
+﻿{% extends "index.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bg-light p-5 rounded">
+                <h2 class="mb-4 text-center">Đặt lịch với {{ therapist.full_name }}</h2>
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Lưu ý:
+                    <ul>
+                        <li>Mỗi cuộc hẹn kéo dài 2 tiếng.</li>
+                        <li>Chỉ làm việc giờ hành chính (T2 - T6).</li>
+                        <li>Bạn không thể hủy sau khi đặt.</li>
+                    </ul>
+                </div>
+
+                <form method="POST" onsubmit="return confirmBooking()">
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2">1. Chọn hình thức gặp:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="meet_type" id="offline" value="offline" checked>
+                                <label class="form-check-label" for="offline">Offline (Tại 227 Nguyễn Văn Cừ)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="meet_type" id="online" value="online">
+                                <label class="form-check-label" for="online">Online (Google Meet)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2">2. Chọn thời gian trống (5-7 ngày tới):</label>
+                        {% if days_data %}
+                        {% for day in days_data %}
+                        <div class="mb-3">
+                            <h6 class="text-secondary border-bottom pb-1">{{ day.date_str }}</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for slot in day.slots %}
+                                <input type="radio" class="btn-check" name="slot_time" id="slot_{{ slot.value }}" value="{{ slot.value }}" required>
+                                <label class="btn btn-outline-primary btn-sm" for="slot_{{ slot.value }}">
+                                    {{ slot.display }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-danger">Hiện tại chuyên gia này đã kín lịch trong 7 ngày tới.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-5">
+                        <a href="{{ url_for('booking.select_therapist') }}" class="btn btn-secondary">Quay lại</a>
+                        {% if days_data %}
+                        <button type="submit" class="btn btn-primary btn-lg">Xác nhận đặt lịch</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmBooking() {
+    var type = document.querySelector('input[name="meet_type"]:checked').value;
+    var typeText = (type === 'offline') ? 'Offline tại trụ sở' : 'Online qua Google Meet';
+    return confirm("Bạn chắc chắn muốn đặt lịch " + typeText + "? Bạn sẽ không thể hủy lịch này.");
+}
+</script>
+{% endblock %}

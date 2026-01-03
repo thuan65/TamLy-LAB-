@@ -1,0 +1,11 @@
+﻿{% extends "index.html" %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <div class="alert alert-danger d-inline-block">
+        <h3><i class="fa fa-exclamation-triangle"></i> Không thể đặt lịch</h3>
+        <p>{{ message }}</p>
+        <a href="{{ back_url }}" class="btn btn-dark mt-3">Quay lại</a>
+    </div>
+</div>
+{% endblock %}

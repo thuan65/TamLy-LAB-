@@ -1,0 +1,21 @@
+﻿{% extends "index.html" %} {% block content %}
+<div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 500px;">
+        <h1 class="display-6">Đặt lịch hẹn tư vấn</h1>
+        <p class="text-primary">Vui lòng chọn chuyên gia bạn muốn gặp</p>
+    </div>
+
+    <div class="row g-4">
+        {% for t in therapists %}
+        <div class="col-md-6 col-lg-4">
+            <div class="team-item bg-light p-4 text-center h-100">
+                <img class="img-fluid mb-3 rounded-circle" src="{{ url_for('static', filename=t.image) }}" style="width: 150px; height: 150px; object-fit: cover;" alt="">
+                <h4 class="mb-2">{{ t.full_name }}</h4>
+                <p class="text-muted mb-3">{{ t.field }}</p>
+                <a href="{{ url_for('booking.calendar', therapist_id=t.id) }}" class="btn btn-primary px-4">Xem lịch trống</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

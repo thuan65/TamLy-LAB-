@@ -1,0 +1,19 @@
+﻿{% extends "index.html" %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <div class="wow fadeInUp" data-wow-delay="0.1s">
+        <i class="fa fa-check-circle text-success display-1 mb-4"></i>
+        <h1 class="mb-3">Đặt lịch thành công!</h1>
+        <p class="lead">Bạn đã đặt lịch gặp <strong>{{ expert }}</strong>.</p>
+        <div class="bg-light p-4 d-inline-block rounded text-start mx-auto">
+            <p><strong>Thời gian:</strong> {{ time }}</p>
+            <p><strong>Hình thức:</strong> {{ type|upper }}</p>
+            <p><strong>Địa điểm/Link:</strong> {{ location }}</p>
+        </div>
+        <div class="mt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-primary py-3 px-5">Về trang chủ</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

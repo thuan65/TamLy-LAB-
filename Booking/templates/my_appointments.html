@@ -1,0 +1,68 @@
+﻿{% extends "index.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 600px;">
+        <h1 class="display-6">Lịch hẹn của tôi</h1>
+        <p class="text-primary">Danh sách các cuộc hẹn tư vấn bạn đã đăng ký</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="bg-light p-4 rounded shadow-sm">
+                {% if appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Chuyên gia</th>
+                                <th>Thời gian</th>
+                                <th>Hình thức</th>
+                                <th>Địa điểm / Link</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in appointments %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ url_for('static', filename=item.therapist_img) }}"
+                                             class="rounded-circle me-2"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <span class="fw-bold">{{ item.therapist_name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ item.start_time }}</td>
+                                <td>
+                                    {% if item.meet_type == 'online' %}
+                                    <span class="badge bg-info text-dark">Online</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Offline</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ item.location }}</td>
+                                <td>
+                                    <span class="badge bg-success">Đã xác nhận</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fa fa-calendar-times display-4 text-muted mb-3"></i>
+                    <p class="lead">Bạn chưa đặt lịch hẹn nào.</p>
+                    <a href="{{ url_for('booking.select_therapist') }}" class="btn btn-primary">Đặt lịch ngay</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Quay lại trang chủ</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

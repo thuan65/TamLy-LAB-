@@ -36,8 +36,6 @@
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
     </div>
     <!-- Spinner End -->
-
-
     <!-- Topbar Start -->
     <div class="container-fluid bg-secondary top-bar wow fadeIn" data-wow-delay="0.1s">
         <div class="row align-items-center h-100">
@@ -77,8 +75,10 @@
                             </div>
                             <div class="ms-2">
                                 <h6 class="text-primary mb-0">Address</h6>
-                                <span class="text-white">227 Nguyễn Văn Cừ, <br>
-                                    P. Chợ Quán, TPHCM</br></span>
+                                <span class="text-white">
+                                    227 Nguyễn Văn Cừ, <br>
+                                    P. Chợ Quán, TPHCM</br>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -87,8 +87,6 @@
         </div>
     </div>
     <!-- Topbar End -->
-
-
     <!-- Navbar Start -->
     <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="nav-bar">
@@ -107,13 +105,16 @@
                             <div class="dropdown-menu bg-light m-0">
                                 <a href="feature.html" class="dropdown-item">Matching</a>
                                 {% if session.get("user_id") %}
-                                    <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
-                                    <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item">Forum</a>
-                                    <a href="{{ url_for('chat_expert.chat_page') }}"class="dropdown-item">Chat with Expert</a>
+                                <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
+                                <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item">Forum</a>
+                                <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Expert</a>
+                                <a href="{{ url_for('booking.select_therapist') }}" class="dropdown-item">Booking Appointment</a>
+                                <a href="{{ url_for('booking.my_appointments') }}" class="dropdown-item">My Appointments History</a>
                                 {% else %}
-                                    <a href="{{ url_for('auth.login') }}" class="dropdown-item">Diary</a>
-                                    <a href="{{ url_for('auth.login') }}" class="dropdown-item">Forum</a>
-                                    <a href="{{ url_for('auth.login') }}" class="dropdown-item">Chat with Expert</a>
+                                <a href="{{ url_for('auth.login') }}" class="dropdown-item">Diary</a>
+                                <a href="{{ url_for('auth.login') }}" class="dropdown-item">Forum</a>
+                                <a href="{{ url_for('auth.login') }}" class="dropdown-item">Chat with Expert</a>
+                                <a href="{{ url_for('auth.login') }}" class="dropdown-item">Booking Appointment</a>
 
                                 {% endif %}
 
@@ -133,34 +134,34 @@
                     <div class="d-none d-lg-flex ms-auto align-items-center">
 
                         {% if session.get("user_id") %}
-                            <!-- Đã đăng nhập: nút Đăng xuất -->
-                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.logout') }}">
-                                Đăng xuất
+                        <!-- Đã đăng nhập: nút Đăng xuất -->
+                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.logout') }}">
+                            Đăng xuất
+                        </a>
+
+                        <!-- Icon 3 gạch (hamburger) dropdown -->
+                        <div class="nav-item dropdown ms-2">
+                            <a href="#"
+                               class="btn btn-dark dropdown-toggle d-flex align-items-center justify-content-center px-3 py-2"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false"
+                               title="Menu">
+                                <i class="fa-solid fa-bars"></i>
                             </a>
 
-                            <!-- Icon 3 gạch (hamburger) dropdown -->
-                            <div class="nav-item dropdown ms-2">
-                                <a href="#"
-                                class="btn btn-dark dropdown-toggle d-flex align-items-center justify-content-center px-3 py-2"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                title="Menu">
-                                    <i class="fa-solid fa-bars"></i>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-end bg-light m-0">
-                                    <!-- Bạn chỉnh các link trong này theo route của bạn -->
-                                        <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
-                                </div>
+                            <div class="dropdown-menu dropdown-menu-end bg-light m-0">
+                                <!-- Bạn chỉnh các link trong này theo route của bạn -->
+                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
                             </div>
+                        </div>
                         {% else %}
-                            <!-- Chưa đăng nhập: nút Đăng nhập -->
-                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">
-                                Đăng nhập
-                            </a>
-                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">
-                                Đăng ký
-                            </a>
+                        <!-- Chưa đăng nhập: nút Đăng nhập -->
+                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">
+                            Đăng nhập
+                        </a>
+                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">
+                            Đăng ký
+                        </a>
                         {% endif %}
                     </div>
                 </div>
@@ -168,8 +169,6 @@
         </div>
     </div>
     <!-- Navbar End -->
-
-
     <!-- Carousel Start -->
     <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="owl-carousel header-carousel py-5">
@@ -214,8 +213,6 @@
         </div>
     </div>
     <!-- Carousel End -->
-
-
     <!-- Video Start -->
     <div class="container-fluid bg-primary mb-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
@@ -223,7 +220,7 @@
                 <div class="col-lg-11">
                     <div class="h-100 py-5 d-flex align-items-center">
                         <button type="button" class="btn-play" data-bs-toggle="modal"
-                            data-src="https://www.youtube.com/embed/DWRcNpR6Kdc" data-bs-target="#videoModal">
+                                data-src="https://www.youtube.com/embed/DWRcNpR6Kdc" data-bs-target="#videoModal">
                             <span></span>
                         </button>
                         <h3 class="ms-5 mb-0">Every student deserves a chance to shine — with care and understanding.</h3>
@@ -238,8 +235,6 @@
         </div>
     </div>
     <!-- Video End -->
-
-
     <!-- Video Modal Start -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -252,14 +247,13 @@
                     <!-- 16:9 aspect ratio -->
                     <div class="ratio ratio-16x9">
                         <iframe class="embed-responsive-item" src="" id="video" allowfullscreen allowscriptaccess="always"
-                            allow="autoplay"></iframe>
+                                allow="autoplay"></iframe>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- Video Modal End -->
-
     <!-- Team Start -->
     <div class="container-fluid py-5">
         <div class="container">
@@ -272,7 +266,7 @@
                     <div class="team-item d-flex h-100 p-4">
                         <div class="team-detail pe-4">
                             <img class="img-fluid mb-4" src="img/team-1.jpg" alt="">
-                            <h3>Therapist 1</h3> 
+                            <h3>Therapist 1</h3>
                             <span>Field:</span>
                         </div>
                         <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
@@ -317,6 +311,13 @@
         </div>
     </div>
     <!-- Team End -->
+    {% block content %}
+
+        <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s">
+            </div>
+        <div class="container-fluid py-5">
+            </div>
+    {% endblock %}
 
     <!-- Footer Start -->
     <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
@@ -324,8 +325,10 @@
             <div class="row g-5 py-5">
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-light mb-4">Our Office</h4>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br>
-                                    P. Chợ Quán, TPHCM</br></p>
+                    <p class="mb-2">
+                        <i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br>
+                        P. Chợ Quán, TPHCM</br>
+                    </p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
                     <div class="d-flex pt-3">
@@ -370,7 +373,6 @@
         </div>
     </div>
     <!-- Footer End -->
-
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 

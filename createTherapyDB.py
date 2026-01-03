@@ -60,6 +60,25 @@ class StressLog(Base):
     note = Column(Text)
     created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
 
+class Appointment(Base):
+    __tablename__ = "appointments"
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    therapist_id = Column(Integer, ForeignKey("therapists.id"), nullable=False)
+    
+    start_time = Column(String, nullable=False) # Format: YYYY-MM-DD HH:MM:SS
+    end_time = Column(String, nullable=False)   # Format: YYYY-MM-DD HH:MM:SS
+    
+    meet_type = Column(String, default='offline') 
+    
+    location = Column(String)
+    
+    status = Column(String, default='confirmed')
+    
+    created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
+
+    student = relationship("Student", backref="appointments")
+    therapist = relationship("Therapist", backref="appointments")
 
 class DiaryEntry(Base):
     __tablename__ = "diary_entries"
