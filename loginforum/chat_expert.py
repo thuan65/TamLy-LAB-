@@ -1,6 +1,6 @@
 # chat_expert.py
 from flask import Blueprint, redirect, render_template, request, jsonify, session, url_for
-from .db import get_db
+from db import get_db
 from .extensions import socketio
 from flask_socketio import emit, join_room
 from datetime import datetime

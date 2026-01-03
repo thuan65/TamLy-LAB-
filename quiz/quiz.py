@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
-from createTherapyDB import Student, StressLog
+from models import User, StressLog
 from quiz.LogicDiem import (
     CAU_HOI,
     TAN_SUAT,
@@ -118,9 +118,9 @@ def nop_bai():
 
         s = Session()
 
-        student = s.query(Student).filter_by(student_code=mssv).first()
+        student = s.query(User).filter_by(student_code=mssv).first()
         if not student:
-            student = Student(full_name=ho_ten, student_code=mssv, last_stress_score=tong_diem)
+            student = User(full_name=ho_ten, student_code=mssv, last_stress_score=tong_diem)
             s.add(student)
             s.commit()
         else:
