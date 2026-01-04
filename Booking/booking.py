@@ -81,7 +81,12 @@ def calendar(therapist_id):
 
     # Lưu thông tin cần thiết ra biến riêng/dict trước khi xử lý tiếp
     therapist_dict = to_dict(therapist_obj)
-    student_id = student.id 
+        if therapist_obj.expert_profile:
+        therapist_dict['full_name'] = therapist_obj.expert_profile.full_name
+    else:
+        therapist_dict['full_name'] = "Expert" # Tên mặc định nếu chưa có profile
+    # -------------------------------------------------------------
+    student_id = student.id
 
     # --- XỬ LÝ POST (LƯU LỊCH HẸN) ---
     if request.method == "POST":
