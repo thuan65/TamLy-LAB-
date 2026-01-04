@@ -69,7 +69,7 @@ def register():
                     bio=None,                      # Mô tả
                     
                     # STATUS MẶC ĐỊNH - CHỜ ADMIN VERIFY
-                    verification_status="PENDING",
+                    verification_status="NONE",
                     is_active=False,
                     
                     verified_by=None,

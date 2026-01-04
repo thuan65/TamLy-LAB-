@@ -100,7 +100,6 @@
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Game</a>
                             <div class="dropdown-menu bg-light m-0">
-                                <!-- ✅ đổi thành /game/... + gắn class + data-href để tick /game/start -->
                                 <a href="/game/tetris" class="dropdown-item game-link" data-href="/game/tetris">Tetris</a>
                                 <a href="/game/2048" class="dropdown-item game-link" data-href="/game/2048">2048</a>
                                 <a href="/game/wordle" class="dropdown-item game-link" data-href="/game/wordle">Wordle</a>
@@ -109,34 +108,78 @@
                         </div>
                     </div>
 
+                    <!-- RIGHT SIDE -->
                     <div class="d-none d-lg-flex ms-auto align-items-center">
-                        {% if expert_profile %}
-                            {% if expert_profile.verification_status == "PENDING" %}
-                                <div class="alert alert-warning">
-                                    <strong>⚠ Hồ sơ chuyên gia chưa được xác minh</strong><br>
-                                    Vui lòng cập nhật đầy đủ thông tin và gửi để được duyệt.
-                                </div>
-
-                                <a href="{{ url_for('expert.edit_profile') }}" class="btn btn-primary">
-                                    ✏️ Cập nhật hồ sơ & Gửi duyệt
-                                </a>
-                            {% endif %}
-                        {% endif %}
 
                         {% if session.get("user_id") %}
-                        <!-- ✅ Đã đăng nhập: nút Đăng xuất + badge streak -->
-                        <a class="btn btn-dark ms-2 position-relative" href="{{ url_for('auth.logout') }}">
-                            Đăng xuất
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
-                                🔥 <span id="streakBadge">0</span>
-                            </span>
-                        </a>
+
+                            {# ===== Expert status icon (PENDING/NONE) ===== #}
+                            {% if session.get("role","")|upper == "EXPERT" and expert_profile %}
+
+                                {% if expert_profile.verification_status == "NONE" %}
+                                    <!-- chưa gửi -->
+                                    <a href="{{ url_for('expert.edit_profile') }}"
+                                    class="btn btn-warning me-2"
+                                    title="Hồ sơ chưa gửi duyệt. Cần cập nhật hồ sơ.">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    </a>
+
+                                {% elif expert_profile.verification_status == "PENDING" %}
+                                    <!-- đang duyệt -->
+                                    <span class="btn btn-outline-secondary me-2"
+                                        title="Hồ sơ đang chờ duyệt">
+                                        <i class="fa-solid fa-hourglass-half"></i>
+                                    </span>
+
+                                {% elif expert_profile.verification_status == "VERIFIED" %}
+                                    <!-- đã duyệt → không hiện gì -->
+                                {% endif %}
+
+                            {% endif %}
+
+
+
+                            {# ===== Burger user dropdown (student + expert) ===== #}
+                            <div class="nav-item dropdown">
+                                <a href="#"
+                                   class="btn btn-dark dropdown-toggle d-flex align-items-center position-relative"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-bars me-2"></i>
+                                    <span class="fw-semibold">{{ session.get("username") or "Tài khoản" }}</span>
+
+                                    {# ✅ streak chỉ cho student #}
+                                    {% if session.get("role","")|upper == "STUDENT" %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                                            🔥 <span id="streakBadge">0</span>
+                                        </span>
+                                    {% endif %}
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end bg-light m-0 shadow-sm">
+                                    <h6 class="dropdown-header">
+                                        Xin chào, {{ session.get("username") or "bạn" }}!
+                                    </h6>
+
+                                    {% if session.get("role")|upper == "EXPERT" %}
+                                        <a class="dropdown-item" href="{{ url_for('expert.edit_profile') }}">
+                                            <i class="fa-regular fa-pen-to-square me-2"></i>Cập nhật hồ sơ
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                    {% endif %}
+
+                                    <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                                    </a>
+                                </div>
+                            </div>
 
                         {% else %}
-                        <!-- Chưa đăng nhập -->
-                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">Đăng nhập</a>
-                        <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">Đăng ký</a>
+
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">Đăng ký</a>
+
                         {% endif %}
+
                     </div>
                 </div>
             </nav>
@@ -154,12 +197,8 @@
                             <h1 class="display-1 text-uppercase mb-3">Vì một tương lai tươi sáng</h1>
                             <p class="fs-5 mb-5">Chăm sóc và quan tâm bằng sự thấu cảm</p>
                             <div class="d-flex">
-                                <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">Trắc nghiệm tâm lý
-                                </a>
-
-                                <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">
-                                Tham gia
-                                </a>
+                                <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">Trắc nghiệm tâm lý</a>
+                                <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">Tham gia</a>
                             </div>
                         </div>
                     </div>
@@ -178,14 +217,8 @@
                             <h1 class="display-1 text-uppercase mb-3">Lắng nghe, đồng hành, chữa lành.</h1>
                             <p class="fs-5 mb-5">Luôn luôn lắng nghe, lâu lâu mới hiểu.</p>
                             <div class="d-flex mt-4">
-                                <div class="d-flex mt-4">
-                                    <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">
-                                        Trắc nghiệm tâm lý
-                                    </a>
-                                    <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">
-                                        Tham gia
-                                    </a>
-                                </div>
+                                <a class="btn btn-primary py-3 px-4 me-3" href="{{ url_for('quiz_bp.trang_quiz') }}">Trắc nghiệm tâm lý</a>
+                                <a class="btn btn-secondary py-3 px-4" href="{{ url_for('auth.login') }}">Tham gia</a>
                             </div>
                         </div>
                     </div>
@@ -390,7 +423,8 @@
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-    <!-- ✅ Streak Modal (đặt trong body, gần cuối) -->
+    {# ✅ Streak Modal: CHỈ student mới có #}
+    {% if session.get("user_id") and session.get("role") == "STUDENT" %}
     <div class="modal fade" id="streakModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4">
@@ -410,11 +444,10 @@
         </div>
       </div>
     </div>
+    {% endif %}
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-
-    <!-- ✅ bootstrap bundle phải load trước khi dùng bootstrap.Modal -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
@@ -423,7 +456,8 @@
     <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
 
-    <!-- ✅ STREAK: load + update badge + show popup 1 lần/ngày -->
+    {# ✅ STREAK JS: CHỈ student mới chạy #}
+    {% if session.get("user_id") and session.get("role") == "STUDENT" %}
     <script>
     async function loadStreakAndRender() {
       try {
@@ -432,12 +466,10 @@
 
         const data = await res.json();
 
-        // update badge cạnh logout
         const badge = document.getElementById("streakBadge");
         if (badge) badge.textContent = data.streak ?? 0;
 
-        // popup chỉ hiện khi hôm nay DONE và chưa show lần nào trong ngày
-        const today = data.today;                 // "YYYY-MM-DD"
+        const today = data.today;
         const done = !!data.today_done;
         const streak = data.streak ?? 0;
 
@@ -464,6 +496,7 @@
 
     document.addEventListener("DOMContentLoaded", loadStreakAndRender);
     </script>
+    {% endif %}
 
     <!-- ✅ GAME: click game -> POST /game/start để tick played_game -> rồi mới chuyển trang game -->
     <script>
@@ -527,6 +560,16 @@
 
     <!-- Template Javascript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
 
+    <!-- ✅ Enable tooltips -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function (el) {
+        new bootstrap.Tooltip(el);
+      });
+    });
+    </script>
+
+</body>
 </html>

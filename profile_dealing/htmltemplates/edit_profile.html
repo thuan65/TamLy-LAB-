@@ -5,111 +5,172 @@
     <title>Cập nhật hồ sơ chuyên gia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Dùng bootstrap + style của PROJECT (đồng bộ quiz/navbar) -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
             background: #f4f6f8;
         }
 
-        .container {
-            max-width: 700px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
+        .profile-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 12px;
         }
 
-        h2 {
-            margin-bottom: 10px;
+        .profile-card {
+            width: 100%;
+            max-width: 720px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: none;
+            overflow: hidden;
         }
 
-        .status {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+        /* Header: VÀNG theo theme */
+        .profile-header {
+            background: var(--bs-primary);
+            color: #111;
+            padding: 20px 26px;
+        }
+        .profile-header h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+        .profile-header small {
+            opacity: .9;
+            font-weight: 500;
+        }
+
+        .status-box {
+            border-radius: 10px;
+            padding: 12px 14px;
             font-size: 14px;
+            margin-bottom: 18px;
         }
 
-        .status.pending {
+        .status-pending {
             background: #fff3cd;
             color: #856404;
+            border: 1px solid rgba(0,0,0,.06);
         }
 
-        .status.verified {
-            background: #d4edda;
-            color: #155724;
+        .status-verified {
+            background: #fff;
+            color: #111;
+            border: 1px solid rgba(0,0,0,.12);
         }
 
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
+        label { font-weight: 600; }
+
+        /* Nút primary: vàng chữ đen */
+        .btn.btn-primary{
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: #111;
+            font-weight: 700;
+            padding: 10px 26px;
+            border-radius: 999px;
+        }
+        .btn.btn-primary:hover{
+            filter: brightness(.95);
+            color: #111;
         }
 
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
+        /* Focus input vàng nhẹ */
+        .form-control:focus{
+            border-color: rgba(255,183,3,.7);
+            box-shadow: 0 0 0 .2rem rgba(255,183,3,.22);
+        }
+        .action-btn{
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            font-weight: 600;
         }
 
-        textarea {
-            min-height: 100px;
-        }
-
-        button {
-            margin-top: 25px;
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
     </style>
 </head>
 
 <body>
-<div class="container">
-    <h2>Hồ sơ chuyên gia</h2>
+<div class="profile-wrapper">
+    <div class="card profile-card">
 
-    {% if profile.verification_status == "PENDING" %}
-        <div class="status pending">
-            ⏳ Hồ sơ đang chờ admin xác minh. Khi chỉnh sửa, trạng thái sẽ quay lại chờ duyệt.
+        <div class="profile-header">
+            <h4>Hồ sơ chuyên gia</h4>
+            <small>Cập nhật thông tin cá nhân &amp; chuyên môn</small>
         </div>
-    {% elif profile.verification_status == "VERIFIED" %}
-        <div class="status verified">
-            ✅ Hồ sơ đã được xác minh
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            {% if profile.verification_status == "PENDING" %}
+                <div class="status-box status-pending">
+                    ⏳ Hồ sơ đang chờ admin xác minh.
+                </div>
+            {% elif profile.verification_status == "VERIFIED" %}
+                <div class="status-box status-verified">
+                    ✅ Hồ sơ đã được xác minh
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('expert.update_profile') }}">
+                <div class="mb-3">
+                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                    <input type="text" name="full_name" class="form-control" required
+                           value="{{ profile.full_name }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Chức danh (Title)</label>
+                    <input type="text" name="title" class="form-control"
+                           value="{{ profile.title or '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Học vị / Trình độ</label>
+                    <input type="text" name="qualification" class="form-control"
+                           value="{{ profile.qualification or '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Chuyên môn</label>
+                    <input type="text" name="specialization" class="form-control"
+                           value="{{ profile.specialization or '' }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Tiểu sử / Giới thiệu</label>
+                    <textarea name="bio" class="form-control" rows="4">{{ profile.bio or '' }}</textarea>
+                </div>
+
+                <div class="d-flex gap-3 mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary action-btn flex-fill">
+                        <i class="fa-solid fa-house me-2"></i>Home
+                    </a>
+
+                    <button type="submit" class="btn btn-primary action-btn flex-fill">
+                        Cập nhật hồ sơ
+                    </button>
+                </div>
+
+            </form>
         </div>
-    {% endif %}
 
-    <form method="POST" action="{{ url_for('expert.update_profile') }}">
-        
-        <label>Họ và tên *</label>
-        <input type="text" name="full_name" required
-               value="{{ profile.full_name }}">
-
-        <label>Chức danh (Title)</label>
-        <input type="text" name="title"
-               value="{{ profile.title or '' }}">
-
-        <label>Học vị / Trình độ</label>
-        <input type="text" name="qualification"
-               value="{{ profile.qualification or '' }}">
-
-        <label>Chuyên môn</label>
-        <input type="text" name="specialization"
-               value="{{ profile.specialization or '' }}">
-
-        <label>Tiểu sử / Giới thiệu</label>
-        <textarea name="bio">{{ profile.bio or '' }}</textarea>
-
-        <button type="submit">💾 Cập nhật hồ sơ</button>
-    </form>
+    </div>
 </div>
 </body>
 </html>

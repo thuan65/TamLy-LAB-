@@ -46,4 +46,4 @@ def update_profile():
         db.commit()
 
     return redirect(url_for("index"))
-
+"{{ url_for('index') }}"

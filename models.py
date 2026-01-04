@@ -47,7 +47,7 @@ class ExpertProfile(Base):
     specialization = Column(String(255))
     organization = Column(String(255)) #Tổ chức, phòng khám,...
     years_of_experience = Column(Integer)
-    verification_status = Column(String, default= "PENDING")
+    verification_status = Column(String, default= "NONE")
 
     verified_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     verified_at = Column(DateTime)
