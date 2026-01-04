@@ -54,7 +54,7 @@ def search_experts():
 
         # 5. Lọc và sắp xếp kết quả
         results = []
-        threshold = 0.3  # Ngưỡng tương đồng tối thiểu
+        threshold = 0.1  # Ngưỡng tương đồng tối thiểu
         
         for i, score in enumerate(cosine_scores):
             if score.item() >= threshold:
