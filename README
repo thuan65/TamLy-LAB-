@@ -7,11 +7,15 @@ with TherapySession() as session:
     ... (bất cứ hành động query nào)
     vd: student = session.query(User).filter_by(user_id=user_id).first()
 
+FOR X.Quyên
 
+ROLE:   "STUDENT" , "EXPERT"
+EXPERT: "PENDING", "VERIFIED"
 
-
-
-
+USER: EXPERT <- EXPERT_PROFILE: 
+1 trong các cách truy xuất
+profile = db.query(ExpertProfile).filter_by(user_id=user_id).first() #cột user_id là id của User nằm trong profile
+        profile.verification_status.full_name #Đây là vd truy xuất full name
 --------------------------------------------------------------------------------------------------------------------------------------------
 
 

@@ -35,14 +35,29 @@ def select_therapist():
     
     db = TherapySession()
 
-    therapists_objs = db.query(User)\
-    .options(joinedload(User.expert_profile))\
-    .filter(User.role=="EXPERT")\
-    .filter(ExpertProfile.is_active==True)\
-    .filter(ExpertProfile.verification_status== "VERIFIED")\
+    therapists_objs = (db.query(User)
+    .join(ExpertProfile, ExpertProfile.user_id == User.id)
+    .options(joinedload(User.expert_profile))
+    .filter(User.role == "EXPERT")
+    .filter(ExpertProfile.is_active == True)
+    .filter(ExpertProfile.verification_status == "VERIFIED")
     .all()
+)
+
+    for therapist in therapists_objs:
+        print(therapist)
     
-    therapists_list = [to_dict(t) for t in therapists_objs]
+    #therapists_list = [to_dict(t) for t in therapists_objs]
+
+    therapists_list = []
+    for therapist in therapists_objs:
+        expert_profile = therapist.expert_profile
+        therapists_list.append({
+            "id": therapist.id,
+            "full_name": expert_profile.full_name if expert_profile else "Expert", #Default name
+            "image": getattr(expert_profile, "image", None),    
+            "field": expert_profile.specialization,
+        })
 
     db.close()
     
