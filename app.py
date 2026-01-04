@@ -21,7 +21,7 @@ from loginforum.chat import chat
 from  profile_dealing.expertUpdateProfile import expert_bp
 from streak.routes import streak_bp
 from admin_verify.routes import admin_bp
-from admin_verify.routes import expert_profile_bp
+#from admin_verify.routes import expert_profile_bp
 
 from db import close_db, init_db
 from loginforum.history_conversation import history_bp
@@ -60,7 +60,7 @@ app.register_blueprint(booking_bp)
 app.register_blueprint(search_specialization_bp)
 app.register_blueprint(streak_bp)
 app.register_blueprint(admin_bp)
-app.register_blueprint(expert_profile_bp)
+#app.register_blueprint(expert_profile_bp)
 
 @app.route("/")
 def index():
