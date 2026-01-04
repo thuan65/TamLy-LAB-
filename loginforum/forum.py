@@ -2,10 +2,44 @@ from flask import Blueprint, render_template, request, redirect, session, url_fo
 from sentence_transformers import SentenceTransformer, util
 from .toxic_filter import is_toxic
 from db import get_db, get_all_forum_posts
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 
 forum = Blueprint("forum", __name__, url_prefix="/forum", template_folder="htmltemplates")
 
 model = SentenceTransformer("keepitreal/vietnamese-sbert")
+
+VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+
+def to_vn_time(value):
+    """
+    value: có thể là string 'YYYY-MM-DD HH:MM:SS' (hoặc có .ffffff) hoặc datetime
+    Trả về datetime đã convert về Asia/Ho_Chi_Minh
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        s = value.strip()
+        # thử các format phổ biến
+        for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+            try:
+                dt = datetime.strptime(s, fmt)
+                break
+            except ValueError:
+                dt = None
+        if dt is None:
+            return None
+    else:
+        dt = value
+
+    # Nếu dt không có tzinfo, giả sử DB lưu UTC (thường gặp)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+
+    return dt.astimezone(VN_TZ)
+
 
 def compute_similarity(query_text, posts, top_k=5):
     """So sánh độ tương đồng giữa query và posts trong DB"""
@@ -31,9 +65,6 @@ def compute_similarity(query_text, posts, top_k=5):
 
 @forum.route("/")
 def show_forum():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login", next=request.full_path))
-
     conn = get_db()
     # Lấy tất cả post kèm tên người đăng
     posts = conn.execute(
@@ -42,20 +73,49 @@ def show_forum():
 
     posts_with_answers = []
     for post in posts:
-        # Lấy câu trả lời cho mỗi post
         answers = conn.execute(
-            "SELECT answers.*, users.username AS expert_username FROM answers JOIN users ON answers.expert_id = users.id WHERE post_id=?",
-            (post['id'],)
+            "SELECT answers.*, users.username AS expert_username "
+            "FROM answers JOIN users ON answers.expert_id = users.id "
+            "WHERE post_id=?",
+            (post["id"],)
         ).fetchall()
+
         post_dict = dict(post)
-        post_dict['answers'] = [dict(a) for a in answers]
+
+        vn_dt = to_vn_time(post_dict.get("created_at"))
+        if vn_dt:
+            post_dict["created_date"] = vn_dt.strftime("%d/%m/%Y")
+            post_dict["created_time"] = vn_dt.strftime("%H:%M")
+        else:
+            post_dict["created_date"] = ""
+            post_dict["created_time"] = ""
+
+        ans_list = []
+        for a in answers:
+            a_dict = dict(a)
+
+            vn_a = to_vn_time(a_dict.get("created_at"))
+            if vn_a:
+                a_dict["created_date"] = vn_a.strftime("%d/%m/%Y")
+                a_dict["created_time"] = vn_a.strftime("%H:%M")
+            else:
+                a_dict["created_date"] = ""
+                a_dict["created_time"] = ""
+
+            ans_list.append(a_dict)
+
+        post_dict["answers"] = ans_list
         posts_with_answers.append(post_dict)
+
 
     return render_template("forum.html", posts=posts_with_answers)
 
 @forum.route("/post/new", methods=["GET","POST"])
 def new_post():
-    if "user_id" not in session or session.get("role") != "student":
+    if "user_id" not in session:
+        return redirect(url_for("auth.login", next=request.full_path))
+
+    if session.get("role") != "student":
         return "Chỉ student mới được tạo bài!", 403
 
     if request.method == "POST":
@@ -80,24 +140,38 @@ def reply_post(post_id):
         return "Bạn không có quyền trả lời!", 403
 
     conn = get_db()
-    post = conn.execute("SELECT * FROM posts WHERE id=?", (post_id,)).fetchone()
+    post = conn.execute(
+        "SELECT posts.*, users.username "
+        "FROM posts JOIN users ON posts.user_id = users.id "
+        "WHERE posts.id=?",
+        (post_id,)
+    ).fetchone()
     if not post:
         return "Bài viết không tồn tại", 404
 
+    post = dict(post)
+
     if request.method == "POST":
-        content = request.form["content"]
+        content = request.form.get("content", "").strip()
+        if not content:
+            return render_template("reply_post.html", post=post, error="Bạn chưa nhập nội dung.")
+
+        # Lưu câu trả lời (ai cũng có thể trả lời)
         conn.execute(
             "INSERT INTO answers(content, expert_id, post_id) VALUES(?,?,?)",
             (content, session["user_id"], post_id)
         )
-        conn.execute(
-            "UPDATE posts SET tag='answered' WHERE id=?",
-            (post_id,)
-        )
+
+        # chỉ expert mới mark answered
+        if session.get("role") == "expert":
+            conn.execute("UPDATE posts SET tag='answered' WHERE id=?", (post_id,))
+
         conn.commit()
-        return redirect("/forum")
+        return redirect(url_for("forum.show_forum") + f"#post-{post_id}")
+
 
     return render_template("reply_post.html", post=post)
+
 
 # @forum.route("/search_forum", methods=["GET"])
 # def search_forum():
@@ -124,16 +198,37 @@ def search_forum():
     filtered_results = [p for p in top_results if not is_toxic(p["content"])]
     db = get_db()
     for post in filtered_results:
+        # convert timezone + tạo field hiển thị
+        vn_dt = to_vn_time(post.get("created_at"))
+        if vn_dt:
+            post["created_date"] = vn_dt.strftime("%d/%m/%Y")
+            post["created_time"] = vn_dt.strftime("%H:%M")
+        else:
+            post["created_date"] = ""
+            post["created_time"] = ""
+
         answers = db.execute(
-            "SELECT a.content, u.username as expert_username "
+            "SELECT a.content, a.created_at, u.username as expert_username "
             "FROM answers a "
             "JOIN users u ON a.expert_id = u.id "
             "WHERE a.post_id=?",
             (post["id"],)
         ).fetchall()
-        post["answers"] = [{"content": a["content"], "expert_username": a["expert_username"]} for a in answers]
+
+        ans_list = []
+        for a in answers:
+            vn_a = to_vn_time(a["created_at"])
+            ans_list.append({
+                "content": a["content"],
+                "expert_username": a["expert_username"],
+                "created_date": vn_a.strftime("%d/%m/%Y") if vn_a else "",
+                "created_time": vn_a.strftime("%H:%M") if vn_a else "",
+            })
+
+        post["answers"] = ans_list
 
     return render_template("search_results.html", posts=filtered_results, query=query)
+
 
 # print(is_toxic("fuck"))   # phải trả về True
 # print(is_toxic("you are stupid"))  # True

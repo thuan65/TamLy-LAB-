@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, url_for
 from toxic_filter import is_toxic
 from db import get_db, get_all_forum_posts
 
@@ -66,12 +66,23 @@ def reply_post(post_id):
         return "Bạn không có quyền trả lời!", 403
 
     conn = get_db()
-    post = conn.execute("SELECT * FROM posts WHERE id=?", (post_id,)).fetchone()
+    post = conn.execute(
+        "SELECT posts.*, users.username "
+        "FROM posts JOIN users ON posts.user_id = users.id "
+        "WHERE posts.id=?",
+        (post_id,)
+    ).fetchone()
+
     if not post:
         return "Bài viết không tồn tại", 404
 
+    post = dict(post)  # chuyen row ve dang dict cho ko loi 
+
     if request.method == "POST":
-        content = request.form["content"]
+        content = request.form.get("content", "").strip()
+        if not content:
+            return render_template("reply_post.html", post=post, error="Bạn chưa nhập nội dung.")
+
         conn.execute(
             "INSERT INTO answers(content, expert_id, post_id) VALUES(?,?,?)",
             (content, session["user_id"], post_id),
@@ -81,9 +92,11 @@ def reply_post(post_id):
             (post_id,),
         )
         conn.commit()
-        return redirect("/forum")
+
+        return redirect(url_for("forum.post_detail", post_id=post_id))
 
     return render_template("reply_post.html", post=post)
+
 
 
 @forum.route("/search_forum")

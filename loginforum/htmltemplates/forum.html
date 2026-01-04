@@ -31,6 +31,10 @@
         .pill-btn { border-radius: 999px; }
         .post-body { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; height: auto; }
         .post-meta { color: #6c757d; font-size: 0.9rem; }
+
+        /* Reply box */
+        .reply-box { background: #ffffff; border: 1px solid #e9ecef; border-radius: 10px; }
+        .answer-item { border-left: 3px solid #0d6efd; padding-left: 12px; }
     </style>
 </head>
 
@@ -89,11 +93,11 @@
                         {% if session.get('user_id') and session.get('role') == 'expert' %}
                         <form action="{{ url_for('chat.toggle_opt_in') }}" method="POST">
                             {% if session.get('chat_opt_in') == 1 %}
-                                <button class="btn btn-success pill-btn">
+                                <button class="btn btn-success pill-btn" type="submit">
                                     <i class="fa-solid fa-circle me-2"></i>Online
                                 </button>
                             {% else %}
-                                <button class="btn btn-outline-secondary pill-btn">
+                                <button class="btn btn-outline-secondary pill-btn" type="submit">
                                     <i class="fa-regular fa-circle me-2"></i>Offline
                                 </button>
                             {% endif %}
@@ -112,7 +116,7 @@
                                 </div>
                             </div>
                             <div class="col-md-3 d-grid">
-                                <button class="btn btn-primary py-3">
+                                <button class="btn btn-primary py-3" type="submit">
                                     <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm
                                 </button>
                             </div>
@@ -122,32 +126,103 @@
                     <!-- POSTS -->
                     {% if posts %}
                         {% for post in posts %}
-        <div class="p-4 bg-white rounded border mb-3">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
-                <h5 class="mb-0">{{ post.title if post.title else post['title'] }}</h5>
-                {% set tag_value = (post.tag if post.tag else post['tag']) or 'unanswered' %}
-                {% if tag_value == 'answered' %}
-                    <span class="badge bg-success post-badge">Đã trả lời</span>
-                {% else %}
-                    <span class="badge bg-warning text-dark post-badge">Chưa trả lời</span>
-                {% endif %}
-            </div>
-            <div class="post-meta d-flex flex-wrap gap-3 mb-3">
-                <span><i class="fa-regular fa-user me-2"></i>{{ post.username if post.username else post['username'] }}</span>
-                <span><i class="fa-regular fa-calendar me-2"></i>{{ (post.created_at if post.created_at else post['created_at'])[:10] }}</span>
-                <span><i class="fa-regular fa-clock me-2"></i>{{ (post.created_at if post.created_at else post['created_at'])[11:16] }}</span>
-            </div>
+                        <div class="p-4 bg-white rounded border mb-3" id="post-{{ post.id if post.id else post['id'] }}">
 
-            <div class="post-body p-3 mb-2">
-                <div class="post-content">{{- (post.content if post.content else post['content'])|trim -}}</div>
-            </div>
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                                <h5 class="mb-0">{{ post.title if post.title else post['title'] }}</h5>
 
-                            {% if session.get('user_id') %}
-                                <a href="{{ url_for('forum.reply_post', post_id=post.id if post.id else post['id']) }}"
-                                   class="btn btn-outline-primary pill-btn">
-                                    <i class="fa-solid fa-reply me-2"></i>Trả lời
-                                </a>
+                                {% set tag_value = (post.tag if post.tag else post['tag']) or 'unanswered' %}
+                                {% if tag_value == 'answered' %}
+                                    <span class="badge bg-success post-badge">Đã trả lời</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark post-badge">Chưa trả lời</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- ✅ TIMEZONE FIX: dùng created_date / created_time (đã convert ở backend) -->
+                            <div class="post-meta d-flex flex-wrap gap-3 mb-3">
+                                <span>
+                                    <i class="fa-regular fa-user me-2"></i>
+                                    {{ post.username if post.username else post['username'] }}
+                                </span>
+
+                                <span>
+                                    <i class="fa-regular fa-calendar me-2"></i>
+                                    {{ post.created_date if post.created_date else post['created_date'] }}
+                                </span>
+
+                                <span>
+                                    <i class="fa-regular fa-clock me-2"></i>
+                                    {{ post.created_time if post.created_time else post['created_time'] }}
+                                </span>
+                            </div>
+
+                            <div class="post-body p-3 mb-3">
+                                <div class="post-content">{{- (post.content if post.content else post['content'])|trim -}}</div>
+                            </div>
+
+                            {# =========================
+                               HIỂN THỊ CÂU TRẢ LỜI (AI CŨNG THẤY)
+                               ========================= #}
+                            {% if post.answers and post.answers|length > 0 %}
+                                <div class="reply-box p-3 mb-3">
+                                    <div class="fw-bold mb-2">
+                                        <i class="fa-solid fa-comments me-2"></i>Câu trả lời
+                                    </div>
+
+                                    {% for a in post.answers %}
+                                    <div class="answer-item mb-3">
+                                        <div class="small text-muted mb-1 d-flex flex-wrap gap-3">
+                                            <span>
+                                                <i class="fa-solid fa-user-doctor me-2"></i>
+                                                Chuyên gia:
+                                                <b>{{ a.expert_username if a.expert_username else a['expert_username'] }}</b>
+                                            </span>
+
+                                            <span>
+                                                <i class="fa-regular fa-calendar me-2"></i>
+                                                {{ a.created_date if a.created_date else a['created_date'] }}
+                                            </span>
+
+                                            <span>
+                                                <i class="fa-regular fa-clock me-2"></i>
+                                                {{ a.created_time if a.created_time else a['created_time'] }}
+                                            </span>
+                                        </div>
+
+                                        <div class="post-content">
+                                            {{- (a.content if a.content else a['content'])|trim -}}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+
+                                </div>
                             {% endif %}
+
+                            {# =========================
+                               Ô TRẢ LỜI (CHỈ EXPERT THẤY)
+                               ========================= #}
+                            {% if session.get('user_id') and session.get('role') == 'expert' %}
+                                <div class="reply-box p-3">
+                                    <div class="fw-bold mb-2">
+                                        <i class="fa-solid fa-reply me-2"></i>Trả lời (chỉ dành cho chuyên gia)
+                                    </div>
+
+                                    <form method="POST"
+                                          action="{{ url_for('forum.reply_post', post_id=post.id if post.id else post['id']) }}">
+                                        <textarea class="form-control mb-2"
+                                                  name="content"
+                                                  rows="3"
+                                                  placeholder="Nhập câu trả lời..."
+                                                  required></textarea>
+
+                                        <button type="submit" class="btn btn-outline-primary pill-btn">
+                                            <i class="fa-solid fa-paper-plane me-2"></i>Gửi trả lời
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+
                         </div>
                         {% endfor %}
                     {% else %}

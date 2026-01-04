@@ -23,12 +23,37 @@
         .post-card { padding: 18px 20px; display: block !important; }
         .post-card * { align-self: flex-start; }
 
-        .post-meta { font-size: 0.95rem; color: #6c757d; }
-        .post-title { margin: 8px 0 0; font-weight: 700; }
+        .post-meta { font-size: 0.95rem; color: #6c757d; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .post-title { margin: 10px 0 0; font-weight: 800; }
         .post-snippet { white-space: pre-wrap; margin-top: 10px; line-height: 1.55; color: #333; }
 
         .result-gap { gap: 14px; }
         .pill-btn { border-radius: 999px; }
+
+        .meta-chip{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+        }
+
+        .answer-box{
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .answer-item{
+            border-left: 3px solid #198754;
+            padding-left: 12px;
+            margin-top: 10px;
+        }
+        .answer-item:first-child{ margin-top: 0; }
+        .answer-content{ white-space: pre-wrap; line-height: 1.55; }
     </style>
 </head>
 
@@ -73,9 +98,27 @@
                                     <div class="col-12">
                                         <div class="bg-white rounded border post-card">
 
-                                            <div class="post-meta">
-                                                <i class="fa-regular fa-user me-2"></i>
-                                                Đăng bởi: <strong>{{ post.username }}</strong>
+                                            <!-- META -->
+                                            <div class="post-meta mb-2">
+                                                <span class="meta-chip">
+                                                    <i class="fa-regular fa-user"></i>
+                                                    <span>Đăng bởi: <strong>{{ post.username }}</strong></span>
+                                                </span>
+
+                                                {# ✅ dùng created_date/created_time (đã convert VN ở backend) #}
+                                                {% if post.created_date %}
+                                                <span class="meta-chip">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    <span>{{ post.created_date }}</span>
+                                                </span>
+                                                {% endif %}
+
+                                                {% if post.created_time %}
+                                                <span class="meta-chip">
+                                                    <i class="fa-regular fa-clock"></i>
+                                                    <span>{{ post.created_time }}</span>
+                                                </span>
+                                                {% endif %}
                                             </div>
 
                                             <h5 class="post-title">{{ post.title }}</h5>
@@ -88,17 +131,20 @@
 
                                             {% if post.answers %}
                                                 <hr class="my-3">
-                                                <h6 class="fw-bold text-success mb-2">
-                                                    <i class="fa-solid fa-comments me-2"></i>Trả lời
-                                                </h6>
-                                                <ul class="list-group list-group-flush">
+                                                <div class="answer-box">
+                                                    <div class="fw-bold text-success mb-2">
+                                                        <i class="fa-solid fa-comments me-2"></i>Trả lời
+                                                    </div>
+
                                                     {% for ans in post.answers %}
-                                                        <li class="list-group-item">
-                                                            <div class="fst-italic">{{ ans.content }}</div>
-                                                            <div class="text-muted small mt-1">— {{ ans.expert_username }}</div>
-                                                        </li>
+                                                        <div class="answer-item">
+                                                            <div class="answer-content">{{ ans.content }}</div>
+                                                            <div class="text-muted small mt-1">
+                                                                — <b>{{ ans.expert_username }}</b>
+                                                            </div>
+                                                        </div>
                                                     {% endfor %}
-                                                </ul>
+                                                </div>
                                             {% endif %}
 
                                         </div>
