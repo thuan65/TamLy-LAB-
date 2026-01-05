@@ -8,6 +8,8 @@ from datetime import datetime
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
+from werkzeug.security import generate_password_hash  # ✅ thêm
+
 # Import models
 from models import User, ExpertProfile
 
@@ -17,19 +19,16 @@ from models import User, ExpertProfile
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, "therapy.db")
 DB_URL = f"sqlite:///{DB_PATH}"
-
 engine = create_engine(DB_URL, echo=False, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
-
 # =========================
 # SEED DATA: 5+ therapist mẫu
-# (Sửa thoải mái trước khi chạy)
 # =========================
 SEED_EXPERTS = [
     {
         "username": "expert_thao",
-        "password": "hashed_pw_here",
+        "password": "123456",  # ✅ để raw cho tiện
         "chat_opt_in": True,
         "profile": {
             "full_name": "ThS. Nguyễn Thảo",
@@ -44,7 +43,7 @@ SEED_EXPERTS = [
     },
     {
         "username": "expert_khanh",
-        "password": "hashed_pw_here",
+        "password": "123456",
         "chat_opt_in": True,
         "profile": {
             "full_name": "CN. Lê Khánh",
@@ -59,7 +58,7 @@ SEED_EXPERTS = [
     },
     {
         "username": "expert_huy",
-        "password": "hashed_pw_here",
+        "password": "123456",
         "chat_opt_in": False,
         "profile": {
             "full_name": "ThS. Trần Minh Huy",
@@ -74,7 +73,7 @@ SEED_EXPERTS = [
     },
     {
         "username": "expert_lam",
-        "password": "hashed_pw_here",
+        "password": "123456",
         "chat_opt_in": True,
         "profile": {
             "full_name": "TS. Phạm Bảo Lâm",
@@ -89,7 +88,7 @@ SEED_EXPERTS = [
     },
     {
         "username": "expert_vy",
-        "password": "hashed_pw_here",
+        "password": "123456",
         "chat_opt_in": False,
         "profile": {
             "full_name": "BS. CKI Lưu Bảo Vy",
@@ -102,10 +101,9 @@ SEED_EXPERTS = [
             "bio": "Hỗ trợ đánh giá tình trạng và phối hợp hướng can thiệp phù hợp. Ưu tiên sàng lọc nguy cơ và kế hoạch hỗ trợ thực tế."
         }
     },
-    # thêm 1 người nữa cho chắc “ít nhất 5”
     {
         "username": "expert_nhi",
-        "password": "hashed_pw_here",
+        "password": "123456",
         "chat_opt_in": True,
         "profile": {
             "full_name": "ThS. Võ Thanh Nhi",
@@ -120,7 +118,6 @@ SEED_EXPERTS = [
     },
 ]
 
-
 # =========================
 # HELPERS
 # =========================
@@ -131,8 +128,7 @@ def ensure_db_exists():
 def get_user_by_username(db, username: str):
     return db.execute(select(User).where(User.username == username)).scalar_one_or_none()
 
-def create_expert(db, username: str, password: str, chat_opt_in: bool, profile: dict):
-    # Nếu username đã tồn tại -> báo và skip
+def create_expert(db, username: str, password_raw: str, chat_opt_in: bool, profile: dict):
     existing = get_user_by_username(db, username)
     if existing:
         print(f"⚠️  Username '{username}' đã tồn tại (user_id={existing.id}) -> skip")
@@ -140,18 +136,18 @@ def create_expert(db, username: str, password: str, chat_opt_in: bool, profile: 
 
     user = User(
         username=username,
-        password=password,
+        password=generate_password_hash(password_raw),  # ✅ hash thật
         role="expert",
         chat_opt_in=bool(chat_opt_in),
         is_online=False,
         last_seen=datetime.now(),
     )
     db.add(user)
-    db.flush()  # lấy user.id ngay
+    db.flush()
 
     expert_profile = ExpertProfile(
         user_id=user.id,
-        full_name=profile.get("full_name", "").strip() or "Unnamed Expert",
+        full_name=(profile.get("full_name") or "").strip() or "Unnamed Expert",
         title=profile.get("title"),
         qualification=profile.get("qualification"),
         specialization=profile.get("specialization"),
@@ -175,7 +171,7 @@ def seed_experts():
             user_id = create_expert(
                 db=db,
                 username=item["username"],
-                password=item.get("password", "hashed_pw_here"),
+                password_raw=item.get("password", "123456"),
                 chat_opt_in=item.get("chat_opt_in", False),
                 profile=item["profile"],
             )
@@ -192,13 +188,10 @@ def seed_experts():
         db.close()
 
 def add_expert_manual():
-    """
-    Nhập thủ công 1 therapist/expert rồi insert vào DB
-    """
     ensure_db_exists()
     print("\n=== ADD EXPERT MANUAL ===")
     username = input("username (unique): ").strip()
-    password = input("password (hash hay raw tuỳ bạn): ").strip() or "hashed_pw_here"
+    password = input("password (raw): ").strip() or "123456"
     chat_opt_in = input("chat_opt_in? (y/n): ").strip().lower() == "y"
 
     full_name = input("full_name: ").strip()
@@ -218,7 +211,7 @@ def add_expert_manual():
         user_id = create_expert(
             db=db,
             username=username,
-            password=password,
+            password_raw=password,
             chat_opt_in=chat_opt_in,
             profile=dict(
                 full_name=full_name,
@@ -250,7 +243,13 @@ def list_experts(limit=50):
     db = SessionLocal()
     try:
         rows = db.execute(
-            select(User.id, User.username, ExpertProfile.full_name, ExpertProfile.specialization, ExpertProfile.verification_status)
+            select(
+                User.id,
+                User.username,
+                ExpertProfile.full_name,
+                ExpertProfile.specialization,
+                ExpertProfile.verification_status,
+            )
             .join(ExpertProfile, ExpertProfile.user_id == User.id)
             .where(User.role == "expert")
             .order_by(User.id.desc())
@@ -264,11 +263,10 @@ def list_experts(limit=50):
     finally:
         db.close()
 
-
 # =========================
 # MAIN MENU
 # =========================
-if __name__ == "__main__":
+if __name__ == "__main__":  # ✅ sửa đúng
     print(f"DB: {DB_PATH}")
     print("1) Seed 5+ therapist mẫu")
     print("2) Add therapist thủ công (nhập tay)")

@@ -134,16 +134,31 @@
                            value="{{ profile.full_name }}">
                 </div>
 
+                <!-- HỌC HÀM -->
                 <div class="mb-3">
-                    <label class="form-label">Chức danh (Title)</label>
-                    <input type="text" name="title" class="form-control"
-                           value="{{ profile.title or '' }}">
+                <label class="form-label">Học hàm</label>
+                <select id="titleSelect" name="title" class="form-select">
+                    <option value="" {{ '' == (profile.title or '') and 'selected' or '' }}>None</option>
+                    <option value="Phó Giáo sư" {{ 'Phó Giáo sư' == (profile.title or '') and 'selected' or '' }}>Phó Giáo sư</option>
+                    <option value="Giáo sư" {{ 'Giáo sư' == (profile.title or '') and 'selected' or '' }}>Giáo sư</option>
+                </select>
                 </div>
 
+                <!-- HỌC VỊ / TRÌNH ĐỘ -->
                 <div class="mb-3">
-                    <label class="form-label">Học vị / Trình độ</label>
-                    <input type="text" name="qualification" class="form-control"
-                           value="{{ profile.qualification or '' }}">
+                <label class="form-label">Học vị / Trình độ</label>
+                <select id="qualificationSelect" name="qualification" class="form-select">
+                    <option value="">-- Chọn học vị --</option>
+                    <option value="Tiến sĩ" {{ 'Tiến sĩ' == (profile.qualification or '') and 'selected' or '' }}>Tiến sĩ</option>
+                    <option value="Thạc sĩ" {{ 'Thạc sĩ' == (profile.qualification or '') and 'selected' or '' }}>Thạc sĩ</option>
+                    <option value="Cử nhân" {{ 'Cử nhân' == (profile.qualification or '') and 'selected' or '' }}>Cử nhân</option>
+                </select>
+                <input type="hidden" id="qualificationHidden" name="qualification"
+                     value="{{ profile.qualification or '' }}">
+
+                <small id="qualificationHint" class="text-muted d-block mt-1" style="display:none;">
+                    Học hàm PGS/GS yêu cầu học vị Tiến sĩ.
+                </small>
                 </div>
 
                 <div class="mb-3">
@@ -172,5 +187,41 @@
 
     </div>
 </div>
+
+<script>
+  (function () {
+    const titleSelect = document.getElementById("titleSelect");
+    const qualSelect = document.getElementById("qualificationSelect");
+    const qualHidden = document.getElementById("qualificationHidden");
+    const hint = document.getElementById("qualificationHint");
+
+    function syncHidden() {
+      qualHidden.value = qualSelect.value || "";
+    }
+
+    function applyRules() {
+      const title = (titleSelect.value || "").trim();
+      const isProfessor = (title === "Phó Giáo sư" || title === "Giáo sư");
+
+      if (isProfessor) {
+        qualSelect.value = "Tiến sĩ";
+        qualSelect.disabled = true;      // UX: khóa dropdown
+        hint.style.display = "block";
+      } else {
+        qualSelect.disabled = false;
+        hint.style.display = "none";
+      }
+
+      syncHidden(); // ✅ đảm bảo hidden luôn có giá trị đúng để submit
+    }
+
+    titleSelect.addEventListener("change", applyRules);
+    qualSelect.addEventListener("change", syncHidden);
+
+    applyRules(); // init
+  })();
+</script>
+
+
 </body>
 </html>
