@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cập nhật hồ sơ chuyên gia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/pub/static/css/all.min.css">
+
+    <style>
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+            background: #f4f6f8;
+        }
+
+        .profile-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 12px;
+        }
+
+        .profile-card {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: none;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* Header Vàng theme */
+        .profile-header {
+            background: var(--bs-primary);
+            color: #111;
+            padding: 25px;
+            text-align: center;
+        }
+        .profile-header h4 { margin: 0; font-weight: 700; }
+
+        /* Status Boxes */
+        .status-box {
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .status-verified { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        /* Form styling */
+        label { font-weight: 600; color: #333; margin-bottom: 6px; }
+        .form-control, .form-select {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #ffb703;
+            box-shadow: 0 0 0 0.25rem rgba(255, 183, 3, 0.15);
+        }
+
+        .hint { font-size: 0.8rem; color: #6c757d; margin-top: 4px; }
+        
+        .action-btn {
+            height: 50px;
+            border-radius: 999px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary { background: var(--bs-primary); border: none; color: #111; }
+        .btn-primary:hover { filter: brightness(0.9); color: #111; transform: translateY(-1px); }
+        .btn-outline-secondary { border-radius: 999px; font-weight: 600; }
+    </style>
+</head>
+
+<body>
+<div class="profile-wrapper">
+    <div class="card profile-card">
+        
+        <div class="profile-header">
+            <h4><i class="fa-solid fa-user-doctor me-2"></i>Cập nhật hồ sơ chuyên gia</h4>
+            <small>Hoàn thành thông tin cá nhân & chuyên môn để bắt đầu tư vấn</small>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <div id="alertBox"></div>
+
+            {% if profile and profile.verification_status %}
+                {% if profile.verification_status == "PENDING" %}
+                    <div class="status-box status-pending">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>Hồ sơ đang chờ xác minh. Bạn vẫn có thể cập nhật thông tin.</span>
+                    </div>
+                {% elif profile.verification_status == "VERIFIED" %}
+                    <div class="status-box status-verified">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Hồ sơ đã được xác minh chính thức.</span>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <form id="profileForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="qualification">Học vị <span class="text-danger">*</span></label>
+                        <select id="qualification" name="qualification" class="form-select" required>
+                            <option value="">-- Chọn học vị --</option>
+                            <option value="Bác sĩ">Bác sĩ</option>
+                            <option value="Thạc sĩ">Thạc sĩ</option>
+                            <option value="Tiến sĩ">Tiến sĩ</option>
+                        </select>
+                        <div class="hint">Chọn "Tiến sĩ" để có thể chọn học hàm</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="title">Học hàm</label>
+                        <select id="title" name="title" class="form-select" disabled>
+                            <option value="">Không có</option>
+                            <option value="PGS">PGS (Phó Giáo Sư)</option>
+                            <option value="GS">GS (Giáo Sư)</option>
+                        </select>
+                        <div class="hint">Chỉ áp dụng cho cấp bậc Tiến sĩ</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="years_of_experience">Số năm hành nghề <span class="text-danger">*</span></label>
+                        <input type="number" id="years_of_experience" name="years_of_experience" 
+                               class="form-control" min="0" max="60" required placeholder="Ví dụ: 5">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="specialization">Chuyên môn</label>
+                        <input type="text" id="specialization" name="specialization" 
+                               class="form-control" placeholder="Ví dụ: Tâm lý trị liệu">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="organization">Tổ chức / Nơi công tác</label>
+                        <input type="text" id="organization" name="organization" 
+                               class="form-control" placeholder="Ví dụ: Bệnh viện Tâm thần Trung ương">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="bio">Mô tả chi tiết / Tiểu sử <span class="text-danger">*</span></label>
+                        <textarea id="bio" name="bio" class="form-control" rows="4" 
+                                  placeholder="Giới thiệu về bản thân, kinh nghiệm, lĩnh vực chuyên môn..."></textarea>
+                        <div class="hint">Yêu cầu tối thiểu 50 ký tự.</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-4">
+                    <div class="col-sm-4">
+                        <a href="/" class="btn btn-outline-secondary action-btn w-100">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Trang chủ
+                        </a>
+                    </div>
+                    <div class="col-sm-8">
+                        <button type="submit" id="submitBtn" class="btn btn-primary action-btn w-100">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu hồ sơ
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const qualificationSelect = document.getElementById('qualification');
+    const titleSelect = document.getElementById('title');
+    const form = document.getElementById('profileForm');
+    const alertBox = document.getElementById('alertBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // 1. Mở/Khóa Học hàm dựa trên Học vị
+    qualificationSelect.addEventListener('change', function() {
+        if (this.value === 'Tiến sĩ') {
+            titleSelect.disabled = false;
+        } else {
+            titleSelect.disabled = true;
+            titleSelect.value = '';
+        }
+    });
+
+    // 2. Hàm hiển thị Alert kiểu Bootstrap
+    function showAlert(message, type = 'success') {
+        const colorClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation';
+        alertBox.innerHTML = `
+            <div class="alert ${colorClass} alert-dismissible fade show" role="alert">
+                <i class="fa-solid ${icon} me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 3. Load dữ liệu cũ từ API
+    async function loadProfile() {
+        try {
+            const res = await fetch('/expert/profile/api/get');
+            const data = await res.json();
+            if (data.success && data.profile) {
+                const p = data.profile;
+                if (p.qualification) {
+                    qualificationSelect.value = p.qualification;
+                    if (p.qualification === 'Tiến sĩ') titleSelect.disabled = false;
+                }
+                if (p.title) titleSelect.value = p.title;
+                document.getElementById('years_of_experience').value = p.years_of_experience || '';
+                document.getElementById('specialization').value = p.specialization || '';
+                document.getElementById('organization').value = p.organization || '';
+                document.getElementById('bio').value = p.bio || '';
+            }
+        } catch (e) { console.error("Lỗi load data:", e); }
+    }
+
+    // 4. Xử lý Submit
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const bio = document.getElementById('bio').value.trim();
+        
+        if (bio.length < 50) {
+            showAlert('Tiểu sử quá ngắn (tối thiểu 50 ký tự)', 'danger');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+
+        const formData = {
+            qualification: qualificationSelect.value,
+            title: titleSelect.value || 'Không có',
+            years_of_experience: document.getElementById('years_of_experience').value,
+            specialization: document.getElementById('specialization').value.trim(),
+            organization: document.getElementById('organization').value.trim(),
+            bio: bio
+        };
+
+        try {
+            const res = await fetch('/expert/profile/api/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const result = await res.json();
+            if (result.success) {
+                showAlert('Hồ sơ đã được lưu thành công!', 'success');
+                setTimeout(() => window.location.href = '/', 1500);
+            } else {
+                showAlert(result.message || 'Lỗi khi lưu!', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu hồ sơ ngay';
+            }
+        } catch (error) {
+            showAlert('Không thể kết nối máy chủ', 'danger');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Lưu hồ sơ ngay';
+        }
+    });
+
+    loadProfile();
+</script>
+</body>
+</html>

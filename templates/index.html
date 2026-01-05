@@ -118,7 +118,7 @@
 
                                 {% if expert_profile.verification_status == "NONE" %}
                                     <!-- chưa gửi -->
-                                    <a href="{{ url_for('expert.edit_profile') }}"
+                                    <a href="{{ url_for('expert_profile_bp.profile_page') }}"
                                     class="btn btn-warning me-2"
                                     title="Hồ sơ chưa gửi duyệt. Cần cập nhật hồ sơ.">
                                         <i class="fa-solid fa-circle-exclamation"></i>
@@ -134,10 +134,13 @@
                                 {% elif expert_profile.verification_status == "VERIFIED" %}
                                     <!-- đã duyệt → không hiện gì -->
                                 {% endif %}
-
                             {% endif %}
 
-
+                            {% if session.get("role","")|upper == "ADMIN" %}
+                                <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-primary btn-sm me-3 shadow-sm text-dark fw-bold">
+                                    <i class="fa-solid fa-shield-halved me-1"></i> Quản trị
+                                </a>
+                            {% endif %}
 
                             {# ===== Burger user dropdown (student + expert) ===== #}
                             <div class="nav-item dropdown">
@@ -161,7 +164,7 @@
                                     </h6>
 
                                     {% if session.get("role")|upper == "EXPERT" %}
-                                        <a class="dropdown-item" href="{{ url_for('expert.edit_profile') }}">
+                                        <a class="dropdown-item" href="{{ url_for('expert_profile_bp.profile_page') }}">
                                             <i class="fa-regular fa-pen-to-square me-2"></i>Cập nhật hồ sơ
                                         </a>
                                         <div class="dropdown-divider"></div>

@@ -66,6 +66,9 @@ def update_expert_profile(db, user_id: int, **kwargs):
     if "organization" in kwargs:
         profile.organization = kwargs["organization"]
     
+    if profile.verification_status == "NONE":
+        profile.verification_status = "PENDING"
+    
     db.commit()
     
     return {

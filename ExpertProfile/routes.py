@@ -11,7 +11,7 @@ expert_profile_bp = Blueprint(
     "expert_profile_bp", 
     __name__, 
     url_prefix="/expert/profile",
-    template_folder="templates"
+    template_folder="html_templates"
 )
 
 

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Xác minh Chuyên gia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+            background: #f0f2f5;
+            color: #1a1d20;
+        }
+
+        /* Stats Cards Styling */
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        /* Admin Content Area */
+        .admin-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card-main {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            background: var(--bs-primary); /* Màu vàng dự án */
+            padding: 25px;
+            border: none;
+        }
+        .card-header-custom h4 { margin: 0; font-weight: 700; color: #111; }
+
+        /* Nav Tabs Custom */
+        .nav-pills .nav-link {
+            color: #6c757d;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--bs-primary);
+            color: #111;
+        }
+
+        /* Expert Item */
+        .expert-item {
+            border: 1px solid #edf2f7;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .expert-item:hover { border-color: var(--bs-primary); background: #fffcf5; }
+
+        .badge-status {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        /* Buttons */
+        .btn-action {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 8px 16px;
+        }
+        .btn-refresh {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: #111;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        .btn-refresh:hover { background: #f8f9fa; }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Dashboard Quản Trị</h2>
+            <p class="text-muted">Hệ thống xác minh chuyên gia tư vấn</p>
+        </div>
+        <button class="btn btn-refresh shadow-sm" onclick="loadData()">
+            <i class="fa-solid fa-arrows-rotate me-2"></i>Làm mới dữ liệu
+        </button>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <div class="card stat-card p-3">
+                <div class="stat-icon bg-primary text-dark"><i class="fa-solid fa-users"></i></div>
+                <small class="text-muted fw-bold">TỔNG USER</small>
+                <h3 class="fw-bold mt-1" id="statTotalUsers">-</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3">
+                <div class="stat-icon bg-info text-white"><i class="fa-solid fa-user-graduate"></i></div>
+                <small class="text-muted fw-bold">SINH VIÊN</small>
+                <h3 class="fw-bold mt-1" id="statStudents">-</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3">
+                <div class="stat-icon bg-warning text-dark"><i class="fa-solid fa-user-tie"></i></div>
+                <small class="text-muted fw-bold">CHỜ DUYỆT</small>
+                <h3 class="fw-bold mt-1 text-warning" id="statPending">-</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card p-3">
+                <div class="stat-icon bg-success text-white"><i class="fa-solid fa-certificate"></i></div>
+                <small class="text-muted fw-bold">ĐÃ XÁC MINH</small>
+                <h3 class="fw-bold mt-1 text-success" id="statVerified">-</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Nút quay về trang chủ -->
+    <a href="/" class="btn btn-outline-secondary action-btn w-100">
+        <i class="fa-solid fa-arrow-left me-2"></i>Trang chủ
+    </a>
+
+    <div class="card card-main">
+        <div class="card-header-custom">
+            <ul class="nav nav-pills card-header-pills" id="adminTabs">
+                <li class="nav-item">
+                    <button class="nav-link active" data-tab="pending">
+                        <i class="fa-solid fa-hourglass-half me-2"></i>Đơn chờ duyệt
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab="all">
+                        <i class="fa-solid fa-list me-2"></i>Tất cả chuyên gia
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body p-4 bg-white">
+            <div id="expertList">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <span>Đang tải danh sách...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    let currentTab = 'pending';
+
+    // Load Thống kê
+    async function loadStats() {
+        try {
+            const res = await fetch('/admin/api/stats');
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('statTotalUsers').innerText = data.stats.total_users;
+                document.getElementById('statStudents').innerText = data.stats.total_students;
+                document.getElementById('statPending').innerText = data.stats.pending_experts;
+                document.getElementById('statVerified').innerText = data.stats.verified_experts;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // Load Danh sách Chuyên gia
+    async function loadExperts(type = 'pending') {
+        const listEl = document.getElementById('expertList');
+        listEl.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <span>Đang đồng bộ dữ liệu...</span>
+            </div>`;
+
+        try {
+            const endpoint = type === 'pending' ? '/admin/api/experts/pending' : '/admin/api/experts/all';
+            const res = await fetch(endpoint);
+            const data = await res.json();
+            
+            if (!data.success || (type === 'pending' ? data.pending_experts.length : data.experts.length) === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-5">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-25">
+                        <p class="text-muted">Không tìm thấy hồ sơ chuyên gia nào.</p>
+                    </div>`;
+                return;
+            }
+
+            const experts = type === 'pending' ? data.pending_experts : data.experts;
+            listEl.innerHTML = experts.map(exp => createExpertHTML(exp, type)).join('');
+        } catch (e) {
+            listEl.innerHTML = '<div class="alert alert-danger">Lỗi kết nối API máy chủ.</div>';
+        }
+    }
+
+    function createExpertHTML(expert, type) {
+        const status = (expert.verification_status || 'PENDING').toUpperCase();
+        let badgeClass = 'bg-secondary';
+        if(status === 'VERIFIED') badgeClass = 'bg-success';
+        if(status === 'PENDING') badgeClass = 'bg-warning text-dark';
+        if(status === 'REJECTED') badgeClass = 'bg-danger';
+
+        return `
+            <div class="expert-item">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle bg-light text-primary fw-bold d-flex align-items-center justify-content-center me-3" style="width:50px; height:50px; border-radius:50%; font-size:20px;">
+                            ${expert.full_name.charAt(0)}
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">${expert.full_name}</h5>
+                            <small class="text-muted">@${expert.username} • ID: ${expert.user_id}</small>
+                        </div>
+                    </div>
+                    <span class="badge badge-status ${badgeClass}">${status}</span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4"><small class="text-muted d-block">Học vị / Học hàm</small> <b>${expert.title || ''} ${expert.qualification || 'N/A'}</b></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Chuyên môn</small> <b>${expert.specialization || 'N/A'}</b></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Kinh nghiệm</small> <b>${expert.years_of_experience || 0} năm</b></div>
+                </div>
+
+                <div class="bg-light p-3 rounded-3 mb-3">
+                    <small class="text-muted d-block mb-1">Giới thiệu chuyên môn:</small>
+                    <p class="small mb-0 text-dark">${expert.bio || 'Chưa có thông tin tiểu sử.'}</p>
+                </div>
+
+                ${status === 'PENDING' ? `
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-outline-danger btn-action" onclick="rejectExpert(${expert.user_id}, '${expert.full_name}')">
+                            <i class="fa-solid fa-xmark me-2"></i>Từ chối
+                        </button>
+                        <button class="btn btn-primary btn-action text-dark" onclick="verifyExpert(${expert.user_id}, '${expert.full_name}')">
+                            <i class="fa-solid fa-check me-2"></i>Duyệt hồ sơ
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    // Logic xử lý API
+    async function verifyExpert(id, name) {
+        if (!confirm(`Phê duyệt chuyên gia ${name}?`)) return;
+        const res = await fetch(`/admin/api/experts/${id}/verify`, { method: 'POST' });
+        const d = await res.json();
+        alert(d.message);
+        loadData();
+    }
+
+    async function rejectExpert(id, name) {
+        const reason = prompt(`Lý do từ chối ${name}:`, "Hồ sơ chưa đủ thông tin");
+        if (!reason) return;
+        const res = await fetch(`/admin/api/experts/${id}/reject`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ reason })
+        });
+        const d = await res.json();
+        alert(d.message);
+        loadData();
+    }
+
+    function loadData() {
+        loadStats();
+        loadExperts(currentTab);
+    }
+
+    // Tab Events
+    document.querySelectorAll('#adminTabs button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#adminTabs button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.dataset.tab;
+            loadExperts(currentTab);
+        });
+    });
+
+    loadData();
+</script>
+</body>
+</html>

@@ -1,16 +1,9 @@
 from flask import Blueprint, session, jsonify, request, render_template
 from database import TherapySession
 from models import User, ExpertProfile
-from .utils import (
-    is_admin,
-    get_pending_experts_list,
-    get_all_experts_list,
-    verify_expert_profile,
-    reject_expert_profile,
-    get_admin_stats
-)
+from .utils import (is_admin, get_pending_experts_list, get_all_experts_list, verify_expert_profile, reject_expert_profile, get_admin_stats)
 
-admin_bp = Blueprint("admin_bp", __name__, url_prefix="/admin")
+admin_bp = Blueprint("admin_bp", __name__, url_prefix="/admin", template_folder= "html_templates")
 
 
 # Check admin cho tất cả routes
