@@ -203,6 +203,8 @@ class Appointment(Base):
     
     created_at = Column(String, default=lambda: datetime.now().isoformat(timespec="seconds"))
 
+    meet_link = Column(String, nullable=True)
+
     student = relationship("User", foreign_keys=[student_id], backref="student_appointments")
     therapist = relationship("User", foreign_keys=[therapist_id], backref="therapist_appointments")
 

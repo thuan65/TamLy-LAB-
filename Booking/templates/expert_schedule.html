@@ -1,0 +1,81 @@
+﻿{% extends "index.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 600px;">
+        <h1 class="display-6">Quản lý lịch hẹn tư vấn</h1>
+        <p class="text-primary">Dành cho chuyên gia</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="bg-light rounded p-4 shadow-sm">
+                {% if appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>ID</th>
+                                <th>Hình thức</th>
+                                <th>Link Meeting (Online)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in appointments %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ item.start_time }}</div>
+                                    <small class="text-muted">đến {{ item.end_time }}</small>
+                                </td>
+
+                                <td>{{ item.student_name }}</td>
+
+                                <td>
+                                    {% if item.meet_type == 'online' %}
+                                    <span class="badge bg-info text-dark">Online</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Offline</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.meet_type == 'online' %}
+                                    <form action="{{ url_for('booking.update_meet_link') }}" method="POST" class="d-flex gap-2">
+                                        <input type="hidden" name="appointment_id" value="{{ item.id }}">
+
+                                        <input type="text" class="form-control form-control-sm"
+                                               name="meet_link"
+                                               placeholder="Dán link Google Meet..."
+                                               value="{{ item.meet_link if item.meet_link else '' }}"
+                                               style="min-width: 200px;">
+
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-save"></i> Lưu
+                                        </button>
+                                    </form>
+
+                                    {% if item.meet_link %}
+                                    <div class="mt-1">
+                                        <small class="text-success"><i class="fa fa-check-circle"></i> Đã có link</small>
+                                        <a href="{{ item.meet_link }}" target="_blank" class="small ms-2">Bắt đầu</a>
+                                    </div>
+                                    {% endif %}
+
+                                    {% else %}
+                                    <span class="text-muted small">227 Nguyễn Văn Cừ</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted">Chưa có lịch hẹn nào sắp tới.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

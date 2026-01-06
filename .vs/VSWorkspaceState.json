@@ -1,12 +1,14 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Aerial",
     "\\Booking",
     "\\Booking\\templates",
     "\\Login-Forum",
+    "\\loginforum",
     "\\migrations",
     "\\templates"
   ],
-  "SelectedNode": "\\createTherapyDB.py",
+  "SelectedNode": "\\Booking\\templates\\my_appointments.html",
   "PreviewInSolutionExplorer": false
 }

@@ -99,13 +99,17 @@
                                         </td>
 
                                         <td class="small">
+                                            {% if item.meet_type == 'online' %}
+                                            Google Meet Link
+                                            {% else %}
                                             {{ item.location }}
+                                            {% endif %}
                                             {% if item.meet_link %}
-                                                <div class="mt-1">
-                                                    <a class="text-primary" href="{{ item.meet_link }}" target="_blank" rel="noopener">
-                                                        Mở link <i class="fa fa-arrow-up-right-from-square ms-1"></i>
-                                                    </a>
-                                                </div>
+                                            <div class="mt-1">
+                                                <a class="text-primary" href="{{ item.meet_link }}" target="_blank" rel="noopener">
+                                                    Mở link <i class="fa fa-arrow-up-right-from-square ms-1"></i>
+                                                </a>
+                                            </div>
                                             {% endif %}
                                         </td>
 

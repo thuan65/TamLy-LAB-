@@ -91,8 +91,19 @@
                                 <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
                                 <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item">Forum</a>
                                 <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Expert</a>
+                                {# Kiểm tra nếu là EXPERT #}
+                                {% if session.get('role')|upper == 'EXPERT' %}
+
+
+                                <a href="{{ url_for('booking.expert_schedule') }}" class="dropdown-item">Quản lý lịch hẹn</a>
+
+                                {# Nếu là STUDENT hoặc chưa đăng nhập #}
+                                {% else %}
+
                                 <a href="{{ url_for('booking.select_therapist') }}" class="dropdown-item">Booking Appointment</a>
                                 <a href="{{ url_for('booking.my_appointments') }}" class="dropdown-item">My Appointments History</a>
+
+                                {% endif %}
                                 <a href="{{ url_for('Aerial.index') }}" class="dropdown-item">Chatbot</a>
                             </div>
                         </div>

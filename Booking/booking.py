@@ -107,7 +107,7 @@ def calendar(therapist_id):
             db.close()
             return render_template("booking_error.html", message=error_msg, back_url=url_for('booking.select_therapist'))
 
-        location = "227 Nguyễn Văn Cừ" if meet_type == "offline" else "Google Meet Link (sẽ gửi qua mail)"
+        location = "227 Nguyễn Văn Cừ" if meet_type == "offline" else "Google Meet Link"
         
         new_app = Appointment(
             student_id=student_id,
@@ -180,7 +180,7 @@ def my_appointments():
         db.close()
         return "Không tìm thấy thông tin học sinh."
 
-#appointments được lấy ra theo student id
+    #appointments được lấy ra theo student id
     appointments = db.query(Appointment).filter_by(student_id=student.id)\
                     .order_by(Appointment.start_time.desc()).all()
     
@@ -189,15 +189,81 @@ def my_appointments():
         therapist = app.therapist
         expert_profile = therapist.expert_profile
         app_list.append({
+            "id": app.id,
             "start_time": app.start_time,
             "end_time": app.end_time,
             "therapist_name": expert_profile.full_name if expert_profile else "Expert", #Default name
             "therapist_img": getattr(expert_profile, "image", None),    
             "meet_type": app.meet_type,
             "location": app.location,
+            "meet_link": app.meet_link,
             "status": app.status
         })
+    db.close()
+    return render_template("my_appointments.html", appointments=app_list)
+
+# =========================================================
+# ROUTE 4: KHU VỰC DÀNH CHO CHUYÊN GIA (EXPERT)
+# =========================================================
+
+# 1. Xem danh sách lịch hẹn của chính mình
+@booking_bp.route("/expert/schedule")
+def expert_schedule():
+    # Kiểm tra đăng nhập và role
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+    
+    db = TherapySession()
+    current_user = db.query(User).filter_by(id=session["user_id"]).first()
+
+    # Chỉ cho phép Expert vào
+    if not current_user or current_user.role != "EXPERT":
+        db.close()
+        return "Bạn không có quyền truy cập trang này (Yêu cầu quyền Chuyên gia)."
+
+    # Lấy danh sách lịch hẹn mà mình là therapist
+    # Sắp xếp: Lịch mới nhất lên đầu (hoặc sắp theo ngày tăng dần tùy bà)
+    appointments = db.query(Appointment).filter_by(therapist_id=current_user.id)\
+                    .order_by(Appointment.start_time.desc()).all()
+
+    # Xử lý data để đẩy ra view
+    schedule_list = []
+    for app in appointments:
+        student = app.student
+        student_profile = student.student_profile
+        
+        schedule_list.append({
+            "id": app.id,
+            "start_time": app.start_time,
+            "end_time": app.end_time,
+            "student_name": student_profile.full_name if student_profile else "Student",
+            "meet_type": app.meet_type,
+            "meet_link": app.meet_link, # Link hiện tại
+            "status": app.status
+        })
+
+    db.close()
+    return render_template("expert_schedule.html", appointments=schedule_list)
+
+
+# 2. Xử lý lưu link Google Meet
+@booking_bp.route("/expert/update-link", methods=["POST"])
+def update_meet_link():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    appointment_id = request.form.get("appointment_id")
+    link = request.form.get("meet_link")
+
+    db = TherapySession()
+    
+    # Tìm cuộc hẹn và check xem có đúng là của expert đang đăng nhập không (bảo mật)
+    app_obj = db.query(Appointment).filter_by(id=appointment_id).first()
+    
+    if app_obj and app_obj.therapist_id == session["user_id"]:
+        app_obj.meet_link = link # Cập nhật link
+        db.commit()
     
     db.close()
     
-    return render_template("my_appointments.html", appointments=app_list)
+    return redirect(url_for("booking.expert_schedule"))
