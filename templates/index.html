@@ -80,8 +80,8 @@
 
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav me-auto">
-                        <a href="index" class="nav-item nav-link active">Home</a>
-                        <a href="about" class="nav-item nav-link">About</a>
+                        <a href="{{ url_for('index') }}" class="nav-item nav-link active">Home</a>
+                        <a href="{{ url_for('about') }}" class="nav-item nav-link">About</a>
                         <a href="{{ url_for('quiz_bp.trang_quiz') }}" class="nav-item nav-link">Quiz</a>
 
                         <div class="nav-item dropdown">

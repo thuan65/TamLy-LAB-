@@ -37,6 +37,171 @@
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
     </div>
     <!-- Spinner End -->
+
+    <!-- Topbar Start -->
+    <div class="topbar">
+        <div class="container topbar-inner">
+            <div class="logo">Tâm lý</div>
+
+            <div class="topbar-item">
+                <i class="fa fa-phone"></i>
+                <div class="topbar-text">
+                    <small>Call Us</small>
+                    <span>+012 345 6789</span>
+                </div>
+            </div>
+
+            <div class="topbar-item">
+                <i class="fa fa-envelope"></i>
+                <div class="topbar-text">
+                    <small>Mail Us</small>
+                    <span>info@domain.com</span>
+                </div>
+            </div>
+
+            <div class="topbar-item">
+                <i class="fa fa-map-marker-alt"></i>
+                <div class="topbar-text">
+                    <small>Address</small>
+                    <span>227 Nguyễn Văn Cừ, phường Chợ Quán</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+    <!-- Navbar Start -->
+    <div class="container-fluid bg-secondary px-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="nav-bar">
+            <nav class="navbar navbar-expand-lg bg-primary navbar-dark px-4 py-lg-0">
+                <h4 class="d-lg-none m-0">Menu</h4>
+                <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav me-auto">
+                        <a href="{{ url_for('index') }}" class="nav-item nav-link">Home</a>
+                        <a href="{{ url_for('about') }}" class="nav-item nav-link active">About</a>
+                        <a href="{{ url_for('quiz_bp.trang_quiz') }}" class="nav-item nav-link">Quiz</a>
+
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Main Features</a>
+                            <div class="dropdown-menu bg-light m-0">
+                                <a href="{{ url_for('chat.chat_waiting') }}" class="dropdown-item">Matching</a>
+                                <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
+                                <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item">Forum</a>
+                                <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Expert</a>
+                                {# Kiểm tra nếu là EXPERT #}
+                                {% if session.get('role')|upper == 'EXPERT' %}
+
+
+                                <a href="{{ url_for('booking.expert_schedule') }}" class="dropdown-item">Quản lý lịch hẹn</a>
+
+                                {# Nếu là STUDENT hoặc chưa đăng nhập #}
+                                {% else %}
+
+                                <a href="{{ url_for('booking.select_therapist') }}" class="dropdown-item">Booking Appointment</a>
+                                <a href="{{ url_for('booking.my_appointments') }}" class="dropdown-item">My Appointments History</a>
+
+                                {% endif %}
+                                <a href="{{ url_for('Aerial.index') }}" class="dropdown-item">Chatbot</a>
+                            </div>
+                        </div>
+
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Game</a>
+                            <div class="dropdown-menu bg-light m-0">
+                                <a href="/game/tetris" class="dropdown-item game-link" data-href="/game/tetris">Tetris</a>
+                                <a href="/game/2048" class="dropdown-item game-link" data-href="/game/2048">2048</a>
+                                <a href="/game/wordle" class="dropdown-item game-link" data-href="/game/wordle">Wordle</a>
+                                <a href="/game/endlessRun" class="dropdown-item game-link" data-href="/game/endlessRun">Endless Run</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="d-none d-lg-flex ms-auto align-items-center">
+
+                        {% if session.get("user_id") %}
+
+                            {# ===== Expert status icon (PENDING/NONE) ===== #}
+                            {% if session.get("role","")|upper == "EXPERT" and expert_profile %}
+
+                                {% if expert_profile.verification_status == "NONE" %}
+                                    <!-- chưa gửi -->
+                                    <a href="{{ url_for('expert_profile_bp.profile_page') }}"
+                                    class="btn btn-warning me-2"
+                                    title="Hồ sơ chưa gửi duyệt. Cần cập nhật hồ sơ.">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    </a>
+
+                                {% elif expert_profile.verification_status == "PENDING" %}
+                                    <!-- đang duyệt -->
+                                    <span class="btn btn-outline-secondary me-2"
+                                        title="Hồ sơ đang chờ duyệt">
+                                        <i class="fa-solid fa-hourglass-half"></i>
+                                    </span>
+
+                                {% elif expert_profile.verification_status == "VERIFIED" %}
+                                    <!-- đã duyệt → không hiện gì -->
+                                {% endif %}
+                            {% endif %}
+
+                            {% if session.get("role","")|upper == "ADMIN" %}
+                                <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-primary btn-sm me-3 shadow-sm text-dark fw-bold">
+                                    <i class="fa-solid fa-shield-halved me-1"></i> Quản trị
+                                </a>
+                            {% endif %}
+
+                            {# ===== Burger user dropdown (student + expert) ===== #}
+                            <div class="nav-item dropdown">
+                                <a href="#"
+                                   class="btn btn-dark dropdown-toggle d-flex align-items-center position-relative"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-bars me-2"></i>
+                                    <span class="fw-semibold">{{ session.get("username") or "Tài khoản" }}</span>
+
+                                    {# ✅ streak chỉ cho student #}
+                                    {% if session.get("role","")|upper == "STUDENT" %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                                            🔥 <span id="streakBadge">0</span>
+                                        </span>
+                                    {% endif %}
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end bg-light m-0 shadow-sm">
+                                    <h6 class="dropdown-header">
+                                        Xin chào, {{ session.get("username") or "bạn" }}!
+                                    </h6>
+
+                                    {% if session.get("role")|upper == "EXPERT" %}
+                                        <a class="dropdown-item" href="{{ url_for('expert_profile_bp.profile_page') }}">
+                                            <i class="fa-regular fa-pen-to-square me-2"></i>Cập nhật hồ sơ
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                    {% endif %}
+
+                                    <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                                    </a>
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                            <a class="btn btn-dark ms-2" href="{{ url_for('auth.register') }}">Đăng ký</a>
+
+                        {% endif %}
+
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
     <!-- Page Header Start -->
     <div class="container-fluid page-header wow fadeIn"
         data-wow-delay="0.1s"
@@ -46,13 +211,6 @@
 
         <!-- spacer TOP (đẩy cả khối xuống) -->
         <div style="height: 30px;"></div>
-
-        <!-- Home -->
-        <a href="{{ url_for('index') }}"
-        class="btn px-4 py-2 shadow-lg"
-        style="background:#ffb703; color:#000;">
-        <i class="fa fa-home me-2"></i> Home
-        </a>
 
         <!-- About Us nằm giữa phần còn lại -->
         <div class="flex-grow-1 d-flex align-items-center">
@@ -65,33 +223,6 @@
     </div>
     </div>
     <!-- Page Header End -->
-
-
-
-
-    <!-- Video Start -->
-    <div class="container-fluid bg-primary mb-0 wow fadeIn" data-wow-delay="0.1s">
-        <div class="container">
-            <div class="row g-0">
-                <div class="col-lg-11">
-                    <div class="h-100 py-5 d-flex align-items-center">
-                        <button type="button" class="btn-play" data-bs-toggle="modal"
-                            data-src="https://www.youtube.com/embed/DWRcNpR6Kdc" data-bs-target="#videoModal">
-                            <span></span>
-                        </button>
-                        <h3 class="ms-5 mb-0">Mỗi sinh viên đều xứng đáng được chăm sóc và hỗ trợ tâm lý.</h3>
-                    </div>
-                </div>
-                <div class="d-none d-lg-block col-lg-1">
-                    <div class="h-100 w-100 bg-secondary d-flex align-items-center justify-content-center">
-                        <span class="text-white" style="transform: rotate(-90deg);">Scroll Down</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Video End -->
-
 
     <!-- Video Modal Start -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -208,7 +339,7 @@
             <div class="copyright pt-5">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="fw-semi-bold" href="#">Aerial</a>, All Right Reserved.
+                        &copy; <a class="fw-semi-bold" href="#">Thất đại tội</a>, All Right Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         <!--/*** The author’s attribution link must remain intact in the template. ***/-->
