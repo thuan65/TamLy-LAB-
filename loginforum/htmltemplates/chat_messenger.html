@@ -29,7 +29,11 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <style>
-        .chat-shell { height: 70vh; min-height: 520px; }
+        .chat-shell { height: 70vh; min-height: 520px; overflow: hidden; }
+        .chat-shell > .col-lg-4, 
+        .chat-shell > .col-lg-8 {
+            height: 100%;
+        }
         .peer-item { cursor: pointer; }
         .peer-item.active { background: rgba(0,0,0,.05); font-weight: 700; }
 
@@ -53,6 +57,10 @@
             align-items:center;
             justify-content:center;
             border-radius: 999px;
+        }
+        #chat-box {
+        flex: 1;
+        overflow-y: auto !important; 
         }
     </style>
 </head>
