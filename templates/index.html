@@ -161,7 +161,7 @@
                                     <i class="fa-solid fa-bars me-2"></i>
                                     <span class="fw-semibold">{{ session.get("username") or "Tài khoản" }}</span>
 
-                                    {# ✅ streak chỉ cho student #}
+                                    {# streak chỉ cho student #}
                                     {% if session.get("role","")|upper == "STUDENT" %}
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
                                             🔥 <span id="streakBadge">0</span>
@@ -316,6 +316,7 @@
     <!-- Search Result End -->
 
     <!-- Team Start -->
+    {% block team_section %}
     <div class="container-fluid py-5">
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
@@ -324,13 +325,30 @@
             </div>
 
             <div class="row g-4">
+                {# Bắt đầu vòng lặp lấy danh sách chuyên gia #}
+                {% for t in therapists %}
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
                     <div class="team-item d-flex h-100 p-4">
                         <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ url_for('static', filename='img/team-1.jpg') }}" alt="">
-                            <h3>Therapist 1</h3>
-                            <span>Field:</span>
+                        {# --- Logic hiển thị ảnh (Avatar) --- #}
+                            {% if t.image %}
+                                <img class="img-fluid mb-4" 
+                                     src="{{ url_for('static', filename=t.image) }}" 
+                                     alt="{{ t.full_name }}"
+                                     style="width: 100%; object-fit: cover;"> 
+                            {% else %}
+                                {# Ảnh mặc định nếu chưa có avatar #}
+                                <img class="img-fluid mb-4" 
+                                     src="{{ url_for('static', filename='img/default-avatar.png') }}" 
+                                     alt="Default Avatar">
+                            {% endif %}
+                
+                            {# --- Hiển thị Tên và Chuyên môn --- #}
+                        <h5 class="mb-0">{{ t.full_name }}</h5>
+                            <span class="text-primary" style="font-size: 0.9rem;">{{ t.field }}</span>
                         </div>
+            
+                        {# --- Giữ nguyên phần icon mạng xã hội --- #}
                         <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
                             <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-facebook-f"></i></a>
                             <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-x-twitter"></i></a>
@@ -339,41 +357,11 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.3s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ url_for('static', filename='img/team-2.jpg') }}" alt="">
-                            <h3>Therapist 2</h3>
-                            <span>Field: </span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.5s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ url_for('static', filename='img/team-3.jpg') }}" alt="">
-                            <h3>Therapist 3</h3>
-                            <span>Field: </span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+    {% endblock %}
     <!-- Team End -->
 
     {% block content %}
