@@ -32,7 +32,8 @@ from Booking.booking import booking_bp
 from Search.search_specialization import search_specialization_bp
 
 from database import TherapySession
-from models import User
+from sqlalchemy.orm import joinedload
+from models import User, ExpertProfile 
 
 
 app = Flask(__name__)
@@ -65,17 +66,42 @@ app.register_blueprint(expert_profile_bp)
 @app.route("/")
 def index():
     user_id = session.get("user_id")
-
     expert_profile = None
-    if user_id:
-        with TherapySession() as db:
+    therapists_list = [] # Danh sách để hiển thị ra HTML
+
+    with TherapySession() as db:
+        # 1. Logic lấy thông tin người dùng đang đăng nhập
+        if user_id:
             user = db.query(User).filter_by(id=user_id).first()
             if user and user.role == "EXPERT":
                 expert_profile = user.expert_profile
+        
+        # 2. Logic LẤY DANH SÁCH CHUYÊN GIA (Đã đồng bộ với booking.py)
+        # Chỉ lấy chuyên gia đã được VERIFIED
+        therapists_objs = (db.query(User)
+            .join(ExpertProfile, ExpertProfile.user_id == User.id)
+            .options(joinedload(User.expert_profile))
+            .filter(User.role == "EXPERT")
+            .filter(ExpertProfile.verification_status == "VERIFIED") # Chỉ hiện người đã duyệt
+            .filter(ExpertProfile.is_active == True)
+            .all()
+        )
+
+        # 3. Chuyển đổi dữ liệu sang Dictionary (để index.html gọi được t.image, t.field)
+        for therapist in therapists_objs:
+            profile = therapist.expert_profile
+            therapists_list.append({
+                "id": therapist.id,
+                "full_name": profile.full_name if profile else "Chuyên gia",
+                # Lấy ảnh từ profile, nếu không có thì để None (HTML sẽ xử lý default)
+                "image": getattr(profile, "image", None), 
+                "field": getattr(profile, "specialization", "Tâm lý học"),
+            })
 
     return render_template(
         "index.html",
-        expert_profile=expert_profile
+        expert_profile=expert_profile,
+        therapists=therapists_list # Truyền danh sách đã xử lý
     )
 
 @app.route("/index")
