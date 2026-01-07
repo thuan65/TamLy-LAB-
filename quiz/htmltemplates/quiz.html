@@ -3,150 +3,170 @@
 
 <head>
     <meta charset="utf-8">
-    <title>PHQ-9 - Đánh giá Sức khỏe Tâm thần</title>
+    <title>Đánh giá Sức khỏe Tinh thần</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
 
-    <!-- Favicon -->
     <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
 
-    <!-- Google Fonts & Icon CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Libraries Stylesheet -->
     <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
 
-    <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
 
-    <!-- Template Stylesheet -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
-    <!-- Small page-specific styles (nhẹ thôi, không phá theme) -->
     <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8f9fa;
+        }
+        h1, h2, h3, h4, h5, .section-title {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-weight: 700;
+        }
+        .quiz-bg {
+        background: #f4f7f8;
+        min-height: 100vh;
+        padding: 40px 0;
+        }
+
+        /* Nền của toàn bộ khu vực Quiz */
         .quiz-card {
-            border-radius: 12px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            background: #ffffff;
+            border: 1px solid #e1e8ed; 
         }
         .quiz-progress {
-            height: 10px;
-            border-radius: 999px;
-            overflow: hidden;
+            height: 8px;
+            border-radius: 10px;
             background: #e9ecef;
         }
-        .quiz-progress .progress-bar {
-            transition: width .25s ease;
-        }
-        .option-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .75rem;
-        }
         .option-pill {
-            border-radius: 999px;
+            border-radius: 50px;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border: 2px solid #002147; /* Màu Primary của Homepage */
+            color: #002147;
         }
-        .question-title {
-            line-height: 1.5;
+        .btn-check:checked + .option-pill {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+        #submitBtn {
+            background-color: #1ea3b2; 
+            border: none;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        #submitBtn:hover {
+            background-color: #168d9a;
         }
         .result-score {
-            font-size: 44px;
-            font-weight: 800;
-            line-height: 1.1;
+            font-size: 56px;
+            color: #002147;
         }
+        .text-orange { color: #fd7e14 !important; }
+        .border-orange { border-color: #fd7e14 !important; }
+
     </style>
 </head>
 
 <body>
-    <!-- Spinner Start -->
+
     <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <div class="spinner-border text-primary"></div>
     </div>
-    <!-- Spinner End -->
 
+    <div class="container-fluid py-5 quiz-bg wow fadeIn" data-wow-delay="0.1s">
+        <div class="container mb-3">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="fa-solid fa-house me-2"></i>Home
+            </a>
+        </div>
 
-
-    <!-- Quiz Start -->
-    <div class="container-fluid py-5">
-    <div class="container mb-3">
-    <a href="{{ url_for('home') }}" class="btn btn-outline-primary rounded-pill px-4">
-        <i class="fa-solid fa-house me-2"></i>Home
-    </a>
-    </div>
         <div class="container">
-            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 750px;">
+            <div class="text-center mx-auto mb-5 wow fadeIn quiz-heading" data-wow-delay="0.1s" style="max-width: 750px;">
                 <p class="section-title bg-white text-center text-primary px-3">Mental Health</p>
-                <h1 class="display-6 mb-3">Bài đánh giá sức khỏe tâm thần</h1>
-                <p class="mb-0">
-                    Trong <strong>2 tuần vừa qua</strong>, bạn gặp các vấn đề sau với tần suất như thế nào?
-                    Hãy trả lời trung thực để có đánh giá phù hợp. (Chỉ mang tính tham khảo)
+                <h1 class="display-6 mb-3">Khảo sát sức khỏe tinh thần</h1>
+                <p>
+                    Trong <strong>2 tuần vừa qua</strong>, bạn gặp các vấn đề sau với tần suất như thế nào?<br>
+                    Hãy trả lời trung thực để có kết quả phù hợp (chỉ mang tính tham khảo).
                 </p>
             </div>
 
-            <div class="row g-4 justify-content-center mt-3">
-                <div class="col-lg-10 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="bg-light rounded p-4 p-md-5 quiz-card">
-                        <!-- Progress -->
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="bg-light p-4 p-md-5 quiz-card wow fadeInUp" data-wow-delay="0.1s">
+
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <small class="text-muted">Tiến độ</small>
+                            <div class="d-flex justify-content-between mb-2">
+                                <small class="text-muted">Tiến độ khảo sát</small>
                                 <small class="text-muted"><span id="answeredCount">0</span>/<span id="totalCount">0</span></small>
                             </div>
                             <div class="quiz-progress">
-                                <div class="progress-bar bg-primary" id="progressBar" style="width: 0%"></div>
+                                <div class="progress-bar bg-primary" id="progressBar" style="width:0%"></div>
                             </div>
                         </div>
 
                         <form id="quizForm">
-                            <!-- Student info -->
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="ho_ten" placeholder="Nguyễn Văn A" required>
-                                        <label for="ho_ten">👤 Họ và tên <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ho_ten" placeholder="Họ tên" required>
+                                        <label for="ho_ten">Họ và tên *</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="mssv" placeholder="2412345" required>
-                                        <label for="mssv">🎓 MSSV <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="username" placeholder="MSSV/Username" required>
+                                        <label for="username">Tên đăng nhập *</label>
                                     </div>
                                 </div>
                             </div>
 
                             <hr class="my-4">
 
-                            <!-- Questions -->
                             <div id="questions-container"></div>
 
-                            <!-- Impact -->
-                            <div class="mt-4" id="impact-section" style="display:none;">
-                                <div class="p-4 bg-white rounded">
-                                    <h4 class="mb-3">📊 Câu hỏi cuối cùng</h4>
-                                    <p class="mb-3">
-                                        <strong>10.</strong> Những khó khăn trên đã ảnh hưởng đến học tập, công việc hoặc các sinh hoạt thường ngày của bạn như thế nào?
-                                    </p>
-                                    <div class="option-grid" id="impact-container"></div>
-                                </div>
-                            </div>
-
-                            <div class="mt-4">
-                                <button type="button" class="btn btn-primary py-3 w-100" onclick="submitQuiz()" id="submitBtn" disabled>
-                                    <i class="fa-regular fa-paper-plane me-2"></i>Nộp bài đánh giá
+                            <div class="mt-5">
+                                <button type="button" class="btn btn-primary w-100 py-3" onclick="submitQuiz()" id="submitBtn" disabled>
+                                    <i class="fa-regular fa-paper-plane me-2"></i>Nộp bài khảo sát
                                 </button>
-                                <div class="alert alert-warning mt-3 mb-0 text-center">
+                                <div class="alert alert-warning text-center mt-3 mb-0">
                                     <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                    <strong>Lưu ý:</strong> Bài test chỉ mang tính chất tham khảo, không thay thế chẩn đoán của chuyên gia.
+                                    Lưu ý: Bài khảo sát chỉ mang tính tham khảo, không thay thế chẩn đoán từ chuyên gia y tế.
                                 </div>
                             </div>
                         </form>
 
-                        <!-- Result -->
                         <div id="result" class="mt-4" style="display:none;"></div>
+
+                        <div id="afterQuizActions" style="display:none;">
+                            <div class="text-center mt-4">
+                                <a href="{{ url_for('booking.select_therapist') }}" class="btn btn-primary py-2 px-4">
+                                    <i class="fa-solid fa-user-doctor me-2"></i>Xem danh sách chuyên gia tư vấn
+                                </a>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-primary rounded-pill px-4" onclick="loadHistory()">
+                                    <i class="fa-solid fa-clock-rotate-left me-2"></i>Xem lịch sử khảo sát
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="history" class="mt-5" style="display:none;">
+                            <h4 class="mb-4 text-center">Lịch sử khảo sát của bạn</h4>
+                            <div id="history-list" class="row g-4"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -157,17 +177,17 @@
     <!-- Footer Start -->
     <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
-            <div class="row g-5 py-5">
-                <div class="col-lg-4 col-md-6">
+            <div class="row g-5">
+                <div class="col-lg-4  col-md-6">
                     <h4 class="text-light mb-4">Our Office</h4>
                     <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
                     <div class="d-flex pt-3">
-                        <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-x-twitter"></i></a>
-                        <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-youtube"></i></a>
-                        <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                         <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-x-twitter"></i></a>
+                         <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                         <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-youtube"></i></a>
+                         <a class="btn btn-square btn-primary me-2" href="#"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -179,8 +199,8 @@
                     <p>24127302 - Nguyễn Xuân Quyên</p>
                     <p>24127106 - Lai Phạm Như Phúc</p>
                     <p>24127207 - Nguyễn Thục Nghi</p>
-                </div>
-                <div class="col-lg-4 col-md-6">
+                </div> 
+                <div class="col-lg-4 col-md-6">   
                     <h6 class="text-light">Course Information</h6>
                     <p class="mb-1">Course Name: Computational Thinking</p>
                     <h6 class="text-light">Course ID: CSC10014</h6>
@@ -193,7 +213,7 @@
             <div class="copyright pt-5">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="fw-semi-bold" href="#">Aerial</a>, All Right Reserved.
+                        &copy; <a class="fw-semi-bold" href="#">Thất đại tội</a>, All Right Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         Designed By <a class="fw-semi-bold" href="https://htmlcodex.com">HTML Codex</a>
@@ -204,223 +224,226 @@
     </div>
     <!-- Footer End -->
 
-    <!-- Back to Top -->
+     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
-
-    <!-- Template Javascript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
     <script>
         let totalQuestions = 0;
+        let currentUserId = null;
 
-        // Load câu hỏi từ API
         async function loadQuestions() {
             try {
                 const res = await fetch('/quiz/lay-cau-hoi');
                 const data = await res.json();
-
-                const container = document.getElementById('questions-container');
-                container.innerHTML = "";
-                totalQuestions = data.cau_hoi.length;
-
+                
+                const ctn = document.getElementById('questions-container');
+                ctn.innerHTML = '';
+                
+                // có 9 câu + 1 câu ảnh hưởng = 10
+                totalQuestions = data.cau_hoi.length + 1;
                 document.getElementById('totalCount').textContent = totalQuestions;
 
-                data.cau_hoi.forEach((cauHoi, index) => {
-                    const block = document.createElement('div');
-                    block.className = "p-4 bg-white rounded mb-3";
-
-                    const optionsHtml = data.tan_suat.map((label, value) => `
-                        <div>
-                            <input class="btn-check" type="radio" id="q${index}_${value}" name="q${index}" value="${value}" onchange="updateProgress()">
-                            <label class="btn btn-outline-primary option-pill" for="q${index}_${value}">${label}</label>
+                // Render 9 câu hỏi đầu
+                data.cau_hoi.forEach((q, i) => {
+                    ctn.innerHTML += `
+                        <div class="p-4 bg-white rounded mb-3 shadow-sm">
+                            <h5 class="mb-3">${i+1}. ${q}</h5>
+                            <div class="option-grid">
+                                ${data.tan_suat.map((label, value) => `
+                                    <input type="radio" class="btn-check" name="q${i}" id="q${i}_${value}" value="${value}" onchange="updateProgress()">
+                                    <label class="btn btn-outline-primary option-pill" for="q${i}_${value}">${label}</label>
+                                `).join('')}
+                            </div>
                         </div>
-                    `).join("");
-
-                    block.innerHTML = `
-                        <h5 class="mb-3 question-title"><strong>${index + 1}.</strong> ${cauHoi}</h5>
-                        <div class="option-grid">${optionsHtml}</div>
                     `;
-
-                    container.appendChild(block);
                 });
 
-                // Impact options
-                const impactContainer = document.getElementById('impact-container');
-                impactContainer.innerHTML = "";
-                data.anh_huong.forEach((label, value) => {
-                    const div = document.createElement('div');
-                    div.innerHTML = `
-                        <input class="btn-check" type="radio" id="impact_${value}" name="impact" value="${value}" onchange="updateProgress()">
-                        <label class="btn btn-outline-primary option-pill" for="impact_${value}">${label}</label>
-                    `;
-                    impactContainer.appendChild(div);
-                });
-
-            } catch (error) {
-                alert('❌ Lỗi khi tải câu hỏi: ' + error.message);
-            }
+                // Render câu ảnh hưởng
+                ctn.innerHTML += `
+                    <div class="p-4 bg-white rounded mb-3 shadow-sm">
+                        <h5 class="mb-3">${totalQuestions}. Những vấn đề trên gây khó khăn thế nào cho cuộc sống của bạn?</h5>
+                        <div class="option-grid">
+                            ${data.anh_huong.map((label, value) => `
+                                <input type="radio" class="btn-check" name="impact" id="impact_${value}" value="${value}" onchange="updateProgress()">
+                                <label class="btn btn-outline-primary option-pill" for="impact_${value}">${label}</label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (e) { console.error("Lỗi tải câu hỏi:", e); }
         }
 
-        // Cập nhật progress bar
         function updateProgress() {
-            let answered = 0;
-
-            for (let i = 0; i < totalQuestions; i++) {
-                if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
-            }
-
+            const answered = document.querySelectorAll('input[type=radio]:checked').length;
             document.getElementById('answeredCount').textContent = answered;
-
-            const progress = (answered / totalQuestions) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-
-            // Hiện impact khi đã trả lời hết 9 câu
-            if (answered === totalQuestions) {
-                const impactSection = document.getElementById('impact-section');
-                impactSection.style.display = 'block';
-                impactSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-
-            const impactChecked = document.querySelector('input[name="impact"]:checked');
-            document.getElementById('submitBtn').disabled = !(answered === totalQuestions && impactChecked);
+            const percent = (answered / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('submitBtn').disabled = (answered !== totalQuestions);
         }
 
         // Submit
         async function submitQuiz() {
+            // 1. Lấy thông tin định danh
             const hoTen = document.getElementById('ho_ten').value.trim();
-            const mssv = document.getElementById('mssv').value.trim();
-
-            if (!hoTen || !mssv) {
-                alert('⚠️ Vui lòng nhập đầy đủ họ tên và MSSV!');
+            const user = document.getElementById('username').value.trim();
+            
+            // 2. Kiểm tra thông tin định danh (Validation)
+            if (!hoTen || !user) {
+                alert('Vui lòng nhập đầy đủ Họ tên và Tên đăng nhập (hoặc MSSV)!');
                 return;
             }
 
+            // 3. Thu thập đáp án của 9 câu hỏi tần suất
             let answers = [];
-            for (let i = 0; i < totalQuestions; i++) {
+            for (let i = 0; i < totalQuestions - 1; i++) {
                 const choice = document.querySelector(`input[name="q${i}"]:checked`);
                 if (!choice) {
-                    alert(`⚠️ Vui lòng trả lời câu hỏi ${i + 1}!`);
+                    alert(`Bạn chưa hoàn thành câu hỏi số ${i + 1}`);
                     return;
                 }
                 answers.push(Number(choice.value));
             }
 
-            const impactChoice = document.querySelector('input[name="impact"]:checked');
-            if (!impactChoice) {
-                alert('⚠️ Vui lòng chọn mức độ ảnh hưởng!');
+            // 4. Thu thập đáp án câu thứ 10 (Mức độ ảnh hưởng)
+            const impactRadio = document.querySelector('input[name="impact"]:checked');
+            if (!impactRadio) {
+                alert('Vui lòng trả lời câu hỏi về mức độ ảnh hưởng cuộc sống!');
                 return;
             }
+            const impactValue = Number(impactRadio.value);
 
+            // 5. Hiển thị trạng thái chờ trên nút bấm
             const btn = document.getElementById('submitBtn');
+            const originalContent = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý dữ liệu...';
 
+            // 6. Gửi yêu cầu POST đến server
             try {
                 const res = await fetch('/quiz/nop-bai', {
                     method: 'POST',
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        ho_ten: hoTen,
-                        mssv: mssv,
-                        tra_loi: answers,
-                        anh_huong: Number(impactChoice.value)
+                        ho_ten: hoTen,      
+                        username: user,     
+                        tra_loi: answers,   
+                        anh_huong: impactValue 
                     })
                 });
 
                 const data = await res.json();
 
                 if (data.success) {
+                    // Lưu lại ID người dùng để tải lịch sử sau này
+                    currentUserId = data.user_id; 
+                    
+                    // Gọi hàm hiển thị kết quả
                     showResult(data);
+                    
+                    // Cuộn màn hình đến phần kết quả
                     document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                    alert('Lỗi: ' + (data.message || 'Không thể lưu kết quả'));
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-regular fa-paper-plane me-2"></i>Nộp bài đánh giá';
+                    btn.innerHTML = originalContent;
                 }
-            } catch (error) {
-                alert('❌ Lỗi kết nối: ' + error.message);
+            } catch (e) {
+                console.error("Lỗi nộp bài:", e);
+                alert("Lỗi kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!");
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-regular fa-paper-plane me-2"></i>Nộp bài đánh giá';
+                btn.innerHTML = originalContent;
             }
         }
 
-        // Result
         function showResult(data) {
-            const box = document.getElementById('result');
+            document.getElementById('quizForm').style.display = 'none';
+            document.querySelector('.quiz-heading').style.display = 'none';
 
-            let levelClass = 'text-success';
-            let borderClass = 'border-success';
-            if (data.loai === 'warning') { levelClass = 'text-warning'; borderClass = 'border-warning'; }
-            if (data.loai === 'danger') { levelClass = 'text-danger'; borderClass = 'border-danger'; }
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = 'block';
+            document.getElementById('afterQuizActions').style.display = 'block';
 
-            let canhBaoHtml = '';
-            if (data.canh_bao) {
-                canhBaoHtml = `
-                    <div class="alert alert-danger text-center mt-3">
-                        <h5 class="mb-1">${data.canh_bao}</h5>
-                        <div>Vui lòng liên hệ ngay với chuyên gia hoặc hotline hỗ trợ: <strong>115</strong></div>
-                    </div>
-                `;
-            }
+            let colorClass = "";
+            if (data.diem <= 9) colorClass = "text-success";
+            else if (data.diem <= 14) colorClass = "text-warning";
+            else if (data.diem <= 19) colorClass = "text-orange";
+            else colorClass = "text-danger";
+            
+            resDiv.innerHTML = `
+                <div class="text-center p-4 bg-white rounded border">
+                    <h3 class="mb-3">Kết quả khảo sát</h3>
 
-            box.innerHTML = `
-                <div class="p-4 p-md-5 bg-white rounded border ${borderClass}">
-                    <div class="text-center mb-4">
-                        <h3 class="mb-2">${data.msg || 'Kết quả đánh giá'}</h3>
-                        <div class="result-score ${levelClass}">${data.icon || ''} ${data.diem}/27</div>
-                        <div class="fs-4 mt-2">
-                            Mức độ: <strong class="${levelClass}">${data.muc_do}</strong>
-                        </div>
-                        <div class="text-muted mt-2">
-                            Mức độ ảnh hưởng: <strong>${data.anh_huong_text}</strong>
-                        </div>
-                    </div>
+                    <div class="result-score ${colorClass}">${data.diem}/27</div>
 
-                    ${canhBaoHtml}
-
-                    <div class="row g-3 mt-1">
-                        <div class="col-lg-6">
-                            <div class="p-4 bg-light rounded">
-                                <h5 class="mb-3"><i class="fa-solid fa-lightbulb me-2 text-primary"></i>Đánh giá & Lời khuyên</h5>
-                                <ul class="mb-0">
-                                    ${(data.loi_khuyen || []).map(item => `<li class="mb-1">${item}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="p-4 bg-light rounded">
-                                <h5 class="mb-3"><i class="fa-solid fa-bullseye me-2 text-primary"></i>Hành động tiếp theo</h5>
-                                <ul class="mb-0">
-                                    ${(data.hanh_dong || []).map(item => `<li class="mb-1">${item}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <!-- Nếu bạn chưa có route /therapists, đổi lại sau -->
-                        <a href="/therapists" class="btn btn-primary py-2 px-4">
-                            <i class="fa-solid fa-user-doctor me-2"></i>Xem danh sách chuyên gia tư vấn
-                        </a>
+                    <h4 class="mt-2">Mức độ: <span class="${colorClass}">${data.muc_do}</span></h4>
+                    <p class="text-muted">Ảnh hưởng: ${data.anh_huong_text}</p>
+                    ${data.canh_bao ? `<div class="alert alert-danger"><strong>CẢNH BÁO:</strong> ${data.canh_bao}</div>` : ''}
+                    <div class="row g-3 text-start mt-3">
+                        <div class="col-md-6"><div class="p-3 bg-light rounded"><h6>Lời khuyên:</h6><small>${data.loi_khuyen.join('<br>')}</small></div></div>
+                        <div class="col-md-6"><div class="p-3 bg-light rounded"><h6>Hành động:</h6><small>${data.hanh_dong.join('<br>')}</small></div></div>
                     </div>
                 </div>
             `;
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
 
-            box.style.display = 'block';
-            document.getElementById('quizForm').style.display = 'none';
+        async function loadHistory() {
+            const res = await fetch(`/quiz/lich-su/${currentUserId}`);
+            const data = await res.json();
+            const historyDiv = document.getElementById('history');
+            historyDiv.style.display = 'block';
+            
+            // Tạo cấu trúc danh sách lịch sử
+            let html = '<h4 class="mb-4 text-center">Lịch sử khảo sát của bạn</h4><div class="row g-4">';
+            
+            data.lich_su.forEach((log, index) => {
+                // Xác định màu sắc dựa trên điểm số
+                let statusColor = "";
+                let borderStyle = "";
+                
+                if (log.diem <= 9) {
+                    statusColor = "text-success"; 
+                    borderStyle = "border-success";
+                } else if (log.diem <= 14) {
+                    statusColor = "text-warning"; 
+                    borderStyle = "border-warning";
+                } else if (log.diem <= 19) {
+                    statusColor = "text-orange"; 
+                    borderStyle = "border-orange";
+                } else {
+                    statusColor = "text-danger";  
+                    borderStyle = "border-danger";
+                }
+
+                html += `
+                    <div class="col-md-6">
+                        <div class="card history-card h-100 border-2 ${borderStyle}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-secondary">#${data.lich_su.length - index}</span>
+                                    <span class="fs-4">${log.icon || ''}</span>
+                                </div>
+                                <h5 class="${statusColor}">${log.diem}/27 điểm</h5>
+                                <p class="mb-1"><strong>Mức độ:</strong> ${log.muc_do}</p>
+                                <p class="small text-muted mb-0"><i class="bi bi-calendar-event me-1"></i>${log.thoi_gian}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            historyDiv.innerHTML = html;
+            historyDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
         window.onload = loadQuestions;
     </script>
 </body>
-
 </html>
