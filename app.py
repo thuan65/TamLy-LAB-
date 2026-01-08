@@ -30,6 +30,7 @@ from loginforum.forum import forum
 from loginforum.chat_expert import chat_expert_bp
 from Booking.booking import booking_bp
 from Search.search_specialization import search_specialization_bp
+from StudentManagement.student_management import student_mgmt_bp
 
 from database import TherapySession
 from sqlalchemy.orm import joinedload
@@ -62,6 +63,7 @@ app.register_blueprint(search_specialization_bp)
 app.register_blueprint(streak_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(expert_profile_bp)
+app.register_blueprint(student_mgmt_bp)
 
 @app.route("/")
 def index():

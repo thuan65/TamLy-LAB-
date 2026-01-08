@@ -1,0 +1,39 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container py-5">
+    <h3>Báo cáo chi tiết: {{ student.username }}</h3>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Lịch sử Mood (Từ Nhật ký)</h4>
+            <table class="table table-sm">
+                <thead><tr><th>Ngày</th><th>Cảm xúc</th><th>Điểm</th></tr></thead>
+                <tbody>
+                    {% for m in moods %}
+                    <tr>
+                        <td>{{ m.created_at }}</td>
+                        <td>{{ m.mood }}</td>
+                        <td>{{ m.mood_score }}/5</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h4>Lịch sử Quiz</h4>
+            <table class="table table-sm">
+                <thead><tr><th>Ngày làm</th><th>Điểm</th><th>Đánh giá</th></tr></thead>
+                <tbody>
+                    {% for q in quizzes %}
+                    <tr>
+                        <td>{{ q.created_at }}</td>
+                        <td>{{ q.score }}</td>
+                        <td>{{ q.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

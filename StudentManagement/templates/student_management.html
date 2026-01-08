@@ -1,0 +1,94 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Quản lý sinh viên</h2>
+    
+    <form action="" method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Tìm tên hoặc username sinh viên...">
+            <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+        </div>
+    </form>
+
+    <h4>Sinh viên theo dõi</h4>
+    <div class="row g-4 mb-5">
+        {% for s in accepted_students %}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">{{ s.username }}</h5>
+                    
+                    <p>Sức khỏe: 
+                        <span id="badge-{{ s.id }}" class="badge {{ 'bg-success' if s.status_tag == 'CURED' else 'bg-danger' }}">
+                            {{ 'ĐÃ KHỎI BỆNH' if s.status_tag == 'CURED' else 'ĐANG ĐIỀU TRỊ' }}
+                        </span>
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        {% if s.request_status == 'accepted' %}
+                            <a href="{{ url_for('student_mgmt.view_report', student_id=s.id) }}" class="btn btn-sm btn-primary">Xem báo cáo (Quiz/Mood)</a>
+                        {% elif s.request_status == 'pending' %}
+                            <button class="btn btn-sm btn-secondary" disabled>Đã gửi yêu cầu</button>
+                        {% else %}
+                            <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning">Yêu cầu quyền truy cập</button>
+                        {% endif %}
+
+                        <button onclick="toggleStatus('{{ s.id }}')" id="status-btn-{{ s.id }}" class="btn btn-sm {{ 'btn-success' if s.status_tag == 'CURED' else 'btn-outline-success' }}">
+                            {{ 'Đã khỏi bệnh' if s.status_tag == 'CURED' else 'Đánh dấu khỏi bệnh' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if searched_students %}
+    <h4>Kết quả tìm kiếm</h4>
+    <div class="row g-4">
+        {% for s in searched_students %}
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ s.username }}</h5>
+                    <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning">Yêu cầu xem lịch sử</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function sendRequest(sid, btn) {
+    fetch(`/expert/request-quiz/${sid}`, {method: 'POST'})
+    .then(r => r.json())
+    .then(data => {
+        btn.innerText = "Đã gửi yêu cầu";
+        btn.disabled = true;
+    });
+}
+function toggleStatus(sid) {
+    fetch(`/expert/toggle-status/${sid}`, {method: 'POST'})
+    .then(r => r.json())
+    .then(data => {
+        // Cập nhật giao diện ngay lập tức
+        const btn = document.getElementById(`status-btn-${sid}`);
+        const badge = document.getElementById(`badge-${sid}`);
+        
+        if (data.new_status === 'CURED') {
+            btn.innerText = 'Đã khỏi bệnh';
+            btn.className = 'btn btn-sm btn-success';
+            badge.innerText = 'ĐÃ KHỎI BỆNH';
+            badge.className = 'badge bg-success';
+        } else {
+            btn.innerText = 'Đánh dấu khỏi bệnh';
+            btn.className = 'btn btn-sm btn-outline-success';
+            badge.innerText = 'ĐANG ĐIỀU TRỊ';
+            badge.className = 'badge bg-danger';
+        }
+    });
+}
+</script>
+{% endblock %}
