@@ -19,7 +19,6 @@
     <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
 
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
     <style>
@@ -32,12 +31,10 @@
             font-weight: 700;
         }
         .quiz-bg {
-        background: #f4f7f8;
-        min-height: 100vh;
-        padding: 40px 0;
+            background: #f4f7f8;
+            min-height: 100vh;
+            padding: 40px 0;
         }
-
-        /* Nền của toàn bộ khu vực Quiz */
         .quiz-card {
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
@@ -53,7 +50,7 @@
             border-radius: 50px;
             padding: 10px 20px;
             transition: all 0.3s;
-            border: 2px solid #002147; /* Màu Primary của Homepage */
+            border: 2px solid #002147;
             color: #002147;
         }
         .btn-check:checked + .option-pill {
@@ -75,7 +72,12 @@
         }
         .text-orange { color: #fd7e14 !important; }
         .border-orange { border-color: #fd7e14 !important; }
-
+        .history-lookup-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -105,6 +107,24 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="bg-light p-4 p-md-5 quiz-card wow fadeInUp" data-wow-delay="0.1s">
+
+                        <!-- Phần xem lại lịch sử -->
+                        <div class="history-lookup-section" id="historyLookupSection">
+                            <h5 class="mb-3 text-center">
+                                <i class="fa-solid fa-clock-rotate-left me-2"></i>Xem lại lịch sử đánh giá của bạn
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <button class="btn btn-outline-primary w-100 py-3" onclick="lookupCurrentUserHistory()" id="btnLookupHistory">
+                                        <i class="fa-solid fa-search me-2"></i> Xem lịch sử đánh giá
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="inline-history" class="mt-4" style="display:none;"></div>
+                        </div>
+
+                        <hr class="my-4">
 
                         <div class="mb-4">
                             <div class="d-flex justify-content-between mb-2">
@@ -156,14 +176,19 @@
                                 </a>
                             </div>
                             <div class="text-center mt-3">
-                                <button class="btn btn-outline-primary rounded-pill px-4" onclick="loadHistory()">
+                                <button class="btn btn-outline-primary rounded-pill px-4" onclick="loadHistoryAfterQuiz()">
                                     <i class="fa-solid fa-clock-rotate-left me-2"></i>Xem lịch sử khảo sát
                                 </button>
                             </div>
                         </div>
 
                         <div id="history" class="mt-5" style="display:none;">
-                            <h4 class="mb-4 text-center">Lịch sử khảo sát của bạn</h4>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="mb-0">Lịch sử khảo sát</h4>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="hideHistory()">
+                                    <i class="fa-solid fa-times"></i> Đóng
+                                </button>
+                            </div>
                             <div id="history-list" class="row g-4"></div>
                         </div>
 
@@ -172,13 +197,12 @@
             </div>
         </div>
     </div>
-    <!-- Quiz End -->
 
     <!-- Footer Start -->
     <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
             <div class="row g-5">
-                <div class="col-lg-4  col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <h4 class="text-light mb-4">Our Office</h4>
                     <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, <br> P. Chợ Quán, TPHCM</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
@@ -196,7 +220,7 @@
                     <p>24127386 - Vũ Đỗ Mạnh Hùng</p>
                     <p>24127248 - Nguyễn Trần Phương Thúy</p>
                     <p>24127086 - Trần Hoàng Khánh My</p>
-                    <p>24127302 - Nguyễn Xuân Quyên</p>
+                    <p>24127302 - Nguyễn Xuân Quyền</p>
                     <p>24127106 - Lai Phạm Như Phúc</p>
                     <p>24127207 - Nguyễn Thục Nghi</p>
                 </div> 
@@ -222,12 +246,9 @@
             </div>
         </div>
     </div>
-    <!-- Footer End -->
 
-     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-    <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
@@ -235,7 +256,7 @@
 
     <script>
         let totalQuestions = 0;
-        let currentUserId = null;
+        let currentUsername = null;
 
         async function loadQuestions() {
             try {
@@ -245,11 +266,9 @@
                 const ctn = document.getElementById('questions-container');
                 ctn.innerHTML = '';
                 
-                // có 9 câu + 1 câu ảnh hưởng = 10
                 totalQuestions = data.cau_hoi.length + 1;
                 document.getElementById('totalCount').textContent = totalQuestions;
 
-                // Render 9 câu hỏi đầu
                 data.cau_hoi.forEach((q, i) => {
                     ctn.innerHTML += `
                         <div class="p-4 bg-white rounded mb-3 shadow-sm">
@@ -264,7 +283,6 @@
                     `;
                 });
 
-                // Render câu ảnh hưởng
                 ctn.innerHTML += `
                     <div class="p-4 bg-white rounded mb-3 shadow-sm">
                         <h5 class="mb-3">${totalQuestions}. Những vấn đề trên gây khó khăn thế nào cho cuộc sống của bạn?</h5>
@@ -276,7 +294,9 @@
                         </div>
                     </div>
                 `;
-            } catch (e) { console.error("Lỗi tải câu hỏi:", e); }
+            } catch (e) { 
+                console.error("Lỗi tải câu hỏi:", e); 
+            }
         }
 
         function updateProgress() {
@@ -287,19 +307,15 @@
             document.getElementById('submitBtn').disabled = (answered !== totalQuestions);
         }
 
-        // Submit
         async function submitQuiz() {
-            // 1. Lấy thông tin định danh
             const hoTen = document.getElementById('ho_ten').value.trim();
             const user = document.getElementById('username').value.trim();
             
-            // 2. Kiểm tra thông tin định danh (Validation)
             if (!hoTen || !user) {
                 alert('Vui lòng nhập đầy đủ Họ tên và Tên đăng nhập (hoặc MSSV)!');
                 return;
             }
 
-            // 3. Thu thập đáp án của 9 câu hỏi tần suất
             let answers = [];
             for (let i = 0; i < totalQuestions - 1; i++) {
                 const choice = document.querySelector(`input[name="q${i}"]:checked`);
@@ -310,7 +326,6 @@
                 answers.push(Number(choice.value));
             }
 
-            // 4. Thu thập đáp án câu thứ 10 (Mức độ ảnh hưởng)
             const impactRadio = document.querySelector('input[name="impact"]:checked');
             if (!impactRadio) {
                 alert('Vui lòng trả lời câu hỏi về mức độ ảnh hưởng cuộc sống!');
@@ -318,13 +333,11 @@
             }
             const impactValue = Number(impactRadio.value);
 
-            // 5. Hiển thị trạng thái chờ trên nút bấm
             const btn = document.getElementById('submitBtn');
             const originalContent = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý dữ liệu...';
 
-            // 6. Gửi yêu cầu POST đến server
             try {
                 const res = await fetch('/quiz/nop-bai', {
                     method: 'POST',
@@ -340,13 +353,8 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    // Lưu lại ID người dùng để tải lịch sử sau này
-                    currentUserId = data.user_id; 
-                    
-                    // Gọi hàm hiển thị kết quả
+                    currentUsername = user;
                     showResult(data);
-                    
-                    // Cuộn màn hình đến phần kết quả
                     document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
                 } else {
                     alert('Lỗi: ' + (data.message || 'Không thể lưu kết quả'));
@@ -361,9 +369,51 @@
             }
         }
 
+        // Hàm tra cứu lịch sử từ username trong form
+        async function lookupCurrentUserHistory() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                alert('Vui lòng nhập tên đăng nhập trước khi xem lịch sử!');
+                document.getElementById('username').focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnLookupHistory');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang tải...';
+
+            try {
+                const res = await fetch(`/quiz/lich-su?username=${encodeURIComponent(username)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.lich_su.length === 0) {
+                        displayInlineHistory({ 
+                            lich_su: [], 
+                            user_name: username,
+                            full_name: data.full_name || username
+                        });
+                    } else {
+                        displayInlineHistory(data);
+                    }
+                } else {
+                    alert(data.message || 'Không tìm thấy lịch sử khảo sát');
+                }
+            } catch (e) {
+                console.error("Lỗi tra cứu lịch sử:", e);
+                alert('Lỗi kết nối server. Vui lòng thử lại!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
         function showResult(data) {
             document.getElementById('quizForm').style.display = 'none';
             document.querySelector('.quiz-heading').style.display = 'none';
+            document.getElementById('historyLookupSection').style.display = 'none';
 
             const resDiv = document.getElementById('result');
             resDiv.style.display = 'block';
@@ -378,9 +428,7 @@
             resDiv.innerHTML = `
                 <div class="text-center p-4 bg-white rounded border">
                     <h3 class="mb-3">Kết quả khảo sát</h3>
-
                     <div class="result-score ${colorClass}">${data.diem}/27</div>
-
                     <h4 class="mt-2">Mức độ: <span class="${colorClass}">${data.muc_do}</span></h4>
                     <p class="text-muted">Ảnh hưởng: ${data.anh_huong_text}</p>
                     ${data.canh_bao ? `<div class="alert alert-danger"><strong>CẢNH BÁO:</strong> ${data.canh_bao}</div>` : ''}
@@ -390,20 +438,43 @@
                     </div>
                 </div>
             `;
-            resDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
-        async function loadHistory() {
-            const res = await fetch(`/quiz/lich-su/${currentUserId}`);
-            const data = await res.json();
+        // Load lịch sử sau khi làm quiz
+        async function loadHistoryAfterQuiz() {
+            if (!currentUsername) {
+                alert('Không tìm thấy thông tin người dùng');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/quiz/lich-su?username=${encodeURIComponent(currentUsername)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    displayHistory(data);
+                } else {
+                    alert(data.message || 'Không thể tải lịch sử');
+                }
+            } catch (e) {
+                console.error("Lỗi tải lịch sử:", e);
+                alert('Lỗi kết nối. Vui lòng thử lại!');
+            }
+        }
+
+        function displayHistory(data) {
             const historyDiv = document.getElementById('history');
             historyDiv.style.display = 'block';
             
-            // Tạo cấu trúc danh sách lịch sử
-            let html = '<h4 class="mb-4 text-center">Lịch sử khảo sát của bạn</h4><div class="row g-4">';
+            let html = `
+                <div class="alert alert-info mb-4">
+                    <strong>Tên đăng nhập:</strong> ${data.user_name}<br>
+                    <strong>Họ tên:</strong> ${data.full_name || 'N/A'}
+                </div>
+                <div class="row g-4">
+            `;
             
             data.lich_su.forEach((log, index) => {
-                // Xác định màu sắc dựa trên điểm số
                 let statusColor = "";
                 let borderStyle = "";
                 
@@ -439,8 +510,65 @@
             });
             
             html += '</div>';
-            historyDiv.innerHTML = html;
-            historyDiv.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('history-list').innerHTML = html;
+            historyDiv.style.display = 'block';
+            historyDiv.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        function displayInlineHistory(data) {
+            const container = document.getElementById('inline-history');
+            container.style.display = 'block';
+
+            if (!data.lich_su || data.lich_su.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning text-center">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        Bạn chưa có lịch sử khảo sát.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="alert alert-info py-2 mb-3">
+                    <small>Lịch sử của: <strong>${data.full_name || data.user_name}</strong></small>
+                </div>
+                <div class="row g-2" style="max-height: 400px; overflow-y: auto;">
+            `;
+
+            data.lich_su.forEach((log, index) => {
+                let color = "border-secondary";
+                if (log.diem <= 9) color = "border-success";
+                else if (log.diem <= 14) color = "border-warning";
+                else if (log.diem <= 19) color = "border-orange";
+                else color = "border-danger";
+
+                html += `
+                    <div class="col-12">
+                        <div class="card border-2 ${color} mb-2 shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">${log.diem}/27 điểm - ${log.muc_do}</h6>
+                                        <small class="text-muted">${log.thoi_gian}</small>
+                                    </div>
+                                    <span class="fs-4">${log.icon || ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function hideHistory() {
+            document.getElementById('history').style.display = 'none';
         }
 
         window.onload = loadQuestions;
