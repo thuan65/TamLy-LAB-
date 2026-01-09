@@ -87,10 +87,7 @@
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Main Features</a>
                             <div class="dropdown-menu bg-light m-0">
-                                <a href="{{ url_for('chat.chat_waiting') }}" class="dropdown-item">Matching</a>
-                                <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
                                 <a href="{{ url_for('forum.show_forum') }}" class="dropdown-item">Forum</a>
-                                <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Expert</a>
                                 {# Kiểm tra nếu là EXPERT #}
                                 {% if session.get('role')|upper == 'EXPERT' %}
 
@@ -100,7 +97,9 @@
 
                                 {# Nếu là STUDENT hoặc chưa đăng nhập #}
                                 {% else %}
-
+                                <a href="{{ url_for('chat.chat_waiting') }}" class="dropdown-item">Matching</a>
+                                <a href="{{ url_for('diary.diary_home') }}" class="dropdown-item">Diary</a>
+                                <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Expert</a>
                                 <a href="{{ url_for('booking.select_therapist') }}" class="dropdown-item">Booking Appointment</a>
                                 <a href="{{ url_for('booking.my_appointments') }}" class="dropdown-item">My Appointments History</a>
 
@@ -361,11 +360,12 @@
                         <h5 class="mb-0">{{ t.full_name }}</h5>
                             <span class="text-primary" style="font-size: 0.9rem;">{{ t.field }}</span>
                             <div style="height: 10px;"></div>
-                            
+                            {% if session.get("role","")|upper == "STUDENT" or not session.get("user_id") %}
                             <a class="btn btn-primary btn-sm mt-auto align-self-center"
                             href="{{ url_for('chat_expert.chat_page') }}?peer_id={{ t.id }}">
                             Chat ngay
                             </a>
+                            {% endif %}
 
                         </div>
                   
@@ -556,17 +556,23 @@
                 resultList.innerHTML += `
                     <div class="col-md-6 col-lg-4">
                         <div class="team-item d-flex h-100 p-4">
-                            <div class="team-detail pe-4 w-100">
+                            <div class="team-detail pe-4 w-100 d-flex flex-column">
                                 <h5 class="mb-1">${expert.full_name}</h5>
                                 <div class="text-muted mb-2">${expert.title || ""}</div>
                                 <div class="mb-2"><b>Chuyên môn:</b> ${expert.specialization || ""}</div>
-                                <div class="small">${expert.bio || ""}</div>
-                                
+                                <div class="small mb-3">${expert.bio || ""}</div>
+                                {% if session.get("role","")|upper == "STUDENT" or not session.get("user_id") %}
+                                <a class="btn btn-primary btn-sm mt-auto align-self-center"
+                                href="{{ url_for('chat_expert.chat_page') }}?peer_id=${expert.user_id}">
+                                Chat ngay
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 `;
             });
+
 
             resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
 

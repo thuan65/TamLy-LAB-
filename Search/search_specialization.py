@@ -32,7 +32,16 @@ def search_experts():
 
     try:
         # 1. Lấy tất cả chuyên gia đang hoạt động
-        experts_data = session.query(ExpertProfile, User).join(User, ExpertProfile.user_id == User.id).all()
+        experts_data = (
+            session.query(ExpertProfile, User)
+            .join(User, ExpertProfile.user_id == User.id)
+            .filter(
+                User.role == "EXPERT",                
+                ExpertProfile.verification_status == "VERIFIED"  
+            )
+            .all()
+        )
+
         
         if not experts_data:
             return jsonify([])
