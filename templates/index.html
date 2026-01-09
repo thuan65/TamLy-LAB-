@@ -95,8 +95,8 @@
                                 {% if session.get('role')|upper == 'EXPERT' %}
 
 
-                                <a href="{{ url_for('booking.expert_schedule') }}" class="dropdown-item">Quản lý lịch hẹn</a>
-                                <a href="{{ url_for('student_mgmt.manage_students') }}" class="dropdown-item">Quản lý sinh viên</a>                                
+                                <a href="{{ url_for('booking.expert_schedule') }}" class="dropdown-item">Booking Management</a>
+                                <a href="{{ url_for('student_mgmt.manage_students') }}" class="dropdown-item">Student Management</a>                                
 
                                 {# Nếu là STUDENT hoặc chưa đăng nhập #}
                                 {% else %}
@@ -337,10 +337,13 @@
 
             <div class="row g-4">
                 {# Bắt đầu vòng lặp lấy danh sách chuyên gia #}
+                <!-- <p class="text-muted text-center">debug therapists count = {{ therapists|length }}</p> -->
+
                 {% for t in therapists %}
+
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
                     <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
+                        <div class="team-detail pe-4 flex-grow-1 d-flex flex-column">
                         {# --- Logic hiển thị ảnh (Avatar) --- #}
                             {% if t.image %}
                                 <img class="img-fluid mb-4" 
@@ -357,17 +360,19 @@
                             {# --- Hiển thị Tên và Chuyên môn --- #}
                         <h5 class="mb-0">{{ t.full_name }}</h5>
                             <span class="text-primary" style="font-size: 0.9rem;">{{ t.field }}</span>
+                            <div style="height: 10px;"></div>
+                            
+                            <a class="btn btn-primary btn-sm mt-auto align-self-center"
+                            href="{{ url_for('chat_expert.chat_page') }}?peer_id={{ t.id }}">
+                            Chat ngay
+                            </a>
+
                         </div>
-            
-                        {# --- Giữ nguyên phần icon mạng xã hội --- #}
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href=""><i class="fab fa-youtube"></i></a>
-                        </div>
+                  
                     </div>
                 </div>
+                <!-- <small class="text-muted">debug id={{ t.id }}</small> -->
+
                 {% endfor %}
             </div>
         </div>
@@ -556,6 +561,7 @@
                                 <div class="text-muted mb-2">${expert.title || ""}</div>
                                 <div class="mb-2"><b>Chuyên môn:</b> ${expert.specialization || ""}</div>
                                 <div class="small">${expert.bio || ""}</div>
+                                
                             </div>
                         </div>
                     </div>

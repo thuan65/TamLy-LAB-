@@ -1,10 +1,11 @@
 # diary/diary.py
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session as flask_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database import TherapySession
 from models import DiaryEntry, User
 from datetime import datetime
+from models import DiaryEntry  
 import os
 
 
@@ -164,21 +165,74 @@ def delete_diary(entry_id):
     
     return redirect(url_for("diary.list_diary", student_id=student_id))
 
+
 # --- API: Lấy thống kê tâm trạng ---
 @diary_bp.route("/api/diary/mood-stats/<int:student_id>", methods=["GET"])
 def mood_stats(student_id):
     """Thống kê tâm trạng của sinh viên qua các ngày"""
-    with TherapySession as s:
-        entries = s.query(DiaryEntry).filter_by(student_id=student_id)\
-            .order_by(DiaryEntry.created_at.asc()).all()
-        
+    with TherapySession() as s:
+        entries = (
+            s.query(DiaryEntry)
+            .filter_by(student_id=student_id)
+            .order_by(DiaryEntry.created_at.asc())
+            .all()
+        )
+
         stats = []
         for entry in entries:
+            dt = entry.created_at
+            if isinstance(dt, str):
+                # nếu string ISO "YYYY-MM-DDTHH:MM:SS"
+                dt_str = dt[:10]
+            else:
+                dt_str = dt.strftime("%Y-%m-%d")
+
             stats.append({
-                "date": entry.created_at[:10],  # Lấy ngày (YYYY-MM-DD)
+                "date": dt_str,
                 "mood": entry.mood,
                 "mood_score": entry.mood_score,
                 "title": entry.title
             })
-        
+
     return jsonify({"success": True, "stats": stats})
+
+
+@diary_bp.route("/mood-chart", methods=["GET"])
+def mood_chart_page():
+    user_id = flask_session.get("user_id")
+    if not user_id:
+        return redirect(url_for("auth.login"))
+    return render_template("mood_chart.html")
+
+
+@diary_bp.route("/api/mood-series", methods=["GET"])
+def mood_series_api():
+    user_id = flask_session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "unauthorized"}), 401
+
+    with TherapySession() as db:
+        entries = (
+            db.query(DiaryEntry)
+            .filter(DiaryEntry.student_id == user_id)     # ✅ sửa chỗ này
+            .order_by(DiaryEntry.created_at.asc())
+            .all()
+        )
+
+    labels, data = [], []
+    for e in entries:
+        if e.mood_score is None:
+            continue
+
+        dt = e.created_at
+        if isinstance(dt, str):
+            try:
+                dt = datetime.fromisoformat(dt)
+            except Exception:
+                # fallback nếu format lạ
+                dt = datetime.strptime(dt[:10], "%Y-%m-%d")
+
+        labels.append(dt.strftime("%d/%m"))
+        data.append(float(e.mood_score))
+
+    return jsonify({"labels": labels, "data": data})

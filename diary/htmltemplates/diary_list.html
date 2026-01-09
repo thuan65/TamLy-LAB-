@@ -45,7 +45,14 @@
                     <a class="btn btn-primary pill-btn" href="{{ url_for('diary.create_diary', student_id=student.id) }}">
                         <i class="fa-solid fa-plus me-2"></i>Viết nhật ký mới
                     </a>
+                    <a href="{{ url_for('diary.mood_chart_page') }}"
+                    class="btn btn-outline-success pill-btn">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        Biểu đồ cảm xúc
+                    </a>
                 </div>
+                
+
             </div>
 
             <div class="text-center mx-auto mb-4" style="max-width: 750px;">

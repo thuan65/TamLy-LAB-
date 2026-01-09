@@ -233,8 +233,13 @@
 
     <script>
         const userId = parseInt("{{ user_id }}", 10);
-        const role = "{{ role }}";
+        const role = "{{ role|lower }}";
         let currentPeerId = null;
+        const preselectFromServer = JSON.parse('{{ preselect_peer_id|tojson }}');
+        const preselectFromUrl = new URLSearchParams(window.location.search).get("peer_id");
+        const initialPeerId = (preselectFromServer !== null)
+            ? preselectFromServer
+            : (preselectFromUrl ? parseInt(preselectFromUrl, 10) : null);
 
         const socket = io("/");
 
@@ -279,7 +284,19 @@
                     `;
                     item.onclick = () => selectPeer(p.id, p.name, item);
                     list.appendChild(item);
+
+
+
                 });
+
+                if (initialPeerId) {
+                    const el = document.querySelector(`.peer-item[data-id='${initialPeerId}']`);
+                    if (el) {
+                        // lấy name từ span trong button
+                        const name = el.querySelector("span")?.textContent?.trim() || "Chat";
+                        selectPeer(initialPeerId, name, el);
+                    }
+                }
             } catch (err) {
                 console.error(err);
             }
@@ -287,6 +304,10 @@
 
         function selectPeer(id, name, element) {
             if (currentPeerId === id) return;
+            // ✅ update URL để có peer_id
+            const u = new URL(window.location.href);
+            u.searchParams.set("peer_id", id);
+            history.replaceState({}, "", u.toString());
 
             currentPeerId = id;
             document.getElementById("chat-header").textContent = name;

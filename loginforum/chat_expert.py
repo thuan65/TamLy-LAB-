@@ -30,11 +30,13 @@ def chat_page():
     if "user_id" not in session:
         return redirect(url_for("auth.login", next=request.full_path))
 
-
+    peer_id = request.args.get("peer_id", type=int)
     return render_template(
         "chat_messenger.html",
         user_id=session["user_id"],
-        role=session["role"]
+        role=session["role"],
+        preselect_peer_id=peer_id
+
     )
 
 # ============================================================
@@ -74,7 +76,7 @@ def get_peers(user_id):
 @chat_expert_bp.route("/api/get_experts_for_student/<int:uid>")
 def get_experts_for_student(uid):
     conn = get_db()
-    experts = conn.execute("SELECT id, username FROM users WHERE role='EXPERT'").fetchall()
+    experts = conn.execute("SELECT id, username FROM users WHERE UPPER(role)='EXPERT'").fetchall()
     result = []
 
     for e in experts:
@@ -138,16 +140,10 @@ def get_all_experts():
 @chat_expert_bp.route("/api/get_unread/<role>/<int:uid>")
 def get_unread(role, uid):
     conn = get_db()
-    if role == "student":
-        row = conn.execute(
-            "SELECT COUNT(*) AS cnt FROM messages WHERE receiver_id=? AND is_read=0",
-            (uid,)
-        ).fetchone()
-    else:
-        row = conn.execute(
-            "SELECT COUNT(*) AS cnt FROM messages WHERE receiver_id=? AND is_read=0",
-            (uid,)
-        ).fetchone()
+    row = conn.execute(
+        "SELECT COUNT(*) AS cnt FROM messages WHERE receiver_id=? AND is_read=0",
+        (uid,)
+    ).fetchone()
     return jsonify({"unread": row["cnt"] if row else 0})
 
 # ============================================================
@@ -162,11 +158,12 @@ def handle_join(data):
     user_id = session.get("user_id")
     peer_id = data.get("peer_id")
 
-    if not user_id:
+    if not user_id or not peer_id:
         return
 
-    room = get_room_for(user_id, peer_id)
+    room = get_room_for(int(user_id), int(peer_id))
     join_room(room)
+
 
 # ============================================================
 # 9) SOCKET.IO — gửi tin nhắn realtime
