@@ -7,7 +7,7 @@ import logging
 from .extensions import socketio
 from flask_socketio import emit, join_room, leave_room
 
-chat = Blueprint("chat", __name__)
+chat = Blueprint("chat", __name__, template_folder= "htmltemplates")
 
 #Dùng set để lưu ID của seeker đang chờ
 WAITING_USERS = set()
@@ -43,11 +43,10 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
     conn = get_db()
     helper_id = None
     is_expert = 0
-    # Chuỗi tag cần tìm: ví dụ: "cured_anxiety"
+
     tag_to_match = f"cured_{illness}" 
     # Chuỗi tìm kiếm trong SQLite: ví dụ: "%,cured_anxiety,%"
     sql_tag_pattern = f'%,{tag_to_match},%'
-
 
     if not prefer_anonymous:
         # -----------------------------------------------------------------
@@ -66,6 +65,8 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
             (sql_tag_pattern, seeker_id)
         ).fetchone()
 
+        # print("CURED1")
+
         if cured_helper_specific:
             helper_id = cured_helper_specific["id"]
         
@@ -73,13 +74,17 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
         # Step 1B (Fallback): Tìm Cured Student BẤT KỂ status_tag nào
         # (Chỉ chạy nếu Step 1A không tìm thấy)
         # -----------------------------------------------------------------
-        if not helper_id:
+        if helper_id is None:
             cured_helper_broad = conn.execute(
                 """
                 SELECT id FROM users
-                WHERE status_tag LIKE 'cured_%' AND role != 'expert' AND (chat_opt_in=1 OR chat_opt_in='1') AND id != ?
-                AND id NOT IN (SELECT helper_id FROM chat_sessions WHERE status='active')
-                AND id NOT IN (SELECT seeker_id FROM chat_sessions WHERE status='active')
+                WHERE UPPER(status_tag) LIKE 'CURED%' AND LOWER(role) != 'expert' AND (chat_opt_in=1 OR chat_opt_in='1') AND id != ?
+                AND NOT EXISTS (
+                SELECT 1
+                FROM chat_sessions cs
+                WHERE cs.status = 'active'
+                AND (cs.helper_id = users.id OR cs.seeker_id = users.id)
+            )
                 ORDER BY RANDOM() LIMIT 1
                 """,
                 (seeker_id,)
@@ -87,6 +92,8 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
             
             if cured_helper_broad:
                 helper_id = cured_helper_broad["id"]
+        # print("CURER2")
+        # print(helper_id)
 
     # -----------------------------------------------------------------
     # Step 2: Fallback sang Expert
@@ -107,7 +114,8 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
         if expert_helper:
             helper_id = expert_helper["id"]
             is_expert = 1
-            
+        # print("CURE3")
+
     if not helper_id:
         return None
 
@@ -115,9 +123,14 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
     new_session_key = str(uuid.uuid4())
     try:
         conn.execute(
-            "INSERT INTO chat_sessions (session_key, seeker_id, helper_id, is_expert_fallback) VALUES (?, ?, ?, ?)",
-            (new_session_key, seeker_id, helper_id, is_expert)
-        )
+    """
+    INSERT INTO chat_sessions
+    (session_key, seeker_id, helper_id, status, is_expert_fallback)
+    VALUES (?, ?, ?, ?, ?)
+    """,
+    (new_session_key, seeker_id, helper_id, "active", is_expert)
+)
+
         conn.commit()
         return {"session_key": new_session_key, "helper_id": helper_id}
     except Exception as e:
@@ -132,7 +145,8 @@ def find_match_for_user(seeker_id, illness, prefer_anonymous=False):
 def chat_waiting():
     if "user_id" not in session:
         return redirect(url_for("auth.login", next=request.path))
-    return render_template("chat_waiting.html")
+    # return render_template("chat_waiting.html")
+    return render_template("Match_room.html")
 
 @chat.route("/chat/room/<string:session_key>")
 def chat_room(session_key):
@@ -199,14 +213,14 @@ def on_join(data):
     else:
         emit("chat_log", {"message": "Lỗi xác thực phòng."})
 
-@socketio.on('send_message')
+@socketio.on('send_message_to_other')
 def on_send_message(data):
+
     user_id = session.get("user_id")
     message_content = data.get("message", "").strip()
     room_key = data.get("room")
     if not user_id or not message_content or not room_key:
         return
-
     # Emit tin nhắn real-time
     emit("receive_message", {"message": message_content, "sender": "Người lạ"}, to=room_key, skip_sid=request.sid)
 
@@ -256,9 +270,10 @@ def toggle_opt_in():
         return "Lỗi: Không tìm thấy user", 404
     new_status = 1 - current_status["chat_opt_in"]
     conn.execute("UPDATE users SET chat_opt_in=? WHERE id=?", (new_status, session["user_id"]))
+    conn.execute("UPDATE users SET is_online=? WHERE id=?", (new_status, session["user_id"]))
     conn.commit()
     session["chat_opt_in"] = new_status
-    return redirect("/")
+    return redirect("/chat/waiting")
 
 @socketio.on('connect')
 def on_connect():
@@ -290,6 +305,7 @@ def on_request_match(data):
         return
     illness = data.get('illness')
     seeker_id = session.get('user_id')
+    print("############################", seeker_id)
     seeker_room = f'user_{seeker_id}'
     prefer_anonymous = data.get('anonymous', False)  # frontend gửi lên nếu muốn chat ẩn danh
     match_result = find_match_for_user(seeker_id, illness, prefer_anonymous=prefer_anonymous)
@@ -304,4 +320,3 @@ def on_request_match(data):
         socketio.emit("match_found", {"room_url": room_url}, to=seeker_room)
     else:
         socketio.emit("match_failed", {"message":"Không tìm thấy ai rảnh."}, to=seeker_room)
-

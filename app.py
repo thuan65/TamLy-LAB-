@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 #print("GEMINI_API_KEY =", os.getenv("GEMINI_API_KEY"))
-
+        
 
 os.environ["EVENTLET_NO_GREENDNS"] = "yes"
 import eventlet
@@ -31,7 +31,7 @@ from loginforum.chat_expert import chat_expert_bp
 from Booking.booking import booking_bp
 from Search.search_specialization import search_specialization_bp
 from StudentManagement.student_management import student_mgmt_bp
-
+    
 from database import TherapySession
 from sqlalchemy.orm import joinedload
 from models import User, ExpertProfile 
