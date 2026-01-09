@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mood Score Chart</title>
+
+  <!-- nếu bạn có bootstrap/style.css theme sẵn thì giữ y chang như các page khác -->
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h2 class="mb-1">Mood Trend</h2>
+        <div class="text-muted">Biểu đồ đường mood score theo thời gian</div>
+      </div>
+      <a href="{{ url_for('diary.diary_home') }}" class="btn btn-outline-primary">
+        Quay lại
+      </a>
+
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <canvas id="moodLineChart" height="110"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadMoodChart() {
+      const res = await fetch("{{ url_for('diary.mood_series_api') }}");
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Không load được dữ liệu mood.");
+        return;
+      }
+
+      const ctx = document.getElementById("moodLineChart");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: json.labels,
+          datasets: [{
+            label: "Mood Score",
+            data: json.data,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
+    loadMoodChart();
+  </script>
+</body>
+</html>

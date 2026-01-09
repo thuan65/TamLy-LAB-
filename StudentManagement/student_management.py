@@ -109,24 +109,55 @@ def toggle_status(student_id):
     return jsonify({'new_status': new_status})
 
 @student_mgmt_bp.route('/expert/view-report/<int:student_id>')
+@student_mgmt_bp.route('/expert/view-report/<int:student_id>')
 def view_report(student_id):
     expert_id = session.get('user_id')
     conn = get_db_connection()
-    
+
     # Kiểm tra quyền truy cập (phải là accepted)
-    check = conn.execute('SELECT status FROM quiz_access_requests WHERE expert_id=? AND student_id=? AND status="accepted"',
-                        (expert_id, student_id)).fetchone()
+    check = conn.execute(
+        'SELECT status FROM quiz_access_requests WHERE expert_id=? AND student_id=? AND status="accepted"',
+        (expert_id, student_id)
+    ).fetchone()
+
     if not check:
+        conn.close()
         return "Bạn không có quyền xem báo cáo này hoặc yêu cầu chưa được chấp nhận.", 403
 
     # Lấy lịch sử Quiz
-    quizzes = conn.execute('SELECT * FROM stress_logs WHERE student_id=? ORDER BY created_at DESC', (student_id,)).fetchall()
+    quizzes_rows = conn.execute(
+        'SELECT * FROM stress_logs WHERE student_id=? ORDER BY created_at DESC',
+        (student_id,)
+    ).fetchall()
+
     # Lấy lịch sử Mood từ Nhật ký
-    moods = conn.execute('SELECT created_at, mood, mood_score FROM diary_entries WHERE student_id=? ORDER BY created_at DESC', (student_id,)).fetchall()
-    
-    student = conn.execute('SELECT username FROM users WHERE id=?', (student_id,)).fetchone()
+    moods_rows = conn.execute(
+        'SELECT created_at, mood, mood_score FROM diary_entries WHERE student_id=? ORDER BY created_at DESC',
+        (student_id,)
+    ).fetchall()
+
+    student_row = conn.execute(
+        'SELECT username FROM users WHERE id=?',
+        (student_id,)
+    ).fetchone()
+
     conn.close()
+
+    # ✅ Convert Row -> dict (để tojson dùng được)
+    quizzes = [dict(r) for r in quizzes_rows]
+    moods = [dict(r) for r in moods_rows]
+    student = dict(student_row) if student_row else {"username": "Unknown"}
+
+    # ✅ Convert created_at -> string cho chắc (tránh datetime/object lạ)
+    for q in quizzes:
+        if q.get("created_at") is not None:
+            q["created_at"] = str(q["created_at"])
+    for m in moods:
+        if m.get("created_at") is not None:
+            m["created_at"] = str(m["created_at"])
+
     return render_template('view_report.html', quizzes=quizzes, moods=moods, student=student)
+
 
 @student_mgmt_bp.route('/api/notifications')
 def get_notifications():

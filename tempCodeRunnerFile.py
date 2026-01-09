@@ -1,283 +1,120 @@
-# temp_add_experts.py
-# Chạy file này để:
-# 1) Add therapist/expert thủ công (nhập từ bàn phím)
-# 2) Hoặc seed 5+ therapist mẫu vào DB
-
 import os
-from datetime import datetime
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-from werkzeug.security import generate_password_hash  # ✅ thêm
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+#print("GEMINI_API_KEY =", os.getenv("GEMINI_API_KEY"))
 
-# Import models
-from models import User, ExpertProfile
 
-# =========================
-# DB CONFIG (tự bắt therapy.db ở cùng folder)
-# =========================
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(BASE_DIR, "therapy.db")
-DB_URL = f"sqlite:///{DB_PATH}"
-engine = create_engine(DB_URL, echo=False, future=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+os.environ["EVENTLET_NO_GREENDNS"] = "yes"
+import eventlet
+eventlet.monkey_patch()
 
-# =========================
-# SEED DATA: 5+ therapist mẫu
-# =========================
-SEED_EXPERTS = [
-    {
-        "username": "expert_thao",
-        "password": "123456",  # ✅ để raw cho tiện
-        "chat_opt_in": True,
-        "profile": {
-            "full_name": "ThS. Nguyễn Thảo",
-            "title": "Tham vấn viên",
-            "qualification": "Thạc sĩ Tâm lý học lâm sàng",
-            "specialization": "Lo âu, stress học đường, kỹ năng đối phó",
-            "organization": "Trung tâm Tham vấn Tâm lý - Đại học",
-            "years_of_experience": 5,
-            "verification_status": "PENDING",
-            "bio": "Hỗ trợ sinh viên vượt qua lo âu và áp lực học tập bằng CBT/psychoeducation, bài tập thực hành theo tuần."
-        }
-    },
-    {
-        "username": "expert_khanh",
-        "password": "123456",
-        "chat_opt_in": True,
-        "profile": {
-            "full_name": "CN. Lê Khánh",
-            "title": "Tham vấn viên",
-            "qualification": "Cử nhân Tâm lý học",
-            "specialization": "Lo âu xã hội, tự tin, kỹ năng giao tiếp",
-            "organization": "CLB Sức khỏe Tinh thần Sinh viên",
-            "years_of_experience": 3,
-            "verification_status": "PENDING",
-            "bio": "Tập trung vào kỹ năng xã hội, luyện tập giao tiếp, xây dựng tự tin qua tình huống cụ thể."
-        }
-    },
-    {
-        "username": "expert_huy",
-        "password": "123456",
-        "chat_opt_in": False,
-        "profile": {
-            "full_name": "ThS. Trần Minh Huy",
-            "title": "Nhà trị liệu",
-            "qualification": "Thạc sĩ Tham vấn tâm lý",
-            "specialization": "Burnout, quản lý cảm xúc, cân bằng cuộc sống",
-            "organization": "MindCare Clinic",
-            "years_of_experience": 7,
-            "verification_status": "PENDING",
-            "bio": "Đồng hành với burnout và căng thẳng kéo dài; ưu tiên kế hoạch nhỏ, đo tiến trình, điều chỉnh thói quen."
-        }
-    },
-    {
-        "username": "expert_lam",
-        "password": "123456",
-        "chat_opt_in": True,
-        "profile": {
-            "full_name": "TS. Phạm Bảo Lâm",
-            "title": "Chuyên gia",
-            "qualification": "Tiến sĩ Tâm lý học",
-            "specialization": "Trầm cảm, hoảng sợ, lo âu lan tỏa",
-            "organization": "Phòng khám An Nhiên",
-            "years_of_experience": 11,
-            "verification_status": "PENDING",
-            "bio": "Làm việc an toàn, cấu trúc rõ ràng; tập trung nhận diện suy nghĩ tự động, tái cấu trúc nhận thức, kỹ thuật giảm hoảng sợ."
-        }
-    },
-    {
-        "username": "expert_vy",
-        "password": "123456",
-        "chat_opt_in": False,
-        "profile": {
-            "full_name": "BS. CKI Lưu Bảo Vy",
-            "title": "Bác sĩ chuyên khoa I",
-            "qualification": "CKI Tâm thần",
-            "specialization": "Sàng lọc nguy cơ, lo âu, trầm cảm",
-            "organization": "Bệnh viện (Khoa Tâm thần)",
-            "years_of_experience": 8,
-            "verification_status": "PENDING",
-            "bio": "Hỗ trợ đánh giá tình trạng và phối hợp hướng can thiệp phù hợp. Ưu tiên sàng lọc nguy cơ và kế hoạch hỗ trợ thực tế."
-        }
-    },
-    {
-        "username": "expert_nhi",
-        "password": "123456",
-        "chat_opt_in": True,
-        "profile": {
-            "full_name": "ThS. Võ Thanh Nhi",
-            "title": "Tham vấn viên",
-            "qualification": "Thạc sĩ Tâm lý giáo dục",
-            "specialization": "Khủng hoảng tuổi mới lớn, áp lực thành tích, định hướng mục tiêu",
-            "organization": "Trung tâm Hỗ trợ Sinh viên",
-            "years_of_experience": 6,
-            "verification_status": "PENDING",
-            "bio": "Tập trung vào kỹ năng tự học, giảm áp lực thành tích, thiết lập mục tiêu học tập và thói quen bền vững."
-        }
-    },
-]
+from flask import Flask, session, render_template, redirect, url_for
+from Game.game_routes import game_bp
+from quiz.quiz import quiz_bp
+from diary.diary import diary_bp
+from Aerial.Chatbot import chatbot_bp
 
-# =========================
-# HELPERS
-# =========================
-def ensure_db_exists():
-    if not os.path.exists(DB_PATH):
-        raise FileNotFoundError(f"Không thấy therapy.db tại: {DB_PATH}")
+from loginforum.extensions import socketio
+from loginforum.chat import chat
+from  profile_dealing.expertUpdateProfile import expert_bp
+from streak.routes import streak_bp
+from admin_verify.routes import admin_bp
+from ExpertProfile.routes import expert_profile_bp
 
-def get_user_by_username(db, username: str):
-    return db.execute(select(User).where(User.username == username)).scalar_one_or_none()
+from db import close_db, init_db
+from loginforum.history_conversation import history_bp
+from loginforum.auth import auth
+from loginforum.forum import forum
+from loginforum.chat_expert import chat_expert_bp
+from Booking.booking import booking_bp
+from Search.search_specialization import search_specialization_bp
+from StudentManagement.student_management import student_mgmt_bp
 
-def create_expert(db, username: str, password_raw: str, chat_opt_in: bool, profile: dict):
-    existing = get_user_by_username(db, username)
-    if existing:
-        print(f"⚠️  Username '{username}' đã tồn tại (user_id={existing.id}) -> skip")
-        return None
+from database import TherapySession
+from sqlalchemy.orm import joinedload
+from models import User, ExpertProfile 
 
-    user = User(
-        username=username,
-        password=generate_password_hash(password_raw),  # ✅ hash thật
-        role="expert",
-        chat_opt_in=bool(chat_opt_in),
-        is_online=False,
-        last_seen=datetime.now(),
-    )
-    db.add(user)
-    db.flush()
 
-    expert_profile = ExpertProfile(
-        user_id=user.id,
-        full_name=(profile.get("full_name") or "").strip() or "Unnamed Expert",
-        title=profile.get("title"),
-        qualification=profile.get("qualification"),
-        specialization=profile.get("specialization"),
-        organization=profile.get("organization"),
-        years_of_experience=profile.get("years_of_experience"),
-        verification_status=profile.get("verification_status", "PENDING"),
-        bio=profile.get("bio"),
-        is_active=profile.get("is_active", True),
-    )
-    db.add(expert_profile)
+app = Flask(__name__)
+app.secret_key = "my-dev-secret-key"
 
-    print(f"✅ Added expert: {username} (user_id={user.id}) - {expert_profile.full_name}")
-    return user.id
+# init socketio cho app ngoài
+socketio.init_app(app)
 
-def seed_experts():
-    ensure_db_exists()
-    db = SessionLocal()
-    try:
-        count = 0
-        for item in SEED_EXPERTS:
-            user_id = create_expert(
-                db=db,
-                username=item["username"],
-                password_raw=item.get("password", "123456"),
-                chat_opt_in=item.get("chat_opt_in", False),
-                profile=item["profile"],
-            )
-            if user_id:
-                count += 1
+# --- Teardown DB ---
+app.teardown_appcontext(close_db)
 
-        db.commit()
-        print(f"\n🎉 Seed xong. Thêm mới: {count} expert_profiles.")
-    except Exception as e:
-        db.rollback()
-        print("❌ Lỗi seed:", e)
-        raise
-    finally:
-        db.close()
+# --- Đăng ký blueprint ---
+app.register_blueprint(auth)
+app.register_blueprint(forum)
+app.register_blueprint(chat)
+app.register_blueprint(chat_expert_bp)
+app.register_blueprint(history_bp)
+app.register_blueprint(game_bp)
+app.register_blueprint(quiz_bp)
+app.register_blueprint(expert_bp)
 
-def add_expert_manual():
-    ensure_db_exists()
-    print("\n=== ADD EXPERT MANUAL ===")
-    username = input("username (unique): ").strip()
-    password = input("password (raw): ").strip() or "123456"
-    chat_opt_in = input("chat_opt_in? (y/n): ").strip().lower() == "y"
+app.register_blueprint(diary_bp)
+app.register_blueprint(chatbot_bp)
+app.register_blueprint(booking_bp)
+app.register_blueprint(search_specialization_bp)
+app.register_blueprint(streak_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(expert_profile_bp)
+app.register_blueprint(student_mgmt_bp)
 
-    full_name = input("full_name: ").strip()
-    title = input("title (vd: Giảng viên / Tham vấn viên): ").strip() or None
-    qualification = input("qualification (vd: ThS/TS/CKI...): ").strip() or None
-    specialization = input("specialization (vd: Lo âu, stress...): ").strip() or None
-    organization = input("organization: ").strip() or None
+@app.route("/")
+def index():
+    user_id = session.get("user_id")
+    expert_profile = None
+    therapists_list = [] # Danh sách để hiển thị ra HTML
 
-    years_raw = input("years_of_experience (number): ").strip()
-    years_of_experience = int(years_raw) if years_raw.isdigit() else None
-
-    verification_status = input("verification_status (PENDING/APPROVED/REJECTED): ").strip().upper() or "PENDING"
-    bio = input("bio (mô tả ngắn): ").strip() or None
-
-    db = SessionLocal()
-    try:
-        user_id = create_expert(
-            db=db,
-            username=username,
-            password_raw=password,
-            chat_opt_in=chat_opt_in,
-            profile=dict(
-                full_name=full_name,
-                title=title,
-                qualification=qualification,
-                specialization=specialization,
-                organization=organization,
-                years_of_experience=years_of_experience,
-                verification_status=verification_status,
-                bio=bio,
-                is_active=True,
-            ),
-        )
+    with TherapySession() as db:
+        # 1. Logic lấy thông tin người dùng đang đăng nhập
         if user_id:
-            db.commit()
-            print("✅ Commit OK.")
-        else:
-            db.rollback()
-            print("ℹ️ Không thêm mới (do trùng username).")
-    except Exception as e:
-        db.rollback()
-        print("❌ Lỗi add manual:", e)
-        raise
-    finally:
-        db.close()
-
-def list_experts(limit=50):
-    ensure_db_exists()
-    db = SessionLocal()
-    try:
-        rows = db.execute(
-            select(
-                User.id,
-                User.username,
-                ExpertProfile.full_name,
-                ExpertProfile.specialization,
-                ExpertProfile.verification_status,
-            )
+            user = db.query(User).filter_by(id=user_id).first()
+            if user and user.role == "EXPERT":
+                expert_profile = user.expert_profile
+        
+        # 2. Logic LẤY DANH SÁCH CHUYÊN GIA (Đã đồng bộ với booking.py)
+        # Chỉ lấy chuyên gia đã được VERIFIED
+        therapists_objs = (db.query(User)
             .join(ExpertProfile, ExpertProfile.user_id == User.id)
-            .where(User.role == "expert")
-            .order_by(User.id.desc())
-            .limit(limit)
-        ).all()
+            .options(joinedload(User.expert_profile))
+            .filter(User.role == "EXPERT")
+            .filter(ExpertProfile.verification_status == "VERIFIED") # Chỉ hiện người đã duyệt
+            .filter(ExpertProfile.is_active == True)
+            .all()
+        )
 
-        print("\n=== EXPERT LIST ===")
-        for r in rows:
-            print(f"- id={r.id} | {r.username} | {r.full_name} | {r.specialization} | {r.verification_status}")
-        print(f"Total shown: {len(rows)}")
-    finally:
-        db.close()
+        # 3. Chuyển đổi dữ liệu sang Dictionary (để index.html gọi được t.image, t.field)
+        for therapist in therapists_objs:
+            profile = therapist.expert_profile
+            therapists_list.append({
+                "id": therapist.id,
+                "full_name": profile.full_name if profile else "Chuyên gia",
+                # Lấy ảnh từ profile, nếu không có thì để None (HTML sẽ xử lý default)
+                "image": getattr(profile, "image", None), 
+                "field": getattr(profile, "specialization", "Tâm lý học"),
+            })
 
-# =========================
-# MAIN MENU
-# =========================
-if __name__ == "__main__":  # ✅ sửa đúng
-    print(f"DB: {DB_PATH}")
-    print("1) Seed 5+ therapist mẫu")
-    print("2) Add therapist thủ công (nhập tay)")
-    print("3) List therapist/expert đang có")
-    choice = input("Chọn (1/2/3): ").strip()
+    return render_template(
+        "index.html",
+        expert_profile=expert_profile,
+        therapists=therapists_list # Truyền danh sách đã xử lý
+    )
 
-    if choice == "1":
-        seed_experts()
-    elif choice == "2":
-        add_expert_manual()
-    elif choice == "3":
-        list_experts()
-    else:
-        print("Bye.")
+@app.route("/index")
+def home():
+    return redirect(url_for("index"))
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+if __name__ == "__main__":
+    # tạo db nếu cần
+    print(app.url_map) #in ra endpoint de debug
+    socketio.run(app, debug=True, use_reloader=False, allow_unsafe_werkzeug=True)

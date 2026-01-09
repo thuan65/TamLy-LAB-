@@ -1,39 +1,218 @@
-{% extends "index.html" %}
-{% block content %}
-<div class="container py-5">
-    <h3>Báo cáo chi tiết: {{ student.username }}</h3>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <h4>Lịch sử Mood (Từ Nhật ký)</h4>
-            <table class="table table-sm">
-                <thead><tr><th>Ngày</th><th>Cảm xúc</th><th>Điểm</th></tr></thead>
-                <tbody>
-                    {% for m in moods %}
-                    <tr>
-                        <td>{{ m.created_at }}</td>
-                        <td>{{ m.mood }}</td>
-                        <td>{{ m.mood_score }}/5</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Dự án Hỗ trợ Tâm lý Sinh viên</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Spinner Start (giữ y như index để đồng bộ feel) -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <div class="container py-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <p class="section-title bg-white text-start text-primary pe-3 mb-2">Báo cáo</p>
+                <h3 class="mb-0">Báo cáo chi tiết: {{ student.username }}</h3>
+            </div>
+            <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
+                <i class="fa fa-home me-1"></i> Về trang chủ
+            </a>
+
         </div>
-        <div class="col-md-6">
-            <h4>Lịch sử Quiz</h4>
-            <table class="table table-sm">
-                <thead><tr><th>Ngày làm</th><th>Điểm</th><th>Đánh giá</th></tr></thead>
-                <tbody>
-                    {% for q in quizzes %}
-                    <tr>
-                        <td>{{ q.created_at }}</td>
-                        <td>{{ q.score }}</td>
-                        <td>{{ q.note }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Charts -->
+        <div class="row mt-4 g-4">
+            <div class="col-lg-6">
+                <div class="bg-light p-4 rounded shadow-sm h-100">
+                    <h5 class="mb-3">Biểu đồ Mood (từ Nhật ký)</h5>
+                    <div style="height: 320px;">
+                        <canvas id="moodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="bg-light p-4 rounded shadow-sm h-100">
+                    <h5 class="mb-3">Biểu đồ Quiz</h5>
+                    <div style="height: 320px;">
+                        <canvas id="quizChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="row mt-5 g-4">
+            <div class="col-lg-6">
+                <div class="bg-light p-4 rounded shadow-sm">
+                    <h5 class="mb-3">Lịch sử Mood (Từ Nhật ký)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-primary">
+                                <tr><th>Ngày</th><th>Cảm xúc</th><th>Điểm</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for m in moods %}
+                                <tr>
+                                    <td>{{ m.created_at }}</td>
+                                    <td>{{ m.mood }}</td>
+                                    <td>{{ m.mood_score }}/5</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="bg-light p-4 rounded shadow-sm">
+                    <h5 class="mb-3">Lịch sử Quiz</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-primary">
+                                <tr><th>Ngày làm</th><th>Điểm</th><th>Đánh giá</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for q in quizzes %}
+                                <tr>
+                                    <td>{{ q.created_at }}</td>
+                                    <td>{{ q.score }}</td>
+                                    <td>{{ q.note }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- JS Libraries (giữ giống index để style/animation/spinner ok) -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script id="moods-data" type="application/json">
+    {{ moods | tojson }}
+    </script>
+
+    <script id="quizzes-data" type="application/json">
+    {{ quizzes | tojson }}
+    </script>
+
+
+    <script>
+        // spinner hide (nếu main.js không chạy, vẫn đảm bảo tắt spinner)
+        window.addEventListener("load", () => {
+            const sp = document.getElementById("spinner");
+            if (sp) sp.classList.remove("show");
+        });
+
+        function toDateLabel(v) {
+            if (!v) return "";
+            const s = String(v);
+            return s.includes(" ") ? s.split(" ")[0] : s.substring(0, 10);
+        }
+
+        const moodsRaw = JSON.parse(
+            document.getElementById("moods-data").textContent
+        );
+
+        const quizzesRaw = JSON.parse(
+            document.getElementById("quizzes-data").textContent
+        );
+
+        const moodLabels = moodsRaw.map(m => toDateLabel(m.created_at));
+        const moodScores = moodsRaw.map(m => Number(m.mood_score));
+
+        const quizLabels = quizzesRaw.map(q => toDateLabel(q.created_at));
+        const quizScores = quizzesRaw.map(q => Number(q.score));
+
+        const moodCtx = document.getElementById("moodChart");
+        if (moodCtx) {
+            new Chart(moodCtx, {
+                type: "line",
+                data: {
+                    labels: moodLabels,
+                    datasets: [{
+                        label: "Mood score (/5)",
+                        data: moodScores,
+                        tension: 0.35,
+                        fill: false,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, suggestedMax: 5, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        const quizCtx = document.getElementById("quizChart");
+        if (quizCtx) {
+            new Chart(quizCtx, {
+                type: "line",
+                data: {
+                    labels: quizLabels,
+                    datasets: [{
+                        label: "Quiz score",
+                        data: quizScores,
+                        tension: 0.35,
+                        fill: false,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+
+    <!-- Template Javascript (nếu main.js có xử lý spinner/wow...) -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

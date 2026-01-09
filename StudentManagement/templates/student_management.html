@@ -1,94 +1,209 @@
-{% extends "index.html" %}
-{% block content %}
-<div class="container py-5">
-    <h2 class="mb-4">Quản lý sinh viên</h2>
-    
-    <form action="" method="GET" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Tìm tên hoặc username sinh viên...">
-            <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>Quản lý sinh viên</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Fonts & Icon CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <!-- Spinner End -->
+
+    <div class="container py-5">
+        <!-- Header line giống view_report -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <p class="section-title bg-white text-start text-primary pe-3 mb-2">Expert</p>
+                <h3 class="mb-0">Quản lý sinh viên</h3>
+                <p class="text-muted mb-0">Theo dõi trạng thái sinh viên & yêu cầu quyền xem báo cáo (Quiz/Mood).</p>
+            </div>
+
+            <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
+                <i class="fa fa-home me-1"></i> Về trang chủ
+            </a>
         </div>
-    </form>
 
-    <h4>Sinh viên theo dõi</h4>
-    <div class="row g-4 mb-5">
-        {% for s in accepted_students %}
-        <div class="col-md-4">
-            <div class="card shadow-sm border-primary">
-                <div class="card-body">
-                    <h5 class="card-title">{{ s.username }}</h5>
-                    
-                    <p>Sức khỏe: 
-                        <span id="badge-{{ s.id }}" class="badge {{ 'bg-success' if s.status_tag == 'CURED' else 'bg-danger' }}">
-                            {{ 'ĐÃ KHỎI BỆNH' if s.status_tag == 'CURED' else 'ĐANG ĐIỀU TRỊ' }}
-                        </span>
-                    </p>
+        <!-- Search box -->
+        <div class="bg-light p-4 rounded shadow-sm mt-4">
+            <h5 class="mb-3">Tìm sinh viên</h5>
+            <form action="" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Tìm tên hoặc username sinh viên..." value="{{ request.args.get('search','') }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fa fa-search me-1"></i> Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
 
-                    <div class="d-grid gap-2">
-                        {% if s.request_status == 'accepted' %}
-                            <a href="{{ url_for('student_mgmt.view_report', student_id=s.id) }}" class="btn btn-sm btn-primary">Xem báo cáo (Quiz/Mood)</a>
-                        {% elif s.request_status == 'pending' %}
-                            <button class="btn btn-sm btn-secondary" disabled>Đã gửi yêu cầu</button>
-                        {% else %}
-                            <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning">Yêu cầu quyền truy cập</button>
-                        {% endif %}
+        <!-- Accepted students -->
+        <div class="mt-5">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h4 class="mb-0">Sinh viên theo dõi</h4>
+                <span class="text-muted small">Tổng: {{ accepted_students|length if accepted_students else 0 }}</span>
+            </div>
 
-                        <button onclick="toggleStatus('{{ s.id }}')" id="status-btn-{{ s.id }}" class="btn btn-sm {{ 'btn-success' if s.status_tag == 'CURED' else 'btn-outline-success' }}">
-                            {{ 'Đã khỏi bệnh' if s.status_tag == 'CURED' else 'Đánh dấu khỏi bệnh' }}
+            <div class="row g-4">
+                {% if accepted_students %}
+                    {% for s in accepted_students %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="bg-light p-4 rounded shadow-sm h-100 border border-2 border-primary">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">{{ s.username }}</h5>
+                                    <div class="small text-muted">ID: {{ s.id }}</div>
+                                </div>
+
+                                <span id="badge-{{ s.id }}"
+                                      class="badge {{ 'bg-success' if s.status_tag == 'CURED' else 'bg-danger' }}">
+                                    {{ 'ĐÃ KHỎI BỆNH' if s.status_tag == 'CURED' else 'ĐANG ĐIỀU TRỊ' }}
+                                </span>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-grid gap-2">
+                                {% if s.request_status == 'accepted' %}
+                                    <a href="{{ url_for('student_mgmt.view_report', student_id=s.id) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fa fa-chart-line me-1"></i> Xem báo cáo (Quiz/Mood)
+                                    </a>
+                                {% elif s.request_status == 'pending' %}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <i class="fa fa-clock me-1"></i> Đã gửi yêu cầu
+                                    </button>
+                                {% else %}
+                                    <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning">
+                                        <i class="fa fa-lock-open me-1"></i> Yêu cầu quyền truy cập
+                                    </button>
+                                {% endif %}
+
+                                <button onclick="toggleStatus('{{ s.id }}')"
+                                        id="status-btn-{{ s.id }}"
+                                        class="btn btn-sm {{ 'btn-success' if s.status_tag == 'CURED' else 'btn-outline-success' }}">
+                                    <i class="fa fa-check-circle me-1"></i>
+                                    {{ 'Đã khỏi bệnh' if s.status_tag == 'CURED' else 'Đánh dấu khỏi bệnh' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="bg-light p-4 rounded shadow-sm text-center">
+                            <i class="fa fa-users text-primary fa-2x mb-2"></i>
+                            <p class="mb-0">Chưa có sinh viên nào trong danh sách theo dõi.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Search results -->
+        {% if searched_students %}
+        <div class="mt-5">
+            <h4 class="mb-3">Kết quả tìm kiếm</h4>
+            <div class="row g-4">
+                {% for s in searched_students %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="bg-light p-4 rounded shadow-sm h-100">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <h5 class="mb-1">{{ s.username }}</h5>
+                                <div class="small text-muted">ID: {{ s.id }}</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning w-100">
+                            <i class="fa fa-paper-plane me-1"></i> Yêu cầu quyền truy cập
                         </button>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
-        {% endfor %}
+        {% endif %}
     </div>
 
-    {% if searched_students %}
-    <h4>Kết quả tìm kiếm</h4>
-    <div class="row g-4">
-        {% for s in searched_students %}
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">{{ s.username }}</h5>
-                    <button onclick="sendRequest('{{ s.id }}', this)" class="btn btn-sm btn-warning">Yêu cầu xem lịch sử</button>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-</div>
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-function sendRequest(sid, btn) {
-    fetch(`/expert/request-quiz/${sid}`, {method: 'POST'})
-    .then(r => r.json())
-    .then(data => {
-        btn.innerText = "Đã gửi yêu cầu";
-        btn.disabled = true;
-    });
-}
-function toggleStatus(sid) {
-    fetch(`/expert/toggle-status/${sid}`, {method: 'POST'})
-    .then(r => r.json())
-    .then(data => {
-        // Cập nhật giao diện ngay lập tức
-        const btn = document.getElementById(`status-btn-${sid}`);
-        const badge = document.getElementById(`badge-${sid}`);
-        
-        if (data.new_status === 'CURED') {
-            btn.innerText = 'Đã khỏi bệnh';
-            btn.className = 'btn btn-sm btn-success';
-            badge.innerText = 'ĐÃ KHỎI BỆNH';
-            badge.className = 'badge bg-success';
-        } else {
-            btn.innerText = 'Đánh dấu khỏi bệnh';
-            btn.className = 'btn btn-sm btn-outline-success';
-            badge.innerText = 'ĐANG ĐIỀU TRỊ';
-            badge.className = 'badge bg-danger';
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
+
+    <script>
+        // spinner hide (đảm bảo tắt spinner)
+        window.addEventListener("load", () => {
+            const sp = document.getElementById("spinner");
+            if (sp) sp.classList.remove("show");
+        });
+
+        function sendRequest(sid, btn) {
+            fetch(`/expert/request-quiz/${sid}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(() => {
+                    btn.innerText = "Đã gửi yêu cầu";
+                    btn.disabled = true;
+                    btn.className = "btn btn-sm btn-secondary w-100";
+                });
         }
-    });
-}
-</script>
-{% endblock %}
+
+        function toggleStatus(sid) {
+            fetch(`/expert/toggle-status/${sid}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    const btn = document.getElementById(`status-btn-${sid}`);
+                    const badge = document.getElementById(`badge-${sid}`);
+
+                    if (data.new_status === 'CURED') {
+                        btn.innerHTML = '<i class="fa fa-check-circle me-1"></i> Đã khỏi bệnh';
+                        btn.className = 'btn btn-sm btn-success';
+                        badge.innerText = 'ĐÃ KHỎI BỆNH';
+                        badge.className = 'badge bg-success';
+                    } else {
+                        btn.innerHTML = '<i class="fa fa-check-circle me-1"></i> Đánh dấu khỏi bệnh';
+                        btn.className = 'btn btn-sm btn-outline-success';
+                        badge.innerText = 'ĐANG ĐIỀU TRỊ';
+                        badge.className = 'badge bg-danger';
+                    }
+                });
+        }
+    </script>
+
+    <!-- Template Javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

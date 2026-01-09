@@ -10,7 +10,7 @@ os.environ["EVENTLET_NO_GREENDNS"] = "yes"
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, session, render_template
+from flask import Flask, session, render_template, redirect, url_for
 from Game.game_routes import game_bp
 from quiz.quiz import quiz_bp
 from diary.diary import diary_bp
@@ -108,7 +108,7 @@ def index():
 
 @app.route("/index")
 def home():
-    return render_template("index.html")
+    return redirect(url_for("index"))
 
 @app.route("/about")
 def about():
