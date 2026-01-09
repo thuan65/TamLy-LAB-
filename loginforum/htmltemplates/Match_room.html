@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Kết Nối Hỗ Trợ | Anonymous Chat</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        .feature-card { transition: all 0.3s ease; border-radius: 15px; }
+        .big-spinner { width: 3rem; height: 3rem; }
+    </style>
+</head>
+
+<body>
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    <div class="container-fluid page-header py-5 mb-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-5">
+            <h1 class="display-3 text-white mb-4 animated slideInDown">Kết Nối Ẩn Danh</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Hỗ trợ trực tuyến</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    
+                    {% if session.get('status_tag') == 'CURED' or session.get('role')|upper == 'EXPERT' %}
+                    <div class="bg-light rounded p-4 p-md-5 wow fadeInUp feature-card border-start border-5 border-success" data-wow-delay="0.1s">
+                        <div class="text-center">
+                            <p class="section-title bg-white text-center text-success px-3">Helper Mode</p>
+                            <h2 class="mb-3">Chào Người Hỗ Trợ 🤝</h2>
+                            <p class="mb-4">Hệ thống sẽ tự động kết nối bạn với những người đang cần giúp đỡ dựa trên trạng thái Online của bạn.</p>
+                            
+                            <form action="/chat/toggle-opt-in" method="POST" class="d-flex justify-content-center">
+                                {% if session.get('chat_opt_in') == 1 %}
+                                <button type="submit" class="btn btn-success btn-lg px-5 py-3">
+                                    <i class="bi bi-broadcast me-2"></i>🟢 Đang Online (Sẵn sàng chat)
+                                </button>
+                                {% else %}
+                                <button type="submit" class="btn btn-outline-secondary btn-lg px-5 py-3">
+                                    <i class="bi bi-power me-2"></i>⚪ Đang Offline
+                                </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div id="search-section" class="bg-light rounded p-4 p-md-5 wow fadeInUp feature-card border-start border-5 border-primary" data-wow-delay="0.1s">
+                        <div class="text-center" id="search-container">
+                            <p class="section-title bg-white text-center text-primary px-3">Student Mode</p>
+                            <h2 class="mb-3" id="main-title">Bạn cần người lắng nghe?</h2>
+                            <p class="mb-4" id="main-desc">Trò chuyện 1-1 ẩn danh với chuyên gia hoặc những người đã từng vượt qua khó khăn.</p>
+
+                            <div id="search-controls">
+                                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+                                    <select id="illness-select" class="form-select form-select-lg w-auto border-primary">
+                                        <option value="" disabled selected>Chọn chủ đề bạn cần...</option>
+                                        <option value="depression">Trầm cảm</option>
+                                        <option value="anxiety">Lo âu</option>
+                                        <option value="stress">Căng thẳng / Stress</option>
+                                        <option value="relationships">Mối quan hệ</option>
+                                        <option value="other">Chủ đề khác</option>
+                                    </select>
+                                    <button type="button" id="find-chat-btn" class="btn btn-primary btn-lg px-4">
+                                        <i class="bi bi-lightning-fill me-2"></i>Tìm người trò chuyện
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="searching-ui" style="display: none;">
+                                <div class="spinner-border text-primary big-spinner my-4" role="status"></div>
+                                <h4 class="text-primary animated pulse infinite">Đang kết nối...</h4>
+                                <p class="text-muted">Chúng tôi đang tìm kiếm người phù hợp nhất với bạn.</p>
+                                <button type="button" id="stop-chat-btn" class="btn btn-outline-danger mt-3">
+                                    <i class="bi bi-x-circle me-2"></i>Dừng tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-light mb-4">Liên hệ</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>227 Nguyễn Văn Cừ, TPHCM</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 6789</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-light mb-4">Project</h4>
+                    <p>Seven Deadly Sins Lab - CSC10014</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/easing/easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+        const globalSocket = io();
+        const USER_ROLE = "{{ session.get('role', 'guest') }}";
+
+        // Logic điều khiển UI
+        const findChatBtn = document.getElementById('find-chat-btn');
+        const illnessSelect = document.getElementById('illness-select');
+        const stopChatBtn = document.getElementById('stop-chat-btn');
+        const searchControls = document.getElementById('search-controls');
+        const searchingUI = document.getElementById('searching-ui');
+        const mainTitle = document.getElementById('main-title');
+        const mainDesc = document.getElementById('main-desc');
+
+        function toggleSearching(isSearching) {
+            if (isSearching) {
+                if(searchControls) searchControls.style.display = 'none';
+                if(searchingUI) searchingUI.style.display = 'block';
+                if(mainTitle) mainTitle.textContent = "Đang tìm kiếm người hỗ trợ...";
+                if(mainDesc) mainDesc.style.display = 'none';
+            } else {
+                if(searchControls) searchControls.style.display = 'block';
+                if(searchingUI) searchingUI.style.display = 'none';
+                if(mainTitle) mainTitle.textContent = "Bạn cần người lắng nghe?";
+                if(mainDesc) mainDesc.style.display = 'block';
+            }
+        }
+
+        // --- STUDENT: Gửi yêu cầu ---
+        if (findChatBtn) {
+            findChatBtn.addEventListener('click', () => {
+                const illnessType = illnessSelect.value;
+                if (!illnessType) {
+                    alert('Vui lòng chọn một chủ đề bạn cần giúp đỡ!');
+                    return;
+                }
+                toggleSearching(true);
+                globalSocket.emit('request_match', { illness: illnessType });
+            });
+        }
+
+        if (stopChatBtn) {
+            stopChatBtn.addEventListener('click', () => {
+                globalSocket.emit('cancel_match');
+                toggleSearching(false);
+            });
+        }
+
+        // --- EXPERT: Nhận lệnh chuyển hướng ---
+        globalSocket.on('force_join_room', (data) => {
+            console.log('Chuyển hướng chuyên gia:', data.room_url);
+            window.location.href = data.room_url;
+        });
+
+        // --- STUDENT: Nhận kết quả match ---
+        globalSocket.on('match_found', (data) => {
+            if(mainTitle) mainTitle.textContent = "Đã tìm thấy người hỗ trợ!";
+            setTimeout(() => {
+                window.location.href = data.room_url;
+            }, 1000);
+        });
+
+        globalSocket.on('match_failed', (data) => {
+            alert("Rất tiếc, hiện tại không có ai rảnh. Vui lòng thử lại sau.");
+            toggleSearching(false);
+        });
+    </script>
+</body>
+</html>

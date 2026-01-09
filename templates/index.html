@@ -124,6 +124,18 @@
 
                         {% if session.get("user_id") %}
 
+                        <form action="{{ url_for('chat.toggle_opt_in') }}" method="POST">
+                            {% if session.get('chat_opt_in') == 1 %}
+                                <button class="btn btn-success pill-btn" type="submit">
+                                    <i class="fa-solid fa-circle me-2"></i>Online
+                                </button>
+                            {% else %}
+                                <button class="btn btn-outline-secondary pill-btn" type="submit">
+                                    <i class="fa-regular fa-circle me-2"></i>Offline
+                                </button>
+                            {% endif %}
+                        </form>
+
                             {# ===== Expert status icon (PENDING/NONE) ===== #}
                             {% if session.get("role","")|upper == "EXPERT" and expert_profile %}
 

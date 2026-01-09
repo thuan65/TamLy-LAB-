@@ -297,10 +297,11 @@
             e.preventDefault();
             const message = messageInput.value.trim();
             if (!message) return;
-
-            socket.emit('send_message', { room: roomKey, message: message });
+                  
+  console.log("Dữ liệu sắp gửi:", { r: String(roomKey), m: String(message) })
+            socket.emit('send_message_to_other', { room: roomKey, message: message });
             addMessage('message-mine', message);
-
+                     
             messageInput.value = '';
         });
 

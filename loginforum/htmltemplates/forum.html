@@ -83,14 +83,14 @@
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
 
                         <div class="d-flex gap-2">
-                            {% if session.get('user_id') and session.get('role') == 'student' %}
+                            {% if session.get('user_id') and session.get('role') == 'STUDENT' %}
                                 <a href="{{ url_for('forum.new_post') }}" class="btn btn-primary pill-btn">
                                     <i class="fa-solid fa-plus me-2"></i>Bài viết mới
                                 </a>
                             {% endif %}
                         </div>
 
-                        {% if session.get('user_id') and session.get('role') == 'expert' %}
+                        <!-- {% if session.get('user_id') and session.get('role') == 'expert' %}
                         <form action="{{ url_for('chat.toggle_opt_in') }}" method="POST">
                             {% if session.get('chat_opt_in') == 1 %}
                                 <button class="btn btn-success pill-btn" type="submit">
@@ -102,7 +102,7 @@
                                 </button>
                             {% endif %}
                         </form>
-                        {% endif %}
+                        {% endif %} -->
                     </div>
 
                     <!-- SEARCH -->
