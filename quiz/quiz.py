@@ -102,7 +102,7 @@ def nop_bai():
 
         # Tính điểm và phân tích
         tong_diem = sum(tra_loi)
-        muc_do, loai, _ = tinh_muc_do(tong_diem)  # Bỏ icon
+        muc_do, loai, _ = tinh_muc_do(tong_diem)  
         loi_khuyen, hanh_dong = tao_loi_khuyen(tong_diem, muc_do)
         phan_tich = phan_tich_chi_tiet(tra_loi)
 
@@ -132,7 +132,9 @@ def nop_bai():
                 # Update StudentProfile nếu đã tồn tại
                 if user.student_profile:
                     user.student_profile.last_stress_score = tong_diem
-                    user.student_profile.full_name = ho_ten
+                    # Chỉ update full_name nếu khác với tên hiện tại
+                    if user.student_profile.full_name != ho_ten:
+                        user.student_profile.full_name = ho_ten
                 else:
                     # Tạo StudentProfile nếu user chưa có
                     student_profile = StudentProfile(
@@ -151,7 +153,7 @@ def nop_bai():
             log = StressLog(
                 student_id=user.id,
                 score=tong_diem, 
-                scale_name="STRESS_TEST",  # Đổi từ PHQ-9
+                scale_name="STRESS_TEST",  
                 note=note
             )
             s.add(log)
@@ -168,6 +170,7 @@ def nop_bai():
             "hanh_dong": hanh_dong,
             "anh_huong_text": ANH_HUONG[anh_huong_chon],
             "user_id": user_id,
+            "username": username,
             "canh_bao": phan_tich.get("canh_bao"),
             "message": "Đã lưu kết quả thành công!"
         })
@@ -182,32 +185,56 @@ def nop_bai():
         }), 500
 
 
-@quiz_bp.get("/lich-su/<int:user_id>")
-def lich_su(user_id):
-    """API lấy lịch sử làm quiz của user"""
+@quiz_bp.get("/lich-su")
+def lich_su_by_username():
+    """API lấy lịch sử bằng username"""
     try:
+        username = request.args.get("username", "").strip()
+
+        if not username:
+            return jsonify({
+                "success": False,
+                "message": "Vui lòng nhập tên đăng nhập"
+            }), 400
+        
         with TherapySession() as s:
-            # Kiểm tra user có tồn tại
-            user = s.query(User).filter_by(id=user_id).first()
+            # Tìm user theo username
+            user = s.query(User).filter_by(username=username).first()
             if not user:
                 return jsonify({
                     "success": False, 
-                    "message": "Không tìm thấy người dùng"
+                    "message": "Không tìm thấy người dùng với tên đăng nhập này"
+                }), 404
+            
+            # Kiểm tra xem user có phải là student và có student_profile không
+            if not user.student_profile:
+                return jsonify({
+                    "success": False,
+                    "message": "Tài khoản này chưa thực hiện khảo sát. Vui lòng làm bài khảo sát trước."
                 }), 404
 
             # Lấy danh sách logs
             logs = (
                 s.query(StressLog)
-                .filter_by(student_id=user_id)
+                .filter_by(student_id=user.id)
                 .order_by(StressLog.created_at.desc())
                 .all()
             )
+
+            if not logs:
+                return jsonify({
+                    "success": True,
+                    "lich_su": [],
+                    "user_name": user.username,
+                    "full_name": user.student_profile.full_name if user.student_profile else "",
+                    "message": "Chưa có lịch sử khảo sát"
+                })
 
             result = []
             for log in logs:
                 muc_do, _, icon_emoticon = tinh_muc_do(log.score)
                 
-                # Parse created_at (format ISO string)
+                # Parse created_at
                 try:
                     if isinstance(log.created_at, str):
                         dt = datetime.fromisoformat(log.created_at)
@@ -234,23 +261,10 @@ def lich_su(user_id):
             })
     
     except Exception as e:
-        print(f"ERROR in lich_su: {str(e)}")
+        print(f"ERROR in lich_su_by_username: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({
             "success": False, 
             "message": f"Lỗi server: {str(e)}"
         }), 500
-
-
-@quiz_bp.get("/lich-su")
-def lich_su_current_user():
-    """API lấy lịch sử của user đang đăng nhập"""
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "Vui lòng đăng nhập để xem lịch sử"
-        }), 401
-    
-    return lich_su(user_id)
