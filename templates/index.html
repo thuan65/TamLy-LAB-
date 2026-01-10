@@ -91,7 +91,8 @@
                                 {# Kiểm tra nếu là EXPERT #}
                                 {% if session.get('role')|upper == 'EXPERT' %}
 
-
+                                <a href="{{ url_for('chat.chat_waiting') }}" class="dropdown-item">Matching</a>
+                                <a href="{{ url_for('chat_expert.chat_page') }}" class="dropdown-item">Chat with Student</a>
                                 <a href="{{ url_for('booking.expert_schedule') }}" class="dropdown-item">Booking Management</a>
                                 <a href="{{ url_for('student_mgmt.manage_students') }}" class="dropdown-item">Student Management</a>                                
 
